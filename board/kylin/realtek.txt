@@ -67,7 +67,9 @@ liborc-test-0.4.so*
 libpcreposix.so*
 libpcre.so*
 libpixman-1.so*
+libplayready.so*
 libpng16.so*
+libprovision.so*
 librpc.so*
 libsoup-2.4.so*
 libsqlite3.so*
