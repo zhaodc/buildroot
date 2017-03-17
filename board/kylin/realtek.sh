@@ -4,6 +4,9 @@ ROOTFS_DIR="${BINARIES_DIR}/../rootfs"
 ROOTFS_FILES="${BINARIES_DIR}/rootfs.files"
 STAR="*"
 
+echo "Binaries: ${BINARIES_DIR}"
+echo "Target: ${TARGET_DIR}"
+
 # Clean up target
 rm -rf "${TARGET_DIR}/usr/lib/gstreamer-1.0/include"
 rm -rf "${TARGET_DIR}/usr/lib/libstdc++.so.6.0.20-gdb.py"
@@ -16,7 +19,13 @@ mkdir -p "${ROOTFS_DIR}"
 rm -rf "${ROOTFS_FILES}"
 while read line
 do
-	find "${TARGET_DIR}" -name "$line$STAR" -printf "%P\n" >> "${ROOTFS_FILES}"
+	if find "${TARGET_DIR}" -name "$line" -print -quit | grep -q "${TARGET_DIR}" 
+	then
+		find "${TARGET_DIR}" -name "$line" -printf "%P\n" >> "${ROOTFS_FILES}"
+	else 
+		echo "Missing $line"
+  		exit 1
+	fi
 done < "${BOARD_DIR}/realtek.txt"
 
 # Append missing folders
