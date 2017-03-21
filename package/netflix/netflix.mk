@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-NETFLIX_VERSION = f839254b17e030ec48d5269fe3ceb16a90441a42
+NETFLIX_VERSION = e2c5d5911bd8143e2435931f6a127649eb803947
 NETFLIX_SITE = git@github.com:Metrological/netflix.git
 NETFLIX_SITE_METHOD = git
 NETFLIX_LICENSE = PROPRIETARY
@@ -119,7 +119,7 @@ endif
 
 ifeq ($(BR2_PACKAGE_GSTREAMER1),y)
 NETFLIX_CONF_OPTS += -DDPI_IMPLEMENTATION=gstreamer
-NETFLIX_DEPENDENCIES += gstreamer1
+NETFLIX_DEPENDENCIES += gstreamer1 gst1-plugins-base gst1-plugins-bad
 else ifeq ($(BR2_PACKAGE_HAS_LIBOPENMAX),y)
 NETFLIX_CONF_OPTS += \
 	-DDPI_IMPLEMENTATION=reference \
