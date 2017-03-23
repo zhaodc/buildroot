@@ -1,5 +1,22 @@
-config BR2_PACKAGE_KYLIN_PLATFORM_LIB
-	bool "platform API"
+menuconfig BR2_PACKAGE_KYLIN_PLATFORM_LIB
+	bool "Platform Options"
 	help
-         Realtek Kylin hardware API
+         Realtek Kylin hardware options
+         
+if BR2_PACKAGE_KYLIN_PLATFORM_LIB
 
+config BR2_PACKAGE_KYLIN_PLATFORM_BIN_KO
+	bool "Precomplied kernel modules"
+	help
+         Install precomplied kernel modules
+         
+config KYLIN_PLATFORM_LIB_INSTALL_BINARIES
+	bool "Misc Binares"
+	help
+         Install a bunch of realtek provided binaries
+
+config BR2_PACKAGE_PROVIDES_KYLIN
+	default "kylin-platform-lib"
+	
+endif
+	
