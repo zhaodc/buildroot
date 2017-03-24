@@ -89,6 +89,5 @@ libqueueplayer.so
 libmqc.so
 libssl.so
 libprovision.so
-libgnutls-openssl.so
 libgnutlsxx.so
 libpcreposix.so
