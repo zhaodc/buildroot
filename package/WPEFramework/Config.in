@@ -4,6 +4,12 @@ menuconfig BR2_PACKAGE_WPEFRAMEWORK
 	help
 	   Base WPE Framework
 
+menuconfig BR2_PACKAGE_WPEFRAMEWORK_DEBUG
+	bool "Debug"
+	help
+	   Allow the WPE Framework to be more verbose. All development traces
+           are turned on.
+
 menuconfig BR2_PACKAGE_WPEFRAMEWORK_PROVISIONING
 	bool "WPEFramework-Provisioning"
 	select BR2_PACKAGE_LIBPROVISION
