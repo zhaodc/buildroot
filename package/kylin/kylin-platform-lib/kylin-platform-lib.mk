@@ -30,17 +30,17 @@ endef
 ################################################################################
 
 define KYLIN_PLATFORM_LIB_INSTALL_LIBS
-  $(INSTALL) -m 0755 -d $(1)/usr/lib/realtek 
+  $(INSTALL) -m 0755 -d ${1}/usr/lib/realtek 
   $(INSTALL) -m 0755 $(@D)/android/genericLinux/lib/*.so ${1}/usr/lib
 endef
 
 define KYLIN_PLATFORM_LIB_INSTALL_ARCHIVES
-  $(INSTALL) -m 0755 -d $(1)/usr/lib/realtek
+  $(INSTALL) -m 0755 -d ${1}/usr/lib/realtek
   $(INSTALL) -m 0755 $(@D)/android/genericLinux/lib/*.a ${1}/usr/lib/realtek
 endef
 
 define KYLIN_PLATFORM_LIB_INSTALL_HEADERS
-	$(INSTALL) -m 0755 -d $(1)/usr/include/realtek/genericLinux
+	$(INSTALL) -m 0755 -d ${1}/usr/include/realtek/genericLinux
 	cp -arf $(@D)/android/genericLinux/include ${1}/usr/include/realtek/genericLinux
 	cp -arf $(@D)/android/genericLinux/src ${1}/usr/include/realtek/genericLinux
 	cp -arf $(@D)/android/bionic ${1}/usr/include/realtek/
@@ -51,7 +51,7 @@ define KYLIN_PLATFORM_LIB_INSTALL_HEADERS
 endef
 
 define KYLIN_PLATFORM_LIB_INSTALL_PKGCNF
-  $(INSTALL) -d -m 0755 $(1)/usr/lib/pkgconfig
+  $(INSTALL) -d -m 0755 ${1}/usr/lib/pkgconfig
   $(INSTALL) -m 0755 $(@D)/pkgconfig/* ${1}/usr/lib/pkgconfig
 endef
 
@@ -63,13 +63,13 @@ endif
 
 ifeq ($(BR2_PACKAGE_KYLIN_KERNEL_4_1_17)$(BR2_PACKAGE_KYLIN_PLATFORM_BIN_KO),yy)
 define KYLIN_PLATFORM_LIB_INSTALL_KERNEL_MODULES
-  $(INSTALL) -d -m 0755 $(1)/lib/modules/4.1.17
-  cp -av $(@D)/modules/4.1.17 $(1)/lib/modules
+  $(INSTALL) -d -m 0755 ${1}lib/modules/4.1.17
+  cp -av $(@D)/modules/4.1.17 ${1}/lib/modules
 endef
 else ifeq ($(BR2_PACKAGE_KYLIN_KERNEL_4_1_35)$(BR2_PACKAGE_KYLIN_PLATFORM_BIN_KO),yy)
 define KYLIN_PLATFORM_LIB_INSTALL_KERNEL_MODULES
-  $(INSTALL) -d -m 0755 $(1)/lib/modules/4.1.35
-  cp -av $(@D)/modules/4.1.35 $(1)/lib/modules
+  $(INSTALL) -d -m 0755 ${1}/lib/modules/4.1.35
+  cp -av $(@D)/modules/4.1.35 ${1}/lib/modules
 endef
 else
   define KYLIN_PLATFORM_LIB_INSTALL_KERNEL_MODULES
@@ -78,25 +78,25 @@ endif
 
 ifeq ($(KYLIN_PLATFORM_LIB_INSTALL_BINARIES),y)
   define KYLIN_PLATFORM_LIB_INSTALL_MISC_BINARIES
-  $(INSTALL) -d -m 0755 $(1)/etc/firmware
-  cp -av $(@D)/rootfs-overlay/etc/firmware $(1)/etc/firmware
+  $(INSTALL) -d -m 0755 ${1}/etc/firmware
+  cp -av $(@D)/rootfs-overlay/etc/firmware ${1}/etc/firmware
   
-  $(INSTALL) -d -m 0755 $(1)/etc/init.d
-  cp -av $(@D)/rootfs-overlay/etc/init.d/S30alsadaemon $(1)/etc/init.d 
-  cp -av $(@D)/rootfs-overlay/etc/init.d/S99user-init $(1)/etc/init.d/S69user-init
-  cp -av $(@D)/S70weston $(1)/etc/init.d
-  cp -av $(@D)/rootfs-overlay/etc/user-init.conf $(1)/etc/
+  $(INSTALL) -d -m 0755 ${1}/etc/init.d
+  cp -av $(@D)/rootfs-overlay/etc/init.d/S30alsadaemon ${1}/etc/init.d 
+  cp -av $(@D)/rootfs-overlay/etc/init.d/S99user-init ${1}/etc/init.d/S69user-init
+  cp -av $(@D)/S70weston ${1}/etc/init.d
+  cp -av $(@D)/rootfs-overlay/etc/user-init.conf ${1}/etc/
     
-  $(INSTALL) -d -m 0755 $(1)/sbin 
-  cp -av $(@D)/rootfs-overlay/sbin $(1)/sbin 
+  $(INSTALL) -d -m 0755 ${1}/sbin 
+  cp -av $(@D)/rootfs-overlay/sbin ${1}/sbin 
   
-  $(INSTALL) -d -m 0755 $(1)/system
-  cp -av $(@D)/rootfs-overlay/system $(1)/system 
+  $(INSTALL) -d -m 0755 ${1}/system
+  cp -av $(@D)/rootfs-overlay/system ${1}/system 
   
-  $(INSTALL) -d -m 0755 $(1)/usr/bin
+  $(INSTALL) -d -m 0755 ${1}/usr/bin
   $(INSTALL) -m 0755 $(@D)/rootfs-overlay/usr/bin/jpurun ${1}/usr/bin
   
-  $(INSTALL) -d -m 0755 $(1)/usr/sbin
+  $(INSTALL) -d -m 0755 ${1}/usr/sbin
   $(INSTALL) -m 0755 $(@D)/rootfs-overlay/usr/sbin/ALSADaemon ${1}/usr/sbin
   $(INSTALL) -m 0755 $(@D)/rootfs-overlay/usr/sbin/se_status ${1}/usr/sbin
   
