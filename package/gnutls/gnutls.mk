@@ -25,7 +25,6 @@ GNUTLS_CONF_OPTS = \
 	--disable-libdane \
 	--disable-rpath \
 	--enable-local-libopts \
-	--enable-openssl-compatibility \
 	--with-libnettle-prefix=$(STAGING_DIR)/usr \
 	--with-librt-prefix=$(STAGING_DIR) \
 	--without-tpm \
@@ -36,6 +35,12 @@ GNUTLS_CONF_ENV = gl_cv_socket_ipv6=yes \
 	gt_cv_c_wint_t=$(if $(BR2_USE_WCHAR),yes,no) \
 	gl_cv_func_gettimeofday_clobber=no
 GNUTLS_INSTALL_STAGING = YES
+
+ifeq ($(BR2_PACKAGE_PLAYREADY),y)
+GNUTLS_CONF_OPTS += --disable-openssl-compatibility
+else
+GNUTLS_CONF_OPTS += --enable-openssl-compatibility
+endif
 
 # libpthread and libz autodetection poison the linkpath
 GNUTLS_CONF_OPTS += $(if $(BR2_TOOLCHAIN_HAS_THREADS),--with-libpthread-prefix=$(STAGING_DIR)/usr)
