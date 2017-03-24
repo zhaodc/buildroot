@@ -3,24 +3,6 @@ menuconfig BR2_PACKAGE_WPEFRAMEWORK
 
 	help
 	   Base WPE Framework
-	   
-menuconfig BR2_PACKAGE_WPEFRAMEWORK_WEBPROXY
-	bool "WPEFramework-WebProxy"
-
-	help
-	   WPE Platform WebProxy plugin
-
-menuconfig BR2_PACKAGE_WPEFRAMEWORK_MONITOR
-	bool "WPEFramework-Monitor"
-
-	help
-	   WPE Platform Monitor plugin
-
-menuconfig BR2_PACKAGE_WPEFRAMEWORK_SNAPSHOT
-	bool "WPEFramework-Snapshot"
-
-	help
-	   WPE Platform Snapshot plugin
 
 menuconfig BR2_PACKAGE_WPEFRAMEWORK_PROVISIONING
 	bool "WPEFramework-Provisioning"
@@ -28,46 +10,15 @@ menuconfig BR2_PACKAGE_WPEFRAMEWORK_PROVISIONING
 	help
 	   WPE Platform Provisioning plugin
 
-menuconfig BR2_PACKAGE_WPEFRAMEWORK_WEBKITBROWSER
-	bool "WPEFramework-WebKitBrowser"
-
-	help
-	   WPE Platform WebKitBrowser plugin
-
 menuconfig BR2_PACKAGE_WPEFRAMEWORK_DIALSERVER
 	bool "WPEFramework-DIALServer"
 
 	help
 	   WPE Platform DIALServer plugin
 
-menuconfig BR2_PACKAGE_WPEFRAMEWORK_DEVICEINFO
-	bool "WPEFramework-DeviceInfo"
-
-	help
-	   WPE Platform DeviceInfo plugin
-
-menuconfig BR2_PACKAGE_WPEFRAMEWORK_REMOTECONTROL
-	bool "WPEFramework-RemoteControl"
-
-	help
-	   WPE Platform RemoteControl plugin
-
-menuconfig BR2_PACKAGE_WPEFRAMEWORK_TRACECONTROL
-	bool "WPEFramework-TraceControl"
-
-	help
-	   WPE Platform TraceControl plugin
-
 menuconfig BR2_PACKAGE_WPEFRAMEWORK_NETFLIX
 	bool "WPEFramework-Netflix"
 
 	help
 	   WPE Platform Netflix plugin
-
-menuconfig BR2_PACKAGE_WPEFRAMEWORK_WEBSERVER
-	bool "WPEFramework-WebServer"
-
-	help
-	   WPE Platform WebServer plugin
-
 
