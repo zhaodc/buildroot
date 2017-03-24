@@ -64,12 +64,12 @@ endif
 ifeq ($(BR2_PACKAGE_KYLIN_KERNEL_4_1_17)$(BR2_PACKAGE_KYLIN_PLATFORM_BIN_KO),yy)
 define KYLIN_PLATFORM_LIB_INSTALL_KERNEL_MODULES
   $(INSTALL) -d -m 0755 $(1)/usr/lib/modules
-  cp -av $(@D)/modules/4.1.17 $(1)/usr/lib/modules
+  cp -av $(@D)/modules/4.1.17 $(1)/lib/modules
 endef
 else ifeq ($(BR2_PACKAGE_KYLIN_KERNEL_4_1_35)$(BR2_PACKAGE_KYLIN_PLATFORM_BIN_KO),yy)
 define KYLIN_PLATFORM_LIB_INSTALL_KERNEL_MODULES
   $(INSTALL) -d -m 0755 $(1)/usr/lib/modules
-  cp -av $(@D)/modules/4.1.35 $(1)/usr/lib/modules
+  cp -av $(@D)/modules/4.1.35 $(1)/lib/modules
 endef
 else
   define KYLIN_PLATFORM_LIB_INSTALL_KERNEL_MODULES
