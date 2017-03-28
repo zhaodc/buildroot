@@ -82,16 +82,16 @@ ifeq ($(KYLIN_PLATFORM_LIB_INSTALL_BINARIES),y)
   cp -av $(@D)/rootfs-overlay/etc/firmware ${1}/etc/firmware
   
   $(INSTALL) -d -m 0755 ${1}/etc/init.d
-  cp -av $(@D)/rootfs-overlay/etc/init.d/S30alsadaemon ${1}/etc/init.d 
-  cp -av $(@D)/rootfs-overlay/etc/init.d/S99user-init ${1}/etc/init.d/S69user-init
-  cp -av $(@D)/S70weston ${1}/etc/init.d
-  cp -av $(@D)/rootfs-overlay/etc/user-init.conf ${1}/etc/
+  $(INSTALL) -m 0755 $(@D)/rootfs-overlay/etc/init.d/S30alsadaemon ${1}/etc/init.d 
+  $(INSTALL) -m 0755 $(@D)/rootfs-overlay/etc/init.d/S99user-init ${1}/etc/init.d/S69user-init
+  $(INSTALL) -m 0755 $(@D)/S70weston ${1}/etc/init.d
+  $(INSTALL) -m 0755 $(@D)/rootfs-overlay/etc/user-init.conf ${1}/etc/
     
   $(INSTALL) -d -m 0755 ${1}/sbin 
-  cp -av $(@D)/rootfs-overlay/sbin ${1}/sbin 
+  cp -av $(@D)/rootfs-overlay/sbin ${1} 
   
   $(INSTALL) -d -m 0755 ${1}/system
-  cp -av $(@D)/rootfs-overlay/system ${1}/system 
+  cp -av $(@D)/rootfs-overlay/system ${1} 
   
   $(INSTALL) -d -m 0755 ${1}/usr/bin
   $(INSTALL) -m 0755 $(@D)/rootfs-overlay/usr/bin/jpurun ${1}/usr/bin
