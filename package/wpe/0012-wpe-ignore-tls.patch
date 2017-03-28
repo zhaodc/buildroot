@@ -1,0 +1,73 @@
+From ede52a6ef2a89c7f631e1721b436a1c2991d7e94 Mon Sep 17 00:00:00 2001
+From: Zan Dobersek <zdobersek@igalia.com>
+Date: Tue, 28 Mar 2017 21:47:16 +0200
+Subject: [PATCH] Add WKSoupSessionSetIgnoreTLSErrors() API.
+
+---
+ Source/WebKit2/PlatformWPE.cmake                      |  2 ++
+ Source/WebKit2/UIProcess/API/C/soup/WKSoupSession.cpp | 13 +++++++++++++
+ 2 files changed, 15 insertions(+)
+ create mode 100644 Source/WebKit2/UIProcess/API/C/soup/WKSoupSession.cpp
+
+diff --git a/Source/WebKit2/PlatformWPE.cmake b/Source/WebKit2/PlatformWPE.cmake
+index dcf8b3d..80633bb 100644
+--- a/Source/WebKit2/PlatformWPE.cmake
++++ b/Source/WebKit2/PlatformWPE.cmake
+@@ -105,6 +105,7 @@ list(APPEND WebKit2_SOURCES
+ 
+     UIProcess/API/C/soup/WKCookieManagerSoup.cpp
+     UIProcess/API/C/soup/WKSoupCustomProtocolRequestManager.cpp
++    UIProcess/API/C/soup/WKSoupSession.cpp
+ 
+     UIProcess/API/C/wpe/WKView.cpp
+     UIProcess/API/C/wpe/WKWebAutomation.cpp
+@@ -497,6 +498,7 @@ set(WPE_INSTALLED_WEBKIT_HEADERS
+     ${WEBKIT2_DIR}/UIProcess/API/C/wpe/WKWebAutomation.h
+ 
+     ${WEBKIT2_DIR}/UIProcess/API/C/soup/WKCookieManagerSoup.h
++    ${WEBKIT2_DIR}/UIProcess/API/C/soup/WKSoupSession.h
+ )
+ 
+ install(FILES ${WPE_INSTALLED_WEBKIT_HEADERS}
+diff --git a/Source/WebKit2/UIProcess/API/C/soup/WKSoupSession.cpp b/Source/WebKit2/UIProcess/API/C/soup/WKSoupSession.cpp
+new file mode 100644
+index 0000000..6144551
+--- /dev/null
++++ b/Source/WebKit2/UIProcess/API/C/soup/WKSoupSession.cpp
+@@ -0,0 +1,13 @@
++#include "config.h"
++#include "WKSoupSession.h"
++
++#include "WebProcessPool.h"
++
++using namespace WebKit;
++
++void WKSoupSessionSetIgnoreTLSErrors(WKContextRef context, bool ignore)
++{
++#if USE(SOUP)
++    toImpl(context)->setIgnoreTLSErrors(ignore);
++#endif
++}
+diff --git a/Source/WebKit2/UIProcess/API/C/soup/WKSoupSession.h b/Source/WebKit2/UIProcess/API/C/soup/WKSoupSession.h
+new file mode 100644
+index 0000000..bc4c686
+--- /dev/null
++++ b/Source/WebKit2/UIProcess/API/C/soup/WKSoupSession.h
+@@ -0,0 +1,17 @@
++#ifndef WKSoupSession_h
++#define WKSoupSession_h
++
++#include <WebKit/WKBase.h>
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++WK_EXPORT void WKSoupSessionSetIgnoreTLSErrors(WKContextRef context, bool ignore);
++
++#ifdef __cplusplus
++}
++#endif
++
++#endif 
++
