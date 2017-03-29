@@ -1,0 +1,33 @@
+From 0bc7ba7f8e86cf0d410bf7919a2c91994f3bd1b4 Mon Sep 17 00:00:00 2001
+From: yaozenhu <yaozenhu@realtek.com>
+Date: Fri, 21 Oct 2016 13:36:53 +0800
+Subject: [PATCH 2/3] [fix bug] RDK-125 [root cause] alsa-lib use mmap write on
+ change rate cause to cause kernel crash [solution] fix 48000 sample rate on
+ detect_rate function, let audioresample to adjust sample to 48000 [reviewer]
+ Ben, Paul
+
+Change-Id: Ie1df087e21305336fab732c6e639de2149444d69
+---
+ ext/alsa/gstalsa.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/ext/alsa/gstalsa.c b/ext/alsa/gstalsa.c
+index 9d2a973..516fd26 100644
+--- a/ext/alsa/gstalsa.c
++++ b/ext/alsa/gstalsa.c
+@@ -35,8 +35,10 @@ gst_alsa_detect_rates (GstObject * obj, snd_pcm_hw_params_t * hw_params,
+   if ((err = snd_pcm_hw_params_get_rate_max (hw_params, &max, &dir)) < 0)
+     goto max_rate_err;
+ 
+-  min_rate = min;
+-  max_rate = max;
++//  min_rate = min;
++//  max_rate = max;
++  min_rate = 48000; /*FIXME*/
++  max_rate = 48000;
+ 
+   if (min_rate < 4000)
+     min_rate = 4000;            /* random 'sensible minimum' */
+-- 
+2.7.4
+

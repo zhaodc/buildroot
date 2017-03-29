@@ -1,0 +1,25 @@
+From 956e5818c2db9e114163651f9c00aa689d56f425 Mon Sep 17 00:00:00 2001
+From: yaozenhu <yaozenhu@realtek.com>
+Date: Mon, 14 Nov 2016 11:10:51 +0800
+Subject: [PATCH 05/11] [modify] start pull mode task on FLUSH_STOP event is
+ received in tsdemux [reviewer] Paul
+
+---
+ gst/mpegtsdemux/mpegtsbase.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/gst/mpegtsdemux/mpegtsbase.c b/gst/mpegtsdemux/mpegtsbase.c
+index 4aee084..470de3c 100644
+--- a/gst/mpegtsdemux/mpegtsbase.c
++++ b/gst/mpegtsdemux/mpegtsbase.c
+@@ -1114,6 +1114,7 @@ mpegts_base_sink_event (GstPad * pad, GstObject * parent, GstEvent * event)
+       mpegts_base_flush (base, hard);
+       gst_segment_init (&base->segment, GST_FORMAT_UNDEFINED);
+       base->seen_pat = FALSE;
++      gst_pad_start_task (base->sinkpad, (GstTaskFunction) mpegts_base_loop, base, NULL);
+       break;
+     default:
+       res = GST_MPEGTS_BASE_GET_CLASS (base)->push_event (base, event);
+-- 
+2.7.4
+

@@ -1,0 +1,12 @@
+config BR2_PACKAGE_KYLIN_GST_RTKV1SINK
+	bool "gst-rtkv1sink"
+	depends on BR2_PACKAGE_KYLIN_PLATFORM_LIB
+	depends on BR2_PACKAGE_KYLIN_GST_OMX
+	help
+		Realtek GStreamer Video Sink gst-rtkv1sink
+
+comment "gst-rtkv1sink requires Realtek Kylin"
+	depends on !BR2_PACKAGE_KYLIN_PLATFORM_LIB
+
+comment "gst-rtkv1sink requires gst-omx"
+	depends on !BR2_PACKAGE_KYLIN_GST_OMX

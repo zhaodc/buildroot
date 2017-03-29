@@ -1,0 +1,16 @@
+config BR2_PACKAGE_KYLIN_GST_OMX
+	bool "kylin-gst-omx"
+	depends on BR2_PACKAGE_HAS_LIBOPENMAX
+	depends on !BR2_PACKAGE_KYLIN_HARDWARE || (BR2_PACKAGE_KYLIN_HARDWARE && BR2_PACKAGE_KYLIN_PLATFORM_LIB)
+	select BR2_PACKAGE_KYLIN_GST1_PLUGINS_BASE
+	help
+	  GStreamer plug-in to use OpenMAX API.
+
+	  http://cgit.freedesktop.org/gstreamer/gst-omx
+
+
+comment "kylin-gst-omx requires a OpenMAX implementation"
+	depends on !BR2_PACKAGE_HAS_LIBOPENMAX
+
+comment "kylin-gst-omx requires a Kylin platform for Kylin build"
+	depends on BR2_PACKAGE_KYLIN_HARDWARE && !BR2_PACKAGE_KYLIN_PLATFORM_LIB

@@ -4,6 +4,7 @@ menuconfig BR2_PACKAGE_KYLIN_HARDWARE
 	  All platform related packages for Realtek Kylin
 	  
 if BR2_PACKAGE_KYLIN_HARDWARE
+
 	choice
 		prompt "Kernel version"
 		default BR2_PACKAGE_KYLIN_KERNEL_4_1_17
@@ -21,9 +22,10 @@ if BR2_PACKAGE_KYLIN_HARDWARE
 			  Needed if platform has a Linux kernel v4.1.35 
 	endchoice
 
+	source "package/kylin/kylin-omx/Config.in"
 	source "package/kylin/kylin-platform-lib/Config.in"
 	if !BR2_PACKAGE_KYLIN_PLATFORM_BIN_KO
-	source "package/kylin/kylin-mali/Config.in"
+		source "package/kylin/kylin-mali/Config.in"
 	endif
 	source "package/kylin/kylin-graphics/Config.in"
 endif

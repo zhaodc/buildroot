@@ -1,0 +1,27 @@
+From d5083d64849796502face356f3decd725086901c Mon Sep 17 00:00:00 2001
+From: linlijuo <linlijuo@realtek.com>
+Date: Thu, 16 Feb 2017 18:00:29 +0800
+Subject: [PATCH 10/11]  [DEV_FIX] Make decodebin pick two matroskademux 
+ plugins for video and audio flow separately.
+
+Change-Id: I12ee86ea3cabc5f36e335dace27e7c14d7c7b385
+---
+ ext/dash/gstmpdparser.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/ext/dash/gstmpdparser.c b/ext/dash/gstmpdparser.c
+index a96912a..358b9c7 100755
+--- a/ext/dash/gstmpdparser.c
++++ b/ext/dash/gstmpdparser.c
+@@ -5613,7 +5613,7 @@ gst_mpdparser_mimetype_to_caps (const gchar * mimeType)
+   } else if (strcmp (mimeType, "video/webm") == 0) {
+     return "video/x-matroska";
+   } else if (strcmp (mimeType, "audio/webm") == 0) {
+-    return "audio/x-vorbis";	
++    return "audio/x-matroska";	
+   } else
+     return mimeType;
+ }
+-- 
+2.7.4
+

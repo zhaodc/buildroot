@@ -11,7 +11,7 @@ config BR2_PACKAGE_KYLIN_PLATFORM_BIN_KO
          Install precomplied kernel modules
          
 config KYLIN_PLATFORM_LIB_INSTALL_BINARIES
-	bool "Misc Binares"
+	bool "Misc Binaries"
 	help
          Install a bunch of realtek provided binaries
 

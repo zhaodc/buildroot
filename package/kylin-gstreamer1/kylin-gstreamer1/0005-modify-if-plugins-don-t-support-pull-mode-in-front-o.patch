@@ -1,0 +1,39 @@
+From 45b2a1cac6fc54adc5ef60aafe49b733d5662cb1 Mon Sep 17 00:00:00 2001
+From: yaozenhu <yaozenhu@realtek.com>
+Date: Wed, 9 Nov 2016 14:45:11 +0800
+Subject: [PATCH 5/7] [modify] if plugins don't support pull mode in front of
+ baseparse, don't start loop task
+
+Change-Id: I88d2b35ee77ec3b487ae0edf76a90492462289a9
+---
+ libs/gst/base/gstbaseparse.c | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/libs/gst/base/gstbaseparse.c b/libs/gst/base/gstbaseparse.c
+index c4f9271..8b570ce 100644
+--- a/libs/gst/base/gstbaseparse.c
++++ b/libs/gst/base/gstbaseparse.c
+@@ -1331,7 +1331,8 @@ gst_base_parse_sink_event_default (GstBaseParse * parse, GstEvent * event)
+       break;
+ 
+     case GST_EVENT_FLUSH_START:
+-      gst_pad_pause_task (parse->sinkpad);
++      if(parse->priv->pad_mode == GST_PAD_MODE_PULL)
++	      gst_pad_pause_task (parse->sinkpad);
+       GST_OBJECT_LOCK (parse);
+       parse->priv->flushing = TRUE;
+       GST_OBJECT_UNLOCK (parse);
+@@ -1348,8 +1349,8 @@ gst_base_parse_sink_event_default (GstBaseParse * parse, GstEvent * event)
+       parse->priv->skip = 0;
+ 
+       forward_immediate = TRUE;
+-      gst_pad_start_task (parse->sinkpad,
+-        (GstTaskFunction) gst_base_parse_loop, parse->sinkpad, NULL);
++      if(parse->priv->pad_mode == GST_PAD_MODE_PULL)
++	      gst_pad_start_task (parse->sinkpad,(GstTaskFunction) gst_base_parse_loop, parse->sinkpad, NULL);
+       break;
+ 
+     case GST_EVENT_EOS:
+-- 
+2.7.4
+

@@ -11,7 +11,7 @@ KYLIN_PLATFORM_LIB_INSTALL_STAGING = YES
 KYLIN_PLATFORM_LIB_DEPENDENCIES += wayland
 
 define KYLIN_PLATFORM_LIB_BUILD_CMDS
-    @echo  ' - Precompiled Binaries.'
+    @echo  'Nothing to build - Precompiled Binaries.'
 endef
 
 define KYLIN_PLATFORM_LIB_INSTALL_STAGING_CMDS
@@ -25,6 +25,7 @@ define KYLIN_PLATFORM_LIB_INSTALL_TARGET_CMDS
 	$(call KYLIN_PLATFORM_LIB_INSTALL_LIBS,$(TARGET_DIR))
 	$(call KYLIN_PLATFORM_LIB_INSTALL_MISC_BINARIES,$(TARGET_DIR))
 	$(call KYLIN_PLATFORM_LIB_INSTALL_KERNEL_MODULES,$(TARGET_DIR))
+    $(call KYLIN_PLATFORM_LIB_INSTALL_CONFIGURATION,$(TARGET_DIR))
 endef
 
 ################################################################################
@@ -55,12 +56,6 @@ define KYLIN_PLATFORM_LIB_INSTALL_PKGCNF
   $(INSTALL) -m 0755 $(@D)/pkgconfig/* ${1}/usr/lib/pkgconfig
 endef
 
-ifeq ($(BR2_ENABLE_DEBUG),y)
-WEBBRIDGE_CONF_OPTS += -DCMAKE_BUILD_TYPE=Debug
-else ifeq ($(BR2_PACKAGE_CPPSDK_DEBUG),y)
-WEBBRIDGE_CONF_OPTS += -DCMAKE_BUILD_TYPE=Debug
-endif
-
 ifeq ($(BR2_PACKAGE_KYLIN_KERNEL_4_1_17)$(BR2_PACKAGE_KYLIN_PLATFORM_BIN_KO),yy)
 define KYLIN_PLATFORM_LIB_INSTALL_KERNEL_MODULES
   $(INSTALL) -d -m 0755 ${1}lib/modules/4.1.17
@@ -75,6 +70,11 @@ else
   define KYLIN_PLATFORM_LIB_INSTALL_KERNEL_MODULES
   endef
 endif
+
+define KYLIN_PLATFORM_LIB_INSTALL_CONFIGURATION
+    $(INSTALL) -d -m 0755 ${1}/etc/xdg/weston
+    cp -av $(@D)/etc/xdg/weston/weston.ini ${1}/etc/xdg/weston
+endef
 
 ifeq ($(KYLIN_PLATFORM_LIB_INSTALL_BINARIES),y)
   define KYLIN_PLATFORM_LIB_INSTALL_MISC_BINARIES
@@ -99,7 +99,6 @@ ifeq ($(KYLIN_PLATFORM_LIB_INSTALL_BINARIES),y)
   $(INSTALL) -d -m 0755 ${1}/usr/sbin
   $(INSTALL) -m 0755 $(@D)/rootfs-overlay/usr/sbin/ALSADaemon ${1}/usr/sbin
   $(INSTALL) -m 0755 $(@D)/rootfs-overlay/usr/sbin/se_status ${1}/usr/sbin
-  
   endef
 else
   define KYLIN_PLATFORM_LIB_INSTALL_MISC_BINARIES
