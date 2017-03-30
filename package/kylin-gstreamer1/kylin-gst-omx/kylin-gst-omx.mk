@@ -4,9 +4,9 @@
 #
 ################################################################################
 
-KYLIN_GST_OMX_VERSION = 1.2.0
-KYLIN_GST_OMX_SOURCE = gst-omx-$(KYLIN_GST_OMX_VERSION).tar.xz
-KYLIN_GST_OMX_SITE = https://gstreamer.freedesktop.org/src/gst-omx
+KYLIN_GST_OMX_VERSION = e69f705c1cde2ef2b3f7f593b9741da3be3d6259
+KYLIN_GST_OMX_SITE_METHOD = git
+KYLIN_GST_OMX_SITE = git@github.com:Metrological/kylin-gst-omx.git
 
 KYLIN_GST_OMX_LICENSE = LGPLv2.1
 KYLIN_GST_OMX_LICENSE_FILES = COPYING

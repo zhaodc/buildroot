@@ -4,9 +4,9 @@
 #
 ################################################################################
 
-KYLIN_GST_RTKV1SINK_VERSION = fc21beb1798b013fad513257b7248c27c2342a0f
+KYLIN_GST_RTKV1SINK_VERSION = b78158c0341e5f5a221a370d64f552435b6b8db3
 KYLIN_GST_RTKV1SINK_SITE_METHOD = git
-KYLIN_GST_RTKV1SINK_SITE = git@github.com:Metrological/kylin-GST_RTKV1SINK.git
+KYLIN_GST_RTKV1SINK_SITE = git@github.com:Metrological/kylin-gst-rtkv1sink.git
 KYLIN_GST_RTKV1SINK_INSTALL_STAGING = YES
 
 KYLIN_GST_RTKV1SINK_DEPENDENCIES = kylin-gstreamer1 kylin-gst1-plugins-base kylin-gst-omx kylin-platform-lib
