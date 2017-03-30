@@ -1,0 +1,37 @@
+config BR2_PACKAGE_KYLIN_DRIVERS
+	bool "drivers"
+	help
+         kylin platform drivers.
+
+if BR2_PACKAGE_KYLIN_DRIVERS
+
+config BR2_PACKAGE_KYLIN_DRIVERS_BLUETOOTH
+	bool "Bluetooth driver"
+	help
+         Install bluetooth kernel module
+         
+config BR2_PACKAGE_KYLIN_DRIVERS_MALI
+	bool "Mali driver"
+	help
+         Install mali kernel module
+         
+config BR2_PACKAGE_KYLIN_DRIVERS_RF4CE
+	bool "RF4CE driver"
+	help
+         Install greenpeak rf4ce kernel module
+
+config BR2_PACKAGE_KYLIN_DRIVERS_WIFI
+	bool "WiFi drivers"
+	help
+         Install WiFi kernel module	
+         
+config BR2_PACKAGE_KYLIN_DRIVERS_PARAGON
+	bool "Paragon driver"
+	help
+         Install WiFi Paragon module	
+         
+config BR2_PACKAGE_KYLIN_DRIVERS_REALTEK
+	bool "Realtek driver"
+	help
+         Install Realtek driver
+endif
