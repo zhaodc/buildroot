@@ -341,25 +341,13 @@ ifneq ($(BR2_PACKAGE_WEBBRIDGE_WEBSERVER_PORT),)
 WEBBRIDGE_CONF_OPTS += -DWEBBRIDGE_WEBSERVER_PORT=$(call qstrip,$(BR2_PACKAGE_WEBBRIDGE_WEBSERVER_PORT))
 endif
 
-<<<<<<< 9adc328319799d6a0299ff628754af1c9c50ffcc
-<<<<<<< e6faca219f8841af94dab7b33b8b439c86513635
-define WEBBRIDGE_POST_TARGET_INITD
-	$(INSTALL) -D -m 0755 package/webbridge/S80webbridge $(TARGET_DIR)/etc/init.d
-	sed -i 's#@@WEBBRIDGE_PERSISTENT_PATH@@#$(call qstrip,$(BR2_PACKAGE_WEBBRIDGE_PERSISTENT_PATH))#' \
-=======
 define WEBBRIDGE_POST_TARGET_INITD
     $(INSTALL) -D -m 0755 package/webbridge/S80webbridge $(TARGET_DIR)/etc/init.d
     sed \
 		-ie 's#@@WEBBRIDGE_PERSISTENT_PATH@@#$(call qstrip,$(BR2_PACKAGE_WEBBRIDGE_PERSISTENT_PATH))#' \
->>>>>>> Revert "[webbridge] Moved initd script to the cmake"
 		$(TARGET_DIR)/etc/init.d/S80webbridge
 endef
 
 WEBBRIDGE_POST_INSTALL_TARGET_HOOKS += WEBBRIDGE_POST_TARGET_INITD
 
-<<<<<<< 9adc328319799d6a0299ff628754af1c9c50ffcc
-=======
->>>>>>> [webbridge] Moved initd script to the cmake
-=======
->>>>>>> Revert "[webbridge] Moved initd script to the cmake"
 $(eval $(cmake-package))
