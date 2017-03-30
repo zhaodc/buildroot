@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-WESTON_VERSION = 2.0.0
+WESTON_VERSION = 1.12.0
 WESTON_SITE = http://wayland.freedesktop.org/releases
 WESTON_SOURCE = weston-$(WESTON_VERSION).tar.xz
 WESTON_LICENSE = MIT
@@ -51,6 +51,18 @@ WESTON_CONF_OPTS += --disable-weston-launch
 endif
 
 # Needs wayland-egl, which normally only mesa provides
+ifeq ($(BR2_PACKAGE_KYLIN_GRAPHICS),y)
+WESTON_CONF_OPTS += --enable-egl \
+	--enable-simple-egl-clients
+WESTON_DEPENDENCIES += libegl
+WESTON_CONF_ENV += \
+	EGL_CFLAGS="-DEGL_FBDEV=1 -I$(STAGING_DIR)/usr/include -I$(STAGING_DIR)/usr/include/GLES2" \
+	EGL_LIBS="-L$(STAGING_DIR)/usr/lib/server -lEGL -lGLESv2 -lmali" \
+	EGL_TESTS_LIBS="-L$(STAGING_DIR)/usr/lib -lEGL -lGLESv2 -lmali" \
+	EGL_TESTS_CFLAGS="-I$(STAGING_DIR)/usr/include" \
+	GL_RENDERER_CFLAGS="-I$(STAGING_DIR)/usr/include/drm" \
+	GL_RENDERER_LIBS="-L$(STAGING_DIR)/usr/lib -lEGL -lGLESv2 -lmali"
+else
 ifeq ($(BR2_PACKAGE_MESA3D_OPENGL_EGL)$(BR2_PACKAGE_MESA3D_OPENGL_ES),yy)
 WESTON_CONF_OPTS += --enable-egl
 WESTON_DEPENDENCIES += libegl
@@ -58,6 +70,7 @@ else
 WESTON_CONF_OPTS += \
 	--disable-egl \
 	--disable-simple-egl-clients
+endif
 endif
 
 ifeq ($(BR2_PACKAGE_LIBUNWIND),y)
