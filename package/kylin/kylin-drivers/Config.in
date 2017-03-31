@@ -34,4 +34,9 @@ config BR2_PACKAGE_KYLIN_DRIVERS_REALTEK
 	bool "Realtek driver"
 	help
          Install Realtek driver
+
+config BR2_PACKAGE_KYLIN_DRIVERS_AUDIO
+	bool "Realtek audio core"
+	help
+         Install Realtek audio core
 endif

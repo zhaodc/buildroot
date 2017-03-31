@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-KYLIN_DRIVERS_VERSION = 0.0.1
+KYLIN_DRIVERS_VERSION = 0.0.2
 KYLIN_DRIVERS_SITE_METHOD = git
 KYLIN_DRIVERS_SITE = git@github.com:Metrological/kylin-drivers.git
 KYLIN_DRIVERS_INSTALL_STAGING = YES
@@ -125,6 +125,15 @@ define KYLIN_REALTEK_DRIVERS_INSTALL
 endef
 endif
 
+ifeq ($(BR2_PACKAGE_KYLIN_DRIVERS_AUDIO),y)
+define KYLIN_AUDIO_DRIVERS_INSTALL
+  $(INSTALL) -m 0755 $(@D)/drivers/audio/bluecore.audio ${BINARIES_DIR}/bluecore.audio
+endef
+else
+define KYLIN_AUDIO_DRIVERS_INSTALL
+endef
+endif
+
 define KYLIN_DRIVERS_BUILD_CMDS
     $(call KYLIN_MALI_DRIVER_BUILD)
     $(call KYLIN_WIFI_DRIVER_BUILD)
@@ -151,6 +160,8 @@ define KYLIN_DRIVERS_INSTALL_TARGET_CMDS
     $(call KYLIN_PARAGON_DRIVER_INSTALL,${TARGET_DIR})
     $(call KYLIN_REALTEK_DRIVERS_INSTALL,${TARGET_DIR})
 endef
+
+KYLIN_DRIVERS_POST_BUILD_HOOKS += KYLIN_AUDIO_DRIVERS_INSTALL
 
 $(eval $(generic-package))
 
