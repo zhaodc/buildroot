@@ -39,4 +39,10 @@ config BR2_PACKAGE_KYLIN_DRIVERS_AUDIO
 	bool "Realtek audio core"
 	help
          Install Realtek audio core
+         
+config BR2_PACKAGE_KYLIN_RESCUE_IMG
+	bool "Realtek rescue image"
+	help
+         Install Kylin rescue image
+         
 endif

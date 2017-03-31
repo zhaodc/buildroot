@@ -134,6 +134,15 @@ define KYLIN_AUDIO_DRIVERS_INSTALL
 endef
 endif
 
+ifeq ($(BR2_PACKAGE_KYLIN_RESCUE_IMG),y)
+define KYLIN_RESCUE_IMG_INSTALL
+  $(INSTALL) -m 0755 $(@D)/rescue/rescue.root.emmc.cpio.gz_pad.img  ${BINARIES_DIR}/rescue.root.emmc.cpio.gz_pad.img
+endef
+else
+define KYLIN_RESCUE_IMG_INSTALL
+endef
+endif
+
 define KYLIN_DRIVERS_BUILD_CMDS
     $(call KYLIN_MALI_DRIVER_BUILD)
     $(call KYLIN_WIFI_DRIVER_BUILD)
@@ -162,6 +171,7 @@ define KYLIN_DRIVERS_INSTALL_TARGET_CMDS
 endef
 
 KYLIN_DRIVERS_POST_BUILD_HOOKS += KYLIN_AUDIO_DRIVERS_INSTALL
+KYLIN_DRIVERS_POST_BUILD_HOOKS += KYLIN_RESCUE_IMG_INSTALL
 
 $(eval $(generic-package))
 
