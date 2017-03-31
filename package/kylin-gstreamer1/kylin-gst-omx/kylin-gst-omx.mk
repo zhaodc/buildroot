@@ -15,7 +15,7 @@ KYLIN_GST_OMX_AUTORECONF = YES
 
 ifeq ($(BR2_PACKAGE_KYLIN_OMX),y)
 KYLIN_GST_OMX_CONF_OPTS = \
-	--with-omx-target=generic
+	--with-omx-target=generic --with-omx-header-path=$(@D)/omx/openmax
 KYLIN_GST_OMX_CONF_ENV = \
     CFLAGS="-I$(STAGING_DIR)/usr/include/realtek/genericLinux/include"
 endif
