@@ -1,0 +1,182 @@
+diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
+index a43c2e2..9dc70a6 100644
+--- a/desktop-shell/shell.c
++++ b/desktop-shell/shell.c
+@@ -2901,6 +2901,7 @@ desktop_shell_set_background(struct wl_client *client,
+ 	wl_list_for_each_safe(view, next, &surface->views, surface_link)
+ 		weston_view_destroy(view);
+ 	view = weston_view_create(surface);
++	view->alpha = 0;
+ 
+ 	surface->committed = background_committed;
+ 	surface->committed_private = shell;
+diff --git a/libweston/compositor-fbdev.c b/libweston/compositor-fbdev.c
+index 852acc0..d9ef319 100644
+--- a/libweston/compositor-fbdev.c
++++ b/libweston/compositor-fbdev.c
+@@ -49,6 +49,7 @@
+ #include "launcher-util.h"
+ #include "pixman-renderer.h"
+ #include "libinput-seat.h"
++#include "gl-renderer.h"
+ #include "presentation-time-server-protocol.h"
+ 
+ struct fbdev_backend {
+@@ -94,6 +95,8 @@ struct fbdev_output {
+ 	uint8_t depth;
+ };
+ 
++struct gl_renderer_interface *gl_renderer;
++
+ static const char default_seat[] = "seat0";
+ 
+ static inline struct fbdev_output *
+@@ -117,6 +120,7 @@ fbdev_output_start_repaint_loop(struct weston_output *output)
+ 	weston_output_finish_frame(output, &ts, WP_PRESENTATION_FEEDBACK_INVALID);
+ }
+ 
++#if 0
+ static int
+ fbdev_output_repaint(struct weston_output *base, pixman_region32_t *damage)
+ {
+@@ -140,6 +144,25 @@ fbdev_output_repaint(struct weston_output *base, pixman_region32_t *damage)
+ 	 * refresh rate is given in mHz and the interval in ms. */
+ 	wl_event_source_timer_update(output->finish_frame_timer,
+ 	                             1000000 / output->mode.refresh);
++}
++#endif
++
++static int
++fbdev_output_repaint(struct weston_output *base, pixman_region32_t *damage)
++{
++	struct fbdev_output *output = to_fbdev_output(base);
++	struct fbdev_backend *fbb = output->backend;
++	struct weston_compositor *ec = fbb->compositor;
++
++	{
++		ec->renderer->repaint_output(base, damage);
++		/* Update the damage region. */
++		pixman_region32_subtract(&ec->primary_plane.damage,
++	                         &ec->primary_plane.damage, damage);
++
++		wl_event_source_timer_update(output->finish_frame_timer,
++	                             1000000 / output->mode.refresh);
++	}
+ 
+ 	return 0;
+ }
+@@ -367,6 +390,7 @@ fbdev_frame_buffer_open(struct fbdev_output *output, const char *fb_dev,
+ }
+ 
+ /* Closes the FD on success or failure. */
++#if 0
+ static int
+ fbdev_frame_buffer_map(struct fbdev_output *output, int fd)
+ {
+@@ -409,6 +433,7 @@ out_close:
+ 
+ 	return retval;
+ }
++#endif
+ 
+ static void
+ fbdev_frame_buffer_destroy(struct fbdev_output *output)
+@@ -449,10 +474,13 @@ fbdev_output_create(struct fbdev_backend *backend,
+ 		return -1;
+ 	}
+ 
++#if 0
+ 	if (fbdev_frame_buffer_map(output, fb_fd) < 0) {
+ 		weston_log("Mapping frame buffer failed.\n");
+ 		return -1;
+ 	}
++#endif
++		close(fb_fd);
+ 
+ 	output->base.start_repaint_loop = fbdev_output_start_repaint_loop;
+ 	output->base.repaint = fbdev_output_repaint;
+@@ -479,8 +507,21 @@ fbdev_output_create(struct fbdev_backend *backend,
+ 	                   backend->output_transform,
+ 			   1);
+ 
++#if 0
+ 	if (pixman_renderer_output_create(&output->base) < 0)
+ 		goto out_hw_surface;
++#endif
++
++	{
++		setenv("HYBRIS_EGLPLATFORM", "wayland", 1);
++		if (gl_renderer->output_window_create(&output->base,
++					       (EGLNativeWindowType)NULL, NULL,
++					       gl_renderer->alpha_attribs,
++					       NULL, 0) < 0) {
++			weston_log("gl_renderer_output_create failed.\n");
++			goto out_hw_surface;
++		}
++	}
+ 
+ 	loop = wl_display_get_event_loop(backend->compositor->wl_display);
+ 	output->finish_frame_timer =
+@@ -517,8 +558,12 @@ fbdev_output_destroy(struct weston_output *base)
+ 	/* Close the frame buffer. */
+ 	fbdev_output_disable(base);
+ 
++#if 0
+ 	if (base->renderer_state != NULL)
+ 		pixman_renderer_output_destroy(base);
++#endif
++
++		gl_renderer->output_destroy(base);
+ 
+ 	/* Remove the output. */
+ 	weston_output_destroy(&output->base);
+@@ -587,10 +632,12 @@ fbdev_output_reenable(struct fbdev_backend *backend,
+ 	}
+ 
+ 	/* Map the device if it has the same details as before. */
++#if 0
+ 	if (fbdev_frame_buffer_map(output, fb_fd) < 0) {
+ 		weston_log("Mapping frame buffer failed.\n");
+ 		goto err;
+ 	}
++#endif
+ 
+ 	return 0;
+ 
+@@ -608,6 +655,8 @@ fbdev_output_disable(struct weston_output *base)
+ 
+ 	weston_log("Disabling fbdev output.\n");
+ 
++	return;
++
+ 	if (output->hw_surface != NULL) {
+ 		pixman_image_unref(output->hw_surface);
+ 		output->hw_surface = NULL;
+@@ -725,8 +774,27 @@ fbdev_backend_create(struct weston_compositor *compositor,
+ 
+ 	weston_setup_vt_switch_bindings(compositor);
+ 
++#if 0
+ 	if (pixman_renderer_init(compositor) < 0)
+ 		goto out_launcher;
++#endif
++
++	{
++		gl_renderer = weston_load_module("gl-renderer.so",
++						 "gl_renderer_interface");
++		if (!gl_renderer) {
++			weston_log("could not load gl renderer\n");
++			goto out_launcher;
++		}
++
++		if (gl_renderer->display_create(compositor, NO_EGL_PLATFORM,
++					EGL_DEFAULT_DISPLAY, NULL,
++					gl_renderer->alpha_attribs,
++					NULL, 0) < 0) {
++			weston_log("gl_renderer_create failed.\n");
++			goto out_launcher;
++		}
++	}
+ 
+ 	if (fbdev_output_create(backend, param->device) < 0)
+ 		goto out_launcher;
