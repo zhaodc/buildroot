@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-KYLIN_DRIVERS_VERSION = 0.0.2
+KYLIN_DRIVERS_VERSION = 0.0.3
 KYLIN_DRIVERS_SITE_METHOD = git
 KYLIN_DRIVERS_SITE = git@github.com:Metrological/kylin-drivers.git
 KYLIN_DRIVERS_INSTALL_STAGING = YES
