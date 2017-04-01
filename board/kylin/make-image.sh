@@ -7,7 +7,7 @@ if [ -z ${KERNEL_OUTPUT_DIR+x} ]; then KERNEL_OUTPUT_DIR=output_kernel;  fi
 if [ -z ${ROOTFS_DEFCONFIG+x} ]; then ROOTFS_DEFCONFIG=kylin32hf_wpe_ml_defconfig;  fi
 if [ -z ${ROOTFS_OUTPUT_DIR+x} ]; then ROOTFS_OUTPUT_DIR=output_rootfs;  fi
 if [ -z ${BUILDROOT_TOP_DIR+x} ]; then BUILDROOT_TOP_DIR=$PWD;  fi
-if [ -z ${USB_FLASH_DIR+x} ]; then USB_FLASH_DIR=$BUILDROOT_TOP_DIR/usb_flash;  fi
+if [ -z ${USB_FLASH_DIR+x} ]; then USB_FLASH_DIR=$BUILDROOT_TOP_DIR/output/usb_flash;  fi
 
 function print_config(){
 	echo "Selected kernel config: $KERNEL_DEFCONFIG"
@@ -47,11 +47,11 @@ function build_rootfs(){
 
 function print_usage(){
 	echo "$0 commands are:"
-    echo "    clean      "
-    echo "    checkout    "
-    echo "    sync        "
-    echo "    build       "
-    echo "    rescue      "
+    echo "    clean - Clean Build"
+    echo "    all - Build a USB flash drive"
+    echo "    download - Prepare offline build "
+    echo "    create - Create image.img"
+    echo "    build  - Build kernel and rootfs"
 }
 
 function copy_ko(){
@@ -62,6 +62,12 @@ function copy_ko(){
 function get_image_tools(){
 	git clone git@github.com:Metrological/kylin-image.git image
 }
+
+function clean_image(){
+	if [ -d image ]; then image/build_image.sh clean; fi
+    ERR=$?
+    return $ERR;
+} 
 
 function create_image(){
 	[ -d image ] || get_image_tools
@@ -100,10 +106,11 @@ else
     do
         case "$1" in
             create)
-                create_usb
+                create_image
                 ;;
             clean)
                 make_all clean
+                clean_image
                 ;;
             download)
                 config_kernel_build
@@ -118,15 +125,12 @@ else
                 build_kernel
                 copy_ko
                 build_rootfs
-                ;;              
-            copy)
-                copy_ko
-                ;;                   
+                ;;                    
             all)
                 build_kernel
                 copy_ko
                 build_rootfs
-                create_image
+                create_usb
                 ;;
             *)
                 echo -e "$0 \033[47;31mUnknown CMD: $1\033[0m"
