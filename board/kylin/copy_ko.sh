@@ -14,7 +14,7 @@ echo "/lib/modules" >> "${ROOTFS_FILES}"
 rsync -ar --files-from="${ROOTFS_FILES}" "${TARGET_DIR}" "${ROOTFS_DIR}"
 
 # Create tar
-tar -cvf "${BINARIES_DIR}/kernel-modules.tar" -C "${ROOTFS_DIR}" .
+tar -cf "${BINARIES_DIR}/kernel-modules.tar" -C "${ROOTFS_DIR}" .
 
 # Cleaning up
 rm -rf "${ROOTFS_FILES}"
