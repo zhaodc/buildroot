@@ -20,29 +20,41 @@ function print_config(){
 
 function _make(){
 	make O=$1 $2
+    ERR=$?
+    return $ERR;
 }
 
 function make_all(){
 	_make $KERNEL_OUTPUT_DIR $1
 	_make $ROOTFS_OUTPUT_DIR $1
+    ERR=$?
+    return $ERR;
 }
 
 function config_kernel_build(){
 	_make $KERNEL_OUTPUT_DIR $KERNEL_DEFCONFIG
+    ERR=$?
+    return $ERR;
 }
 
 function config_rootfs_build(){
 	_make $ROOTFS_OUTPUT_DIR $ROOTFS_DEFCONFIG
+    ERR=$?
+    return $ERR;
 }
 
 function build_kernel(){
 	[ -e $KERNEL_OUTPUT_DIR/.config ] || config_kernel_build
 	_make $KERNEL_OUTPUT_DIR all
+	ERR=$?
+    return $ERR;
 }
 
 function build_rootfs(){
 	[ -e $ROOTFS_OUTPUT_DIR/.config ] || config_rootfs_build
 	_make $ROOTFS_OUTPUT_DIR all
+	ERR=$?
+    return $ERR;
 }
 
 function print_usage(){
@@ -57,10 +69,14 @@ function print_usage(){
 function copy_ko(){
 	mkdir -p $ROOTFS_OUTPUT_DIR/target
 	tar -xpf $KERNEL_OUTPUT_DIR/images/kernel-modules.tar -C $ROOTFS_OUTPUT_DIR/target
+    ERR=$?
+    return $ERR;
 }
 
 function get_image_tools(){
 	git clone git@github.com:Metrological/kylin-image.git image
+    ERR=$?
+    return $ERR;
 }
 
 function clean_image(){
@@ -80,8 +96,6 @@ function create_image(){
        ./build_image.sh clean build
        ERR=$?
     popd
-
-    ERR=$?
     
     return $ERR;
 }
@@ -90,12 +104,15 @@ function create_usb(){
 	mkdir -p $USB_FLASH_DIR
 	create_image 
 	    
-    cp image/image_file/install.img $USB_FLASH_DIR/.
-    cp image/image_file/components/tmp/pkgfile/generic/bluecore.audio $USB_FLASH_DIR/.
-    cp image/image_file/components/tmp/pkgfile/generic/rescue.root.emmc.cpio.gz_pad.img $USB_FLASH_DIR/.
-    cp image/image_file/components/tmp/pkgfile/generic/rescue.emmc.dtb $USB_FLASH_DIR/.
-    cp image/image_file/components/tmp/pkgfile/generic/emmc.uImage $USB_FLASH_DIR/.
-    cp image/dvrboot.exe.bin $USB_FLASH_DIR/.
+    cp -v image/image_file/install.img $USB_FLASH_DIR
+    cp -v image/image_file/components/tmp/pkgfile/generic/bluecore.audio $USB_FLASH_DIR
+    cp -v image/image_file/components/tmp/pkgfile/generic/rescue.root.emmc.cpio.gz_pad.img $USB_FLASH_DIR
+    cp -v image/image_file/components/tmp/pkgfile/generic/rescue.emmc.dtb $USB_FLASH_DIR
+    cp -v image/image_file/components/tmp/pkgfile/generic/emmc.uImage $USB_FLASH_DIR
+    cp -v image/dvrboot.exe.bin $USB_FLASH_DIR
+    
+    ERR=$?
+    return $ERR;
 }
 
 if [ "$1" = "" ]; then
