@@ -1,0 +1,65 @@
+From 87146014c0347061cd13c837f246b9dcb00ef0d0 Mon Sep 17 00:00:00 2001
+From: Zan Dobersek <zdobersek@igalia.com>
+Date: Fri, 31 Mar 2017 16:17:32 +0200
+Subject: [PATCH] Add WKSoupSessionSetPreferredLanguages().
+
+---
+ .../WebKit2/UIProcess/API/C/soup/WKSoupSession.cpp | 27 ++++++++++++++++++++++
+ .../WebKit2/UIProcess/API/C/soup/WKSoupSession.h   |  2 ++
+ 2 files changed, 29 insertions(+)
+
+diff --git a/Source/WebKit2/UIProcess/API/C/soup/WKSoupSession.cpp b/Source/WebKit2/UIProcess/API/C/soup/WKSoupSession.cpp
+index 6144551..2745907 100644
+--- a/Source/WebKit2/UIProcess/API/C/soup/WKSoupSession.cpp
++++ b/Source/WebKit2/UIProcess/API/C/soup/WKSoupSession.cpp
+@@ -2,6 +2,7 @@
+ #include "WKSoupSession.h"
+ 
+ #include "WebProcessPool.h"
++#include <WebCore/Language.h>
+ 
+ using namespace WebKit;
+ 
+@@ -11,3 +12,29 @@ void WKSoupSessionSetIgnoreTLSErrors(WKContextRef context, bool ignore)
+     toImpl(context)->setIgnoreTLSErrors(ignore);
+ #endif
+ }
++
++void WKSoupSessionSetPreferredLanguages(WKContextRef context, WKArrayRef languages)
++{
++    UNUSED_PARAM(context);
++
++    API::Array* languagesArray = toImpl(languages);
++    if (!languagesArray)
++        return;
++
++    size_t size = languagesArray->size();
++    if (!size)
++        return;
++
++    Vector<String> languagesVector;
++    languagesVector.reserveInitialCapacity(size);
++
++    for (const auto& entry : languagesArray->elementsOfType<API::String>()) {
++        auto string = entry->string();
++        if (equalIgnoringASCIICase(string, "C") || equalIgnoringASCIICase(string, "POSIX"))
++            languagesVector.uncheckedAppend(ASCIILiteral("en-us"));
++        else
++            languagesVector.uncheckedAppend(string.convertToASCIILowercase().replace("_", "-"));
++    }
++
++    WebCore::overrideUserPreferredLanguages(languagesVector);
++}
+diff --git a/Source/WebKit2/UIProcess/API/C/soup/WKSoupSession.h b/Source/WebKit2/UIProcess/API/C/soup/WKSoupSession.h
+index b4ba3a0..aecb04b 100644
+--- a/Source/WebKit2/UIProcess/API/C/soup/WKSoupSession.h
++++ b/Source/WebKit2/UIProcess/API/C/soup/WKSoupSession.h
+@@ -9,6 +9,8 @@ extern "C" {
+ 
+ WK_EXPORT void WKSoupSessionSetIgnoreTLSErrors(WKContextRef context, bool ignore);
+ 
++WK_EXPORT void WKSoupSessionSetPreferredLanguages(WKContextRef context, WKArrayRef languages);
++
+ #ifdef __cplusplus
+ }
+ #endif
