@@ -90,7 +90,7 @@ endif
 ifeq ($(BR2_PACKAGE_KYLIN_WESTON_FBDEV),y)
 KYLIN_WESTON_CONF_OPTS += \
 	--enable-fbdev-compositor \
-	KYLIN_WESTON_NATIVE_BACKEND=fbdev-backend.so
+	WESTON_NATIVE_BACKEND=fbdev-backend.so
 else
 KYLIN_WESTON_CONF_OPTS += --disable-fbdev-compositor
 endif
@@ -98,7 +98,7 @@ endif
 ifeq ($(BR2_PACKAGE_KYLIN_WESTON_DRM),y)
 KYLIN_WESTON_CONF_OPTS += \
 	--enable-drm-compositor \
-	KYLIN_WESTON_NATIVE_BACKEND=drm-backend.so
+	WESTON_NATIVE_BACKEND=drm-backend.so
 KYLIN_WESTON_DEPENDENCIES += libdrm
 else
 KYLIN_WESTON_CONF_OPTS += --disable-drm-compositor
@@ -107,7 +107,7 @@ endif
 ifeq ($(BR2_PACKAGE_KYLIN_WESTON_X11),y)
 KYLIN_WESTON_CONF_OPTS += \
 	--enable-x11-compositor \
-	KYLIN_WESTON_NATIVE_BACKEND=x11-backend.so
+	WESTON_NATIVE_BACKEND=x11-backend.so
 KYLIN_WESTON_DEPENDENCIES += libxcb xlib_libX11
 else
 KYLIN_WESTON_CONF_OPTS += --disable-x11-compositor

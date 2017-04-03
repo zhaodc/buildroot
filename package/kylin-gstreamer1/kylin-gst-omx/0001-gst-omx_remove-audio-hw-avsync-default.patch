@@ -1,0 +1,114 @@
+diff --git a/omx/gstomxaacdec.c b/omx/gstomxaacdec.c
+index 1235b43..f17c347 100644
+--- a/omx/gstomxaacdec.c
++++ b/omx/gstomxaacdec.c
+@@ -173,12 +173,6 @@ gst_omx_aac_dec_set_format (GstOMXAudioDec * dec, GstOMXPort * port,
+   }
+ 
+   if(dec->raw_out == TRUE){
+-        // Hack begin
+-        //Paul: Get hw_avsync_fd from libVOutWrapper. Because no body would like to set this value into gstomxaudiodec if using playbin as pipeline.
+-        printf("[HACK][%s,%d] before dec->hw_avsync_fd: %d\n", __FUNCTION__, __LINE__, dec->hw_avsync_fd);
+-        dec->hw_avsync_fd = vo_wrap_get_hw_avsync_ionSharedFd(VO_WRAP_VIDEO_PLANE_V1);//Assume rtkv1sink using V1 plane.
+-        printf("[HACK][%s,%d] after dec->hw_avsync_fd: %d\n", __FUNCTION__, __LINE__, dec->hw_avsync_fd);
+-        // Hack end
+         gst_omx_component_set_parameter (dec->dec, OMX_realtek_android_index_configureAudioTunnelMode, &dec->hw_avsync_fd);
+   }
+ 
+diff --git a/omx/gstomxac3dec.c b/omx/gstomxac3dec.c
+index 328dae7..9e8a696 100644
+--- a/omx/gstomxac3dec.c
++++ b/omx/gstomxac3dec.c
+@@ -151,12 +151,6 @@ gst_omx_ac3_dec_set_format (GstOMXAudioDec * dec, GstOMXPort * port,
+   }
+ 
+   if(dec->raw_out == TRUE){
+-	  // Hack begin
+-	  //Paul: Get hw_avsync_fd from libVOutWrapper. Because no body would like to set this value into gstomxaudiodec if using playbin as pipeline.
+-	  printf("[HACK][%s,%d] before dec->hw_avsync_fd: %d\n", __FUNCTION__, __LINE__, dec->hw_avsync_fd);
+-	  dec->hw_avsync_fd = vo_wrap_get_hw_avsync_ionSharedFd(VO_WRAP_VIDEO_PLANE_V1);//Assume rtkv1sink using V1 plane.
+-	  printf("[HACK][%s,%d] after dec->hw_avsync_fd: %d\n", __FUNCTION__, __LINE__, dec->hw_avsync_fd);
+-	  // Hack end
+ 	gst_omx_component_set_parameter (dec->dec, OMX_realtek_android_index_configureAudioTunnelMode, &dec->hw_avsync_fd);
+   }
+ 
+diff --git a/omx/gstomxaudiodec.c b/omx/gstomxaudiodec.c
+index 615dd21..af71c67 100644
+--- a/omx/gstomxaudiodec.c
++++ b/omx/gstomxaudiodec.c
+@@ -66,8 +66,7 @@ enum
+   PROP_TIMESTAMP
+ };
+ 
+-//#define DEFAULT_RAW_OUT FALSE
+-#define DEFAULT_RAW_OUT TRUE //Paul: hack, set true as default
++#define DEFAULT_RAW_OUT FALSE
+ #define DEFAULT_MS12_PARAM NULL
+ #define DEFAULT_HWAVSYNC_FD 0
+ #define DEFAULT_TIMESTAMP 0
+diff --git a/omx/gstomxaudiodec.h b/omx/gstomxaudiodec.h
+index 0b891e6..9ab46e4 100644
+--- a/omx/gstomxaudiodec.h
++++ b/omx/gstomxaudiodec.h
+@@ -29,9 +29,7 @@
+ #include <gst/audio/gstaudiodecoder.h>
+ 
+ #include "gstomx.h"
+-// Hack begin
+-#include "vout_wrapper.h"
+-// Hack end
++
+ G_BEGIN_DECLS
+ 
+ #define GST_TYPE_OMX_AUDIO_DEC \
+diff --git a/omx/gstomxeac3dec.c b/omx/gstomxeac3dec.c
+index 83ef9c1..259f9d6 100644
+--- a/omx/gstomxeac3dec.c
++++ b/omx/gstomxeac3dec.c
+@@ -150,12 +150,6 @@ gst_omx_eac3_dec_set_format (GstOMXAudioDec * dec, GstOMXPort * port,
+   }
+ 
+   if(dec->raw_out == TRUE){
+-        // Hack begin
+-        //Paul: Get hw_avsync_fd from libVOutWrapper. Because no body would like to set this value into gstomxaudiodec if using playbin as pipeline.
+-        printf("[HACK][%s,%d] before dec->hw_avsync_fd: %d\n", __FUNCTION__, __LINE__, dec->hw_avsync_fd);
+-        dec->hw_avsync_fd = vo_wrap_get_hw_avsync_ionSharedFd(VO_WRAP_VIDEO_PLANE_V1);//Assume rtkv1sink using V1 plane.
+-        printf("[HACK][%s,%d] after dec->hw_avsync_fd: %d\n", __FUNCTION__, __LINE__, dec->hw_avsync_fd);
+-        // Hack end
+         gst_omx_component_set_parameter (dec->dec, OMX_realtek_android_index_configureAudioTunnelMode, &dec->hw_avsync_fd);
+   }
+ 
+diff --git a/omx/gstomxmp3dec.c b/omx/gstomxmp3dec.c
+index 4b50008..717dcca 100644
+--- a/omx/gstomxmp3dec.c
++++ b/omx/gstomxmp3dec.c
+@@ -172,12 +172,6 @@ gst_omx_mp3_dec_set_format (GstOMXAudioDec * dec, GstOMXPort * port,
+ //    return FALSE;
+ //  }
+   if(dec->raw_out == TRUE){
+-        // Hack begin
+-        //Paul: Get hw_avsync_fd from libVOutWrapper. Because no body would like to set this value into gstomxaudiodec if using playbin as pipeline.
+-        printf("[HACK][%s,%d] before dec->hw_avsync_fd: %d\n", __FUNCTION__, __LINE__, dec->hw_avsync_fd);
+-        dec->hw_avsync_fd = vo_wrap_get_hw_avsync_ionSharedFd(VO_WRAP_VIDEO_PLANE_V1);//Assume rtkv1sink using V1 plane.
+-        printf("[HACK][%s,%d] after dec->hw_avsync_fd: %d\n", __FUNCTION__, __LINE__, dec->hw_avsync_fd);
+-        // Hack end
+         gst_omx_component_set_parameter (dec->dec, OMX_realtek_android_index_configureAudioTunnelMode, &dec->hw_avsync_fd);
+   }
+ 
+diff --git a/omx/gstomxvorbisdec.c b/omx/gstomxvorbisdec.c
+index a7f402c..8565502 100644
+--- a/omx/gstomxvorbisdec.c
++++ b/omx/gstomxvorbisdec.c
+@@ -154,12 +154,6 @@ fprintf(stderr, "20161227 gstomxvorbisdec.c:107\n");
+   }
+ 
+   if(dec->raw_out == TRUE){
+-        // Hack begin
+-        //Paul: Get hw_avsync_fd from libVOutWrapper. Because no body would like to set this value into gstomxaudiodec if using playbin as pipeline.
+-        printf("[HACK][%s,%d] before dec->hw_avsync_fd: %d\n", __FUNCTION__, __LINE__, dec->hw_avsync_fd);
+-        dec->hw_avsync_fd = vo_wrap_get_hw_avsync_ionSharedFd(VO_WRAP_VIDEO_PLANE_V1);//Assume rtkv1sink using V1 plane.
+-        printf("[HACK][%s,%d] after dec->hw_avsync_fd: %d\n", __FUNCTION__, __LINE__, dec->hw_avsync_fd);
+-        // Hack end
+         gst_omx_component_set_parameter (dec->dec, OMX_realtek_android_index_configureAudioTunnelMode, &dec->hw_avsync_fd);
+   }
+ 
