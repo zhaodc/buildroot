@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-KYLIN_WESTON_VERSION = 2.0.0
+KYLIN_WESTON_VERSION = 1.12.0
 KYLIN_WESTON_SITE = http://wayland.freedesktop.org/releases
 KYLIN_WESTON_SOURCE = weston-$(KYLIN_WESTON_VERSION).tar.xz
 KYLIN_WESTON_LICENSE = MIT
