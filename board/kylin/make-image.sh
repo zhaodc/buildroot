@@ -1,6 +1,8 @@
 #!/bin/bash
 #set -x
 
+set -e
+
 # these values can be overridden using exports before caling the script
 if [ -z ${KERNEL_DEFCONFIG+x} ]; then KERNEL_DEFCONFIG=kylin64_kernel_defconfig;  fi
 if [ -z ${KERNEL_OUTPUT_DIR+x} ]; then KERNEL_OUTPUT_DIR=output_kernel;  fi
