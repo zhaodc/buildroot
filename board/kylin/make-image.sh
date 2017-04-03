@@ -6,7 +6,7 @@ set -e
 # these values can be overridden using exports before caling the script
 if [ -z ${KERNEL_DEFCONFIG+x} ]; then KERNEL_DEFCONFIG=kylin64_kernel_defconfig;  fi
 if [ -z ${KERNEL_OUTPUT_DIR+x} ]; then KERNEL_OUTPUT_DIR=output_kernel;  fi
-if [ -z ${ROOTFS_DEFCONFIG+x} ]; then ROOTFS_DEFCONFIG=kylin32hf_wpe_ml_defconfig;  fi
+if [ -z ${ROOTFS_DEFCONFIG+x} ]; then ROOTFS_DEFCONFIG=kylin32_wpe_defconfig;  fi
 if [ -z ${ROOTFS_OUTPUT_DIR+x} ]; then ROOTFS_OUTPUT_DIR=output_rootfs;  fi
 if [ -z ${BUILDROOT_TOP_DIR+x} ]; then BUILDROOT_TOP_DIR=$PWD;  fi
 if [ -z ${USB_FLASH_DIR+x} ]; then USB_FLASH_DIR=$BUILDROOT_TOP_DIR/output/usb_flash;  fi
