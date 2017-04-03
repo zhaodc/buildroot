@@ -1,0 +1,107 @@
+From cbbd80444fbb1358cdf5ada25f19345bddb2f6f8 Mon Sep 17 00:00:00 2001
+From: yaozenhu <yaozenhu@realtek.com>
+Date: Tue, 25 Oct 2016 19:49:25 +0800
+Subject: [PATCH 2/7] [modify] support HW AVSync
+
+Change-Id: Ib38b35d986f9a0343dc6aa963a9e88862cafb2ce
+---
+ tools/gst-launch.c | 69 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 69 insertions(+)
+
+diff --git a/tools/gst-launch.c b/tools/gst-launch.c
+index 859f9db..67ca28f 100644
+--- a/tools/gst-launch.c
++++ b/tools/gst-launch.c
+@@ -902,6 +902,39 @@ bus_sync_handler (GstBus * bus, GstMessage * message, gpointer data)
+   return GST_BUS_PASS;
+ }
+ 
++GstElement* search_element(GstElement *in, char *element_name)
++{
++  GstIterator *it = gst_bin_iterate_elements(GST_BIN(in));
++  gboolean done = FALSE;
++  GValue val = {0, };
++  printf("[realtek] search element %s @@@@@@@@\n", element_name);
++  while (!done) {
++    switch (gst_iterator_next (it, &val)) {
++      case GST_ITERATOR_OK:
++      {
++        GstElement *child = g_value_get_object (&val);
++
++	if(strstr(gst_element_get_name(child), element_name)){
++		printf("[realtek] got element %s @@@@@@@@\n", gst_element_get_name(child));
++		return child;
++        }
++        g_value_reset (&val);
++        break;
++      }
++      case GST_ITERATOR_RESYNC:
++        gst_iterator_resync (it);
++        break;
++      case GST_ITERATOR_DONE:
++        done = TRUE;
++        break;
++      default:
++	done = TRUE;
++	break;
++    }
++  }
++  return NULL;
++}
++
+ int
+ main (int argc, char *argv[])
+ {
+@@ -909,6 +942,14 @@ main (int argc, char *argv[])
+   gboolean verbose = FALSE;
+   gboolean no_fault = FALSE;
+   gboolean eos_on_shutdown = FALSE;
++  GstElement *v1_element = NULL;
++  GstElement *omx_audio_element = NULL;
++  GstElement *fake_element = NULL;
++  gint hw_avsync_fd = 0;
++  gboolean enable_hwavsync = FALSE;
++#define AUDIO_DECODER_COUNT 4
++  char *audio_decoder[AUDIO_DECODER_COUNT] = {"omxaacdec", "omxac3dec", "omxmp3dec", "omxeac3dec"};
++  gint adec_count = 0;
+ #if 0
+   gboolean check_index = FALSE;
+ #endif
+@@ -997,6 +1038,34 @@ main (int argc, char *argv[])
+     pipeline =
+         (GstElement *) gst_parse_launchv ((const gchar **) argvn, &error);
+   }
++#if 1
++  v1_element = search_element(pipeline, "rtkv1sink");
++  if(v1_element != NULL)
++	  g_object_get(G_OBJECT(v1_element), "hwavsync", &enable_hwavsync, NULL);
++
++  printf("[realtek] Enable AVSync %d @@@@@@\n", enable_hwavsync);
++  if(enable_hwavsync){
++	  fake_element = search_element(pipeline, "fake");
++	  for(adec_count = 0; adec_count < AUDIO_DECODER_COUNT; adec_count++){
++		  omx_audio_element = search_element(pipeline, audio_decoder[adec_count]);
++		  if(omx_audio_element)
++			break;
++          }
++
++	  if(v1_element != NULL && fake_element != NULL && omx_audio_element != NULL){
++		g_object_get(G_OBJECT(v1_element), "hwavsync-fd", &hw_avsync_fd, NULL);
++		g_object_set(G_OBJECT(v1_element), "async", FALSE, NULL);
++		g_object_set(G_OBJECT(v1_element), "sync", FALSE, NULL);
++
++		g_object_set(G_OBJECT(fake_element), "async", FALSE, NULL);
++		g_object_set(G_OBJECT(fake_element), "sync", FALSE, NULL);
++
++		g_object_set(G_OBJECT(omx_audio_element), "hwavsync-fd", hw_avsync_fd, NULL);
++		g_object_set(G_OBJECT(omx_audio_element), "raw-out", TRUE, NULL);
++
++	  }
++  }
++#endif
+   g_free (argvn);
+ 
+   if (!pipeline) {
+-- 
+2.7.4
+

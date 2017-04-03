@@ -1,0 +1,30 @@
+From ea10b853d5ab61f9e62f8e8e6868e6a39abc7f32 Mon Sep 17 00:00:00 2001
+From: yaozenhu <yaozenhu@realtek.com>
+Date: Mon, 14 Nov 2016 10:35:23 +0800
+Subject: [PATCH 04/11] [modify] sending origin pts to OMX because we take
+ hwclock to caculate time information
+
+Change-Id: I920e5b78160b7a1b2e4714b75b575a2550358a36
+---
+ gst/mpegtsdemux/tsdemux.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/gst/mpegtsdemux/tsdemux.c b/gst/mpegtsdemux/tsdemux.c
+index 85d3881..c9e94d6 100644
+--- a/gst/mpegtsdemux/tsdemux.c
++++ b/gst/mpegtsdemux/tsdemux.c
+@@ -2661,6 +2661,11 @@ gst_ts_demux_push_pending_data (GstTSDemux * demux, TSDemuxStream * stream)
+ //  if(bs->stream_flag == MPEGTS_IS_VIDEO)
+ //	printf("[realtek] video pid %04x time %lld raw %lld\n", bs->pid, stream->pts, stream->raw_pts);
+ 
++  if (GST_CLOCK_TIME_IS_VALID (stream->raw_pts))
++    GST_BUFFER_PTS (buffer) = MPEGTIME_TO_GSTTIME (stream->raw_pts);
++  if (GST_CLOCK_TIME_IS_VALID (stream->raw_dts))
++    GST_BUFFER_DTS (buffer) = MPEGTIME_TO_GSTTIME (stream->raw_dts);
++
+   if (buffer_list)
+     buffer = NULL;
+ 
+-- 
+2.7.4
+

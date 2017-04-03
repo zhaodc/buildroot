@@ -1,0 +1,138 @@
+From 517774d94a34c110d4f4ac40f4d17eee05f5fa02 Mon Sep 17 00:00:00 2001
+From: yaozenhu <yaozenhu@realtek.com>
+Date: Fri, 7 Oct 2016 10:22:57 +0800
+Subject: [PATCH 2/3] [modify] add ac3parse force x-eac3 output property
+
+Change-Id: I7fa2c78da65864bae968b5e642ec18b80640caf8
+---
+ gst/audioparsers/gstac3parse.c | 60 ++++++++++++++++++++++++++++++++++++++++++
+ gst/audioparsers/gstac3parse.h |  1 +
+ 2 files changed, 61 insertions(+)
+
+diff --git a/gst/audioparsers/gstac3parse.c b/gst/audioparsers/gstac3parse.c
+index 0a2dc9b..19a0376 100644
+--- a/gst/audioparsers/gstac3parse.c
++++ b/gst/audioparsers/gstac3parse.c
+@@ -136,6 +136,15 @@ static const struct
+   1280, 1394, 1920}}
+ };
+ 
++#define DEFAULT_EAC3_OUT        FALSE
++
++enum
++{
++  PROP_0,
++  PROP_EAC3_OUT,
++  PROP_LAST
++};
++
+ static const guint fscod_rates[4] = { 48000, 44100, 32000, 0 };
+ static const guint acmod_chans[8] = { 2, 1, 2, 3, 3, 4, 4, 5 };
+ static const guint numblks[4] = { 1, 2, 3, 6 };
+@@ -170,6 +179,10 @@ static GstCaps *gst_ac3_parse_get_sink_caps (GstBaseParse * parse,
+     GstCaps * filter);
+ static gboolean gst_ac3_parse_set_sink_caps (GstBaseParse * parse,
+     GstCaps * caps);
++static void gst_ac3_parse_set_property (GObject * object, guint prop_id,
++    const GValue * value, GParamSpec * pspec);
++static void gst_ac3_parse_get_property (GObject * object, guint prop_id,
++    GValue * value, GParamSpec * pspec);
+ 
+ #define gst_ac3_parse_parent_class parent_class
+ G_DEFINE_TYPE (GstAc3Parse, gst_ac3_parse, GST_TYPE_BASE_PARSE);
+@@ -185,6 +198,14 @@ gst_ac3_parse_class_init (GstAc3ParseClass * klass)
+       "AC3 audio stream parser");
+ 
+   object_class->finalize = gst_ac3_parse_finalize;
++  object_class->set_property = GST_DEBUG_FUNCPTR (gst_ac3_parse_set_property);
++  object_class->get_property = GST_DEBUG_FUNCPTR (gst_ac3_parse_get_property);
++
++  g_object_class_install_property (object_class, PROP_EAC3_OUT,
++      g_param_spec_boolean ("eac3-out", "eac3 out",
++          "Force eac3 out",
++          DEFAULT_EAC3_OUT,
++          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
+ 
+   gst_element_class_add_pad_template (element_class,
+       gst_static_pad_template_get (&sink_template));
+@@ -206,6 +227,39 @@ gst_ac3_parse_class_init (GstAc3ParseClass * klass)
+ }
+ 
+ static void
++gst_ac3_parse_set_property (GObject * object, guint prop_id,
++    const GValue * value, GParamSpec * pspec)
++{
++  GstAc3Parse *parse = GST_AC3_PARSE(object);
++
++  switch (prop_id) {
++    case PROP_EAC3_OUT:
++      parse->force_eac3_out = g_value_get_boolean (value);
++      printf("[realtek] force eac3 set %d\n", parse->force_eac3_out);
++      break;
++    default:
++      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
++      break;
++  }
++}
++
++static void
++gst_ac3_parse_get_property (GObject * object, guint prop_id, GValue * value,
++    GParamSpec * pspec)
++{
++  GstAc3Parse *parse = GST_AC3_PARSE(object);
++
++  switch (prop_id) {
++    case PROP_EAC3_OUT:
++      g_value_set_boolean (value, parse->force_eac3_out);
++      break;
++    default:
++      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
++      break;
++  }
++}
++
++static void
+ gst_ac3_parse_reset (GstAc3Parse * ac3parse)
+ {
+   ac3parse->channels = -1;
+@@ -220,6 +274,7 @@ static void
+ gst_ac3_parse_init (GstAc3Parse * ac3parse)
+ {
+   gst_base_parse_set_min_frame_size (GST_BASE_PARSE (ac3parse), 8);
++  ac3parse->force_eac3_out = DEFAULT_EAC3_OUT;
+   gst_ac3_parse_reset (ac3parse);
+   ac3parse->baseparse_chainfunc =
+       GST_BASE_PARSE_SINK_PAD (GST_BASE_PARSE (ac3parse))->chainfunc;
+@@ -637,6 +692,10 @@ gst_ac3_parse_handle_frame (GstBaseParse * parse,
+       goto cleanup;
+   }
+ 
++
++  if(ac3parse->force_eac3_out == TRUE)
++	ac3parse->eac = TRUE;
++
+   eac = ac3parse->eac; //FIXME
+ 
+   if (G_UNLIKELY (ac3parse->sample_rate != rate || ac3parse->channels != chans
+@@ -956,5 +1015,6 @@ gst_ac3_parse_set_sink_caps (GstBaseParse * parse, GstCaps * caps)
+ 
+   if(gst_structure_has_name (s, "audio/x-eac3"))
+ 	ac3parse->eac = TRUE;
++
+   return TRUE;
+ }
+diff --git a/gst/audioparsers/gstac3parse.h b/gst/audioparsers/gstac3parse.h
+index 0e7af5a..4ba9bb1 100644
+--- a/gst/audioparsers/gstac3parse.h
++++ b/gst/audioparsers/gstac3parse.h
+@@ -64,6 +64,7 @@ struct _GstAc3Parse {
+   gboolean              sent_codec_tag;
+   volatile gint         align;
+   GstPadChainFunction   baseparse_chainfunc;
++  gboolean		force_eac3_out;
+ };
+ 
+ /**
+-- 
+2.7.4
+

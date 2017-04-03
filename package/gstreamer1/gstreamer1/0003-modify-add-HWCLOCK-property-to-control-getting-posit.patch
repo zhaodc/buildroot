@@ -1,0 +1,128 @@
+From a728479aa6611590aaf608bf254248792b253c5b Mon Sep 17 00:00:00 2001
+From: yaozenhu <yaozenhu@realtek.com>
+Date: Wed, 2 Nov 2016 11:04:59 +0800
+Subject: [PATCH 3/7] [modify] add HWCLOCK property to control getting position
+ time from HW
+
+Change-Id: Ib0d0445aee2b29bc5683f9ec996922a19fad04ed
+---
+ libs/gst/base/gstbasesink.c | 31 +++++++++++++++++++++++++------
+ 1 file changed, 25 insertions(+), 6 deletions(-)
+
+diff --git a/libs/gst/base/gstbasesink.c b/libs/gst/base/gstbasesink.c
+index f0d8c40..afcbf88 100644
+--- a/libs/gst/base/gstbasesink.c
++++ b/libs/gst/base/gstbasesink.c
+@@ -270,6 +270,7 @@ struct _GstBaseSinkPrivate
+   GstClockTime rc_time;
+   GstClockTime rc_next;
+   gsize rc_accumulated;
++  gboolean hwclock;
+ };
+ 
+ #define DO_RUNNING_AVG(avg,val,size) (((val) + ((size)-1) * (avg)) / (size))
+@@ -298,7 +299,7 @@ struct _GstBaseSinkPrivate
+ #define DEFAULT_ENABLE_LAST_SAMPLE  TRUE
+ #define DEFAULT_THROTTLE_TIME       0
+ #define DEFAULT_MAX_BITRATE         0
+-
++#define DEFAULT_HWCLOCK		    FALSE
+ enum
+ {
+   PROP_0,
+@@ -313,6 +314,7 @@ enum
+   PROP_RENDER_DELAY,
+   PROP_THROTTLE_TIME,
+   PROP_MAX_BITRATE,
++  PROP_HWCLOCK,
+   PROP_LAST
+ };
+ 
+@@ -440,6 +442,11 @@ gst_base_sink_class_init (GstBaseSinkClass * klass)
+       g_param_spec_boolean ("qos", "Qos",
+           "Generate Quality-of-Service events upstream", DEFAULT_QOS,
+           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
++
++  g_object_class_install_property (gobject_class, PROP_HWCLOCK,
++      g_param_spec_boolean ("hwclock", "hwclock",
++          "got position from hw clock", DEFAULT_HWCLOCK,
++          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
+   /**
+    * GstBaseSink:async:
+    *
+@@ -666,7 +673,7 @@ gst_base_sink_init (GstBaseSink * basesink, gpointer g_class)
+   g_atomic_int_set (&priv->enable_last_sample, DEFAULT_ENABLE_LAST_SAMPLE);
+   priv->throttle_time = DEFAULT_THROTTLE_TIME;
+   priv->max_bitrate = DEFAULT_MAX_BITRATE;
+-
++  priv->hwclock = DEFAULT_HWCLOCK;
+   GST_OBJECT_FLAG_SET (basesink, GST_ELEMENT_FLAG_SINK);
+ }
+ 
+@@ -1400,6 +1407,9 @@ gst_base_sink_set_property (GObject * object, guint prop_id,
+     case PROP_MAX_BITRATE:
+       gst_base_sink_set_max_bitrate (sink, g_value_get_uint64 (value));
+       break;
++    case PROP_HWCLOCK:
++	sink->priv->hwclock = g_value_get_boolean(value);
++	break;
+     default:
+       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+       break;
+@@ -1446,6 +1456,9 @@ gst_base_sink_get_property (GObject * object, guint prop_id, GValue * value,
+     case PROP_MAX_BITRATE:
+       g_value_set_uint64 (value, gst_base_sink_get_max_bitrate (sink));
+       break;
++    case PROP_HWCLOCK:
++        g_value_set_boolean(value, sink->priv->hwclock);
++	break;
+     default:
+       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+       break;
+@@ -4782,23 +4795,31 @@ default_element_query (GstElement * element, GstQuery * query)
+   gboolean res = FALSE;
+ 
+   GstBaseSink *basesink = GST_BASE_SINK (element);
++  GstBaseSinkClass *bclass = GST_BASE_SINK_GET_CLASS (basesink);
+ 
+   switch (GST_QUERY_TYPE (query)) {
+     case GST_QUERY_POSITION:
+     {
+       gint64 cur = 0;
++      gint64 cur_hwtime = 0;
+       GstFormat format;
+       gboolean upstream = FALSE;
+ 
+       gst_query_parse_position (query, &format, NULL);
+-
++      if(basesink->priv->hwclock){
++	      bclass->query(basesink, query);
++	      gst_query_parse_position (query, &format, &cur_hwtime);
++      }else{
++	      cur_hwtime = -1;
++      }
+       GST_DEBUG_OBJECT (basesink, "position query in format %s",
+           gst_format_get_name (format));
+ 
+       /* first try to get the position based on the clock */
+       if ((res =
+               gst_base_sink_get_position (basesink, format, &cur, &upstream))) {
+-        gst_query_set_position (query, format, cur);
++	if(cur_hwtime == -1)
++	        gst_query_set_position (query, format, cur);
+       } else if (upstream) {
+         /* fallback to peer query */
+         res = gst_pad_peer_query (basesink->sinkpad, query);
+@@ -4941,9 +4962,7 @@ gst_base_sink_default_query (GstBaseSink * basesink, GstQuery * query)
+ {
+   gboolean res;
+   GstBaseSinkClass *bclass;
+-
+   bclass = GST_BASE_SINK_GET_CLASS (basesink);
+-
+   switch (GST_QUERY_TYPE (query)) {
+     case GST_QUERY_ALLOCATION:
+     {
+-- 
+2.7.4
+

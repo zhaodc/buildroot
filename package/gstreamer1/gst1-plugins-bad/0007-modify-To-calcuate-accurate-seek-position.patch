@@ -1,0 +1,178 @@
+From 3fbec74e6398da017d61a11284ea17de0fd0fb0d Mon Sep 17 00:00:00 2001
+From: yaozenhu <yaozenhu@realtek.com>
+Date: Thu, 17 Nov 2016 15:36:49 +0800
+Subject: [PATCH 07/11] [modify] To calcuate accurate seek position [reviewer]
+ Paul
+
+Change-Id: I3434b140571b9a0c42e7ef714963aca908d4a6bb
+---
+ gst/mpegtsdemux/mpegtsbase.c       |  2 +-
+ gst/mpegtsdemux/mpegtspacketizer.c | 19 ++++++++++++++++++-
+ gst/mpegtsdemux/mpegtspacketizer.h |  9 ++++++++-
+ gst/mpegtsdemux/tsdemux.c          | 31 ++++++++++++++++++++++++++++++-
+ 4 files changed, 57 insertions(+), 4 deletions(-)
+
+diff --git a/gst/mpegtsdemux/mpegtsbase.c b/gst/mpegtsdemux/mpegtsbase.c
+index 8392bea..207e0fd 100644
+--- a/gst/mpegtsdemux/mpegtsbase.c
++++ b/gst/mpegtsdemux/mpegtsbase.c
+@@ -1321,6 +1321,7 @@ mpegts_base_scan (MpegTSBase * base)
+     }
+   }
+ 
++  base->packetizer->pcr_start = TRUE;
+ beach:
+   mpegts_packetizer_clear (base->packetizer);
+   return ret;
+@@ -1356,7 +1357,6 @@ mpegts_base_loop (MpegTSBase * base)
+       GstBuffer *buf = NULL;
+ 
+       GST_DEBUG ("Pulling data from %" G_GUINT64_FORMAT, base->seek_offset);
+-
+       ret = gst_pad_pull_range (base->sinkpad, base->seek_offset,
+           100 * base->packetsize, &buf);
+       if (G_UNLIKELY (ret != GST_FLOW_OK))
+diff --git a/gst/mpegtsdemux/mpegtspacketizer.c b/gst/mpegtsdemux/mpegtspacketizer.c
+index a7e0798..cc627e2 100644
+--- a/gst/mpegtsdemux/mpegtspacketizer.c
++++ b/gst/mpegtsdemux/mpegtspacketizer.c
+@@ -247,6 +247,7 @@ mpegts_packetizer_class_init (MpegTSPacketizer2Class * klass)
+ static void
+ mpegts_packetizer_init (MpegTSPacketizer2 * packetizer)
+ {
++  int i;
+   g_mutex_init (&packetizer->group_lock);
+ 
+   packetizer->adapter = gst_adapter_new ();
+@@ -266,6 +267,15 @@ mpegts_packetizer_init (MpegTSPacketizer2 * packetizer)
+   memset (packetizer->observations, 0x0, sizeof (packetizer->observations));
+   packetizer->lastobsid = 0;
+ 
++  for(i = 0; i < MPEGTS_PCR_RECORD_NUMBER; i++){
++        packetizer->pcr_record[i] = -1;
++        packetizer->pcr_packets[i] = 0;
++        packetizer->acc_byterate[i] = 0;
++  }
++  packetizer->pcr_done = FALSE;
++  packetizer->pcr_start = FALSE;
++  packetizer->pcr_count = 0;
++
+   packetizer->nb_seen_offsets = 0;
+   packetizer->refoffset = -1;
+   packetizer->last_in_time = GST_CLOCK_TIME_NONE;
+@@ -387,6 +397,12 @@ mpegts_packetizer_parse_adaptation_field_control (MpegTSPacketizer2 *
+   if (afcflags & MPEGTS_AFC_PCR_FLAG) {
+     MpegTSPCR *pcrtable = NULL;
+     packet->pcr = mpegts_packetizer_compute_pcr (data);
++
++    if(packetizer->pcr_count < MPEGTS_PCR_RECORD_NUMBER && packetizer->pcr_start == TRUE){
++	packetizer->pcr_record[packetizer->pcr_count] = packet->pcr / 300;
++	packetizer->pcr_count++;
++    }
++
+     data += 6;
+     GST_DEBUG ("pcr 0x%04x %" G_GUINT64_FORMAT " (%" GST_TIME_FORMAT
+         ") offset:%" G_GUINT64_FORMAT, packet->pid, packet->pcr,
+@@ -850,7 +866,8 @@ mpegts_packetizer_next_packet (MpegTSPacketizer2 * packetizer,
+       GST_LOG ("offset %" G_GUINT64_FORMAT, packet->offset);
+       packetizer->offset += packet_size;
+       GST_MEMDUMP ("data_start", packet->data_start, 16);
+-
++      if(packetizer->pcr_count < MPEGTS_PCR_RECORD_NUMBER && packetizer->pcr_start == TRUE)
++	      packetizer->pcr_packets[packetizer->pcr_count]++;
+       return mpegts_packetizer_parse_packet (packetizer, packet);
+     }
+   }
+diff --git a/gst/mpegtsdemux/mpegtspacketizer.h b/gst/mpegtsdemux/mpegtspacketizer.h
+index be8bf37..e8f225c 100644
+--- a/gst/mpegtsdemux/mpegtspacketizer.h
++++ b/gst/mpegtsdemux/mpegtspacketizer.h
+@@ -47,7 +47,7 @@
+ #define MPEGTS_AFC_SPLICING_POINT_FLAG          0x04
+ #define MPEGTS_AFC_TRANSPORT_PRIVATE_DATA_FLAG  0x02
+ #define MPEGTS_AFC_EXTENSION_FLAG               0x01
+-
++#define MPEGTS_PCR_RECORD_NUMBER 512
+ #define MAX_WINDOW 512
+ 
+ G_BEGIN_DECLS
+@@ -283,6 +283,13 @@ struct _MpegTSPacketizer2 {
+   MpegTSPCR *observations[MAX_PCR_OBS_CHANNELS];
+   guint8 lastobsid;
+   GstClockTime pcr_discont_threshold;
++
++  guint64            pcr_record[MPEGTS_PCR_RECORD_NUMBER];
++  gint               pcr_count;
++  gboolean           pcr_done;
++  gint               pcr_packets[MPEGTS_PCR_RECORD_NUMBER];
++  guint64            acc_byterate[MPEGTS_PCR_RECORD_NUMBER];
++  gboolean	     pcr_start;
+ };
+ 
+ struct _MpegTSPacketizer2Class {
+diff --git a/gst/mpegtsdemux/tsdemux.c b/gst/mpegtsdemux/tsdemux.c
+index c9e94d6..e49961e 100644
+--- a/gst/mpegtsdemux/tsdemux.c
++++ b/gst/mpegtsdemux/tsdemux.c
+@@ -808,6 +808,29 @@ gst_ts_demux_adjust_seek_offset_for_keyframe (TSDemuxStream * stream,
+   return TRUE;
+ }
+ 
++static guint64 GetMiddle(int count, guint64 *array){
++        int i;
++	guint64 acc = 0;
++	guint64 average;
++
++        for(i = 1; i < count; i++)
++		acc += array[i];
++
++	average = acc / (count - 1);
++
++	printf("[realtek] average byterate %lld\n", average);
++        return average;
++}
++
++static void calculate_byterate(gint16 packetsize, MpegTSPacketizer2 *packetizer){
++        int i;
++        for(i = 1; i < packetizer->pcr_count; i++){
++             guint64 byterate;
++             byterate = gst_util_uint64_scale (GST_SECOND, packetsize * packetizer->pcr_packets[i], MPEGTIME_TO_GSTTIME (packetizer->pcr_record[i] - packetizer->pcr_record[i - 1]));
++             packetizer->acc_byterate[i] = byterate;
++        }
++}
++
+ static GstFlowReturn
+ gst_ts_demux_do_seek (MpegTSBase * base, GstEvent * event)
+ {
+@@ -821,6 +844,7 @@ gst_ts_demux_do_seek (MpegTSBase * base, GstEvent * event)
+   GstSeekType start_type, stop_type;
+   gint64 start, stop;
+   guint64 start_offset;
++  guint64 seek_position;
+ 
+   gst_event_parse_seek (event, &rate, &format, &flags, &start_type, &start,
+       &stop_type, &stop);
+@@ -847,6 +871,10 @@ gst_ts_demux_do_seek (MpegTSBase * base, GstEvent * event)
+         mpegts_packetizer_ts_to_offset (base->packetizer, MAX (0,
+             start - SEEK_TIMESTAMP_OFFSET), demux->program->pcr_pid);
+ 
++    calculate_byterate(base->packetsize, base->packetizer);
++
++    seek_position = GetMiddle(base->packetizer->pcr_count, base->packetizer->acc_byterate);
++
+     if (G_UNLIKELY (start_offset == -1)) {
+       GST_WARNING ("Couldn't convert start position to an offset");
+       goto done;
+@@ -868,7 +896,8 @@ gst_ts_demux_do_seek (MpegTSBase * base, GstEvent * event)
+   }
+ 
+   /* record offset and rate */
+-  base->seek_offset = start_offset;
++//  base->seek_offset = start_offset;
++  base->seek_offset = (seek_position * start) / GST_SECOND;
+   demux->last_seek_offset = base->seek_offset;
+   demux->rate = rate;
+   res = GST_FLOW_OK;
+-- 
+2.7.4
+

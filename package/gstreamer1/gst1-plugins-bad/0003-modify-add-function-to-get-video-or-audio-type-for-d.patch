@@ -1,0 +1,84 @@
+From cde69fb0b700fc0e2baa31773cfd69a397fd20a0 Mon Sep 17 00:00:00 2001
+From: yaozenhu <yaozenhu@realtek.com>
+Date: Wed, 21 Sep 2016 17:04:15 +0800
+Subject: [PATCH 03/11] [modify] add function to get video or audio type for
+ debuging
+
+Change-Id: I5cb018d446e0b49421ccb2cba75845e936893bcd
+---
+ gst/mpegtsdemux/mpegtsbase.h |  2 +-
+ gst/mpegtsdemux/tsdemux.c    | 24 ++++++++++++++++++++++++
+ 2 files changed, 25 insertions(+), 1 deletion(-)
+
+diff --git a/gst/mpegtsdemux/mpegtsbase.h b/gst/mpegtsdemux/mpegtsbase.h
+index fc0c651..d7c1ad7 100644
+--- a/gst/mpegtsdemux/mpegtsbase.h
++++ b/gst/mpegtsdemux/mpegtsbase.h
+@@ -59,7 +59,7 @@ struct _MpegTSBaseStream
+ {
+   guint16             pid;
+   guint8              stream_type;
+-
++  guint8	      stream_flag;
+   /* Content of the registration descriptor (if present) */
+   guint32             registration_id;
+ 
+diff --git a/gst/mpegtsdemux/tsdemux.c b/gst/mpegtsdemux/tsdemux.c
+index 8a41f90..85d3881 100644
+--- a/gst/mpegtsdemux/tsdemux.c
++++ b/gst/mpegtsdemux/tsdemux.c
+@@ -99,6 +99,13 @@ typedef enum
+                                  * Drop all incoming buffers */
+ } PendingPacketState;
+ 
++typedef enum
++{
++	MPEGTS_IS_UNKNOWN = 0,
++	MPEGTS_IS_VIDEO = 1 << 0,
++	MPEGTS_IS_AUDIO = 1 << 1
++}MPEGTSTYPE;
++
+ /* Pending buffer */
+ typedef struct
+ {
+@@ -1048,6 +1055,12 @@ gst_ts_demux_create_tags (TSDemuxStream * stream)
+   }
+ }
+ 
++static void set_stream_flag(MpegTSBaseStream * bs, MPEGTSTYPE type)
++{
++	bs->stream_flag &= 0x00;
++	bs->stream_flag |= type;
++}
++
+ static GstPad *
+ create_pad_for_stream (MpegTSBase * base, MpegTSBaseStream * bstream,
+     MpegTSBaseProgram * program)
+@@ -1554,6 +1567,14 @@ done:
+ 
+     GST_LOG ("stream:%p creating pad with name %s and caps %" GST_PTR_FORMAT,
+         stream, name, caps);
++    
++    if(!strncmp(name, "audio", 5))
++	set_stream_flag(bstream, MPEGTS_IS_AUDIO);
++    else if(!strncmp(name, "video", 5))
++	set_stream_flag(bstream, MPEGTS_IS_VIDEO);
++    else
++        set_stream_flag(bstream, MPEGTS_IS_UNKNOWN);
++
+     pad = gst_pad_new_from_template (template, name);
+     gst_pad_set_active (pad, TRUE);
+     gst_pad_use_fixed_caps (pad);
+@@ -2637,6 +2658,9 @@ gst_ts_demux_push_pending_data (GstTSDemux * demux, TSDemuxStream * stream)
+     GST_BUFFER_FLAG_SET (buffer, GST_BUFFER_FLAG_DISCONT);
+   stream->discont = FALSE;
+ 
++//  if(bs->stream_flag == MPEGTS_IS_VIDEO)
++//	printf("[realtek] video pid %04x time %lld raw %lld\n", bs->pid, stream->pts, stream->raw_pts);
++
+   if (buffer_list)
+     buffer = NULL;
+ 
+-- 
+2.7.4
+

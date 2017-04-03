@@ -1,0 +1,29 @@
+From 82918ba692c6cdf914c12aa6c17de2a8959ac665 Mon Sep 17 00:00:00 2001
+From: yaozenhu <yaozenhu@realtek.com>
+Date: Wed, 21 Sep 2016 11:54:47 +0800
+Subject: [PATCH 02/11] [modify] using h265parser to play h265 stream cause
+ h265 video lag, so remove h265parse plugin
+
+Change-Id: Ic51dcad296a354efaa7363be5b92655afffd2ab0
+---
+ gst/videoparsers/plugin.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/gst/videoparsers/plugin.c b/gst/videoparsers/plugin.c
+index 79d1df6..e6446d8 100644
+--- a/gst/videoparsers/plugin.c
++++ b/gst/videoparsers/plugin.c
+@@ -48,8 +48,8 @@ plugin_init (GstPlugin * plugin)
+       GST_RANK_PRIMARY, GST_TYPE_PNG_PARSE);
+   ret |= gst_element_register (plugin, "jpeg2000parse",
+       GST_RANK_PRIMARY, GST_TYPE_JPEG2000_PARSE);
+-  ret |= gst_element_register (plugin, "h265parse",
+-      GST_RANK_SECONDARY, GST_TYPE_H265_PARSE);
++//  ret |= gst_element_register (plugin, "h265parse",
++//      GST_RANK_SECONDARY, GST_TYPE_H265_PARSE);
+   ret |= gst_element_register (plugin, "vc1parse",
+       GST_RANK_NONE, GST_TYPE_VC1_PARSE);
+ 
+-- 
+2.7.4
+
