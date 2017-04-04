@@ -4,8 +4,10 @@
 #
 ################################################################################
 
-WPE_VERSION = 779249adf98b1efa99ea81c4be4bda9101d1d76b
-WPE_SITE = $(call github,Metrological,WebKitForWayland,$(WPE_VERSION))
+# Tip of the aperezdc/webrtc branch from
+# https://github.com/WebPlatformForEmbedded/WPEWebKit/tree/aperez/webrtc
+WPE_VERSION = acc62511276236dc975f84197534a54df8088bb9
+WPE_SITE = $(call github,WebPlatformForEmbedded,WPEWebKit,$(WPE_VERSION))
 
 WPE_INSTALL_STAGING = YES
 
