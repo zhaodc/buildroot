@@ -1,0 +1,55 @@
+From 5c863bbf7360dbeb37b22845acdc89ea3ef2a952 Mon Sep 17 00:00:00 2001
+From: Bram Oosterhuis <bram.oosterhuis.nl@gmail.com>
+Date: Mon, 3 Apr 2017 19:02:10 +0200
+Subject: [PATCH] Apply 0104-youtube-video-scale.patch
+
+---
+ .../graphics/gstreamer/MediaPlayerPrivateGStreamer.cpp     |  6 ++++++
+ .../graphics/gstreamer/MediaPlayerPrivateGStreamerBase.cpp | 14 ++++++++++++--
+ 2 files changed, 18 insertions(+), 2 deletions(-)
+
+diff --git a/Source/WebCore/platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.cpp b/Source/WebCore/platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.cpp
+index d5faf91..94ad61d 100644
+--- a/Source/WebCore/platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.cpp
++++ b/Source/WebCore/platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.cpp
+@@ -2248,6 +2248,12 @@ void MediaPlayerPrivateGStreamer::createGSTPlayBin()
+     GRefPtr<GstPad> videoSinkPad = adoptGRef(gst_element_get_static_pad(m_videoSink.get(), "sink"));
+     if (videoSinkPad)
+         g_signal_connect_swapped(videoSinkPad.get(), "notify::caps", G_CALLBACK(videoSinkCapsChangedCallback), this);
++#else
++    //realtek
++    {
++        m_videoSink = gst_element_factory_make("rtkv1sink", "rtkv1sink_test");
++        g_object_set(m_pipeline.get(), "video-sink", m_videoSink.get(), nullptr);
++    }
+ #endif
+ 
+ #if USE(WESTEROS_SINK) && USE(HOLE_PUNCH_GSTREAMER)
+diff --git a/Source/WebCore/platform/graphics/gstreamer/MediaPlayerPrivateGStreamerBase.cpp b/Source/WebCore/platform/graphics/gstreamer/MediaPlayerPrivateGStreamerBase.cpp
+index c278300..334d35b 100644
+--- a/Source/WebCore/platform/graphics/gstreamer/MediaPlayerPrivateGStreamerBase.cpp
++++ b/Source/WebCore/platform/graphics/gstreamer/MediaPlayerPrivateGStreamerBase.cpp
+@@ -1007,8 +1007,18 @@ void MediaPlayerPrivateGStreamerBase::updateVideoRectangle()
+ 
+     GST_INFO("Setting video sink size and position to x:%d y:%d, width=%d, height=%d", m_position.x(), m_position.y(), m_size.width(), m_size.height());
+ 
+-    GUniquePtr<gchar> rectString(g_strdup_printf("%d,%d,%d,%d", m_position.x(), m_position.y(), m_size.width(),m_size.height()));
+-    g_object_set(sinkElement.get(), "rectangle", rectString.get(), nullptr);
++    //GUniquePtr<gchar> rectString(g_strdup_printf("%d,%d,%d,%d", m_position.x(), m_position.y(), m_size.width(),m_size.height()));
++    //g_object_set(sinkElement.get(), "rectangle", rectString.get(), nullptr);
++    GstStructure *structure;
++    structure = gst_structure_new("rectangle-property",
++                       "x", G_TYPE_INT, m_position.x(),
++                       "y", G_TYPE_INT, m_position.y(),
++                       "width", G_TYPE_INT, m_size.width(),
++                       "height", G_TYPE_INT, m_size.height(),
++                       NULL);
++    g_object_set(sinkElement.get(), "rectangle", structure, nullptr);
++    gst_structure_free(structure);
++
+ }
+ #endif
+ 
+-- 
+2.7.4
+
