@@ -105,6 +105,8 @@ function create_image(){
 function create_usb(){
 	mkdir -p $USB_FLASH_DIR
 	create_image 
+	
+	 install_img_time=`stat -c %Y image/image_file/install.img`
 	    
     cp -v image/image_file/install.img $USB_FLASH_DIR
     cp -v image/image_file/components/tmp/pkgfile/generic/bluecore.audio $USB_FLASH_DIR
@@ -112,10 +114,21 @@ function create_usb(){
     cp -v image/image_file/components/tmp/pkgfile/generic/rescue.emmc.dtb $USB_FLASH_DIR
     cp -v image/image_file/components/tmp/pkgfile/generic/emmc.uImage $USB_FLASH_DIR
     cp -v image/dvrboot.exe.bin $USB_FLASH_DIR
+    echo 0.$install_img_time > $USB_FLASH_DIR/m670_version.txt
     
     ERR=$?
     return $ERR;
 }
+
+function ok_lets_ship_this(){
+	create_usb
+	
+	tar -zcvf output/usb-flash.tar.gz -C $USB_FLASH_DIR ./
+	
+	ERR=$?
+    return $ERR;
+}
+
 
 if [ "$1" = "" ]; then
     print_usage
@@ -144,7 +157,21 @@ else
                 build_kernel
                 copy_ko
                 build_rootfs
-                ;;                    
+                ;;          
+            kernel)
+                config_kernel_build
+                build_kernel
+                ;;          
+            rootfs)
+                config_rootfs_build
+                build_rootfs
+                ;;               
+            ship)                
+                build_kernel
+                copy_ko
+                build_rootfs
+                ok_lets_ship_this
+                ;;               
             all)
                 build_kernel
                 copy_ko
