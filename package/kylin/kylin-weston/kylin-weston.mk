@@ -156,7 +156,7 @@ endif
 
 define KYLIN_WESTON_INSTALL_CONFIGURATION
     $(INSTALL) -d -m 0755 ${TARGET_DIR}/etc/xdg/weston
-    $(INSTALL) -D -m 0755 package/kylin/kylin-weston/weston.ini $(TARGET_DIR)/etc/init.d
+    $(INSTALL) -D -m 0755 package/kylin/kylin-weston/weston.ini $(TARGET_DIR)/etc/xdg/weston
 endef
 
 define KYLIN_WESTON_POST_TARGET_INITD
