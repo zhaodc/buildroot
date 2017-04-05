@@ -154,4 +154,17 @@ else
 KYLIN_WESTON_CONF_OPTS += --disable-demo-clients-install
 endif
 
+define KYLIN_WESTON_INSTALL_CONFIGURATION
+    $(INSTALL) -d -m 0755 ${TARGET_DIR}/etc/xdg/weston
+    $(INSTALL) -D -m 0755 package/kylin/kylin-weston/weston.ini $(TARGET_DIR)/etc/init.d
+endef
+
+define KYLIN_WESTON_POST_TARGET_INITD
+    $(INSTALL) -d -m 0755 ${TARGET_DIR}/etc/init.d
+    $(INSTALL) -D -m 0755 package/kylin/kylin-weston/S70weston $(TARGET_DIR)/etc/init.d
+endef
+
+KYLIN_WESTON_POST_INSTALL_TARGET_HOOKS += KYLIN_WESTON_INSTALL_CONFIGURATION
+KYLIN_WESTON_POST_INSTALL_TARGET_HOOKS += KYLIN_WESTON_POST_TARGET_INITD
+
 $(eval $(autotools-package))

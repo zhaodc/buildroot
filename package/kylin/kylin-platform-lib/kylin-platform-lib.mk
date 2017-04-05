@@ -25,7 +25,6 @@ define KYLIN_PLATFORM_LIB_INSTALL_TARGET_CMDS
 	$(call KYLIN_PLATFORM_LIB_INSTALL_LIBS,$(TARGET_DIR))
 	$(call KYLIN_PLATFORM_LIB_INSTALL_MISC_BINARIES,$(TARGET_DIR))
 	$(call KYLIN_PLATFORM_LIB_INSTALL_KERNEL_MODULES,$(TARGET_DIR))
-    $(call KYLIN_PLATFORM_LIB_INSTALL_CONFIGURATION,$(TARGET_DIR))
 endef
 
 ################################################################################
@@ -71,20 +70,13 @@ else
   endef
 endif
 
-define KYLIN_PLATFORM_LIB_INSTALL_CONFIGURATION
-    $(INSTALL) -d -m 0755 ${1}/etc/xdg/weston
-    cp -av $(@D)/etc/xdg/weston/weston.ini ${1}/etc/xdg/weston
-endef
-
 ifeq ($(KYLIN_PLATFORM_LIB_INSTALL_BINARIES),y)
   define KYLIN_PLATFORM_LIB_INSTALL_MISC_BINARIES
   $(INSTALL) -d -m 0755 ${1}/etc/firmware
   cp -av $(@D)/rootfs-overlay/etc/firmware ${1}/etc/firmware
   
-  $(INSTALL) -d -m 0755 ${1}/etc/init.d
   $(INSTALL) -m 0755 $(@D)/rootfs-overlay/etc/init.d/S30alsadaemon ${1}/etc/init.d 
   $(INSTALL) -m 0755 $(@D)/rootfs-overlay/etc/init.d/S99user-init ${1}/etc/init.d/S69user-init
-  $(INSTALL) -m 0755 $(@D)/S70weston ${1}/etc/init.d
   $(INSTALL) -m 0755 $(@D)/rootfs-overlay/etc/user-init.conf ${1}/etc/
     
   $(INSTALL) -d -m 0755 ${1}/sbin 
