@@ -19,7 +19,7 @@ start() {
 	[ $? == 0 ] && echo "OK" || echo "FAIL"
 }
 stop() {
-	echo -n "Stopping webbridge: "
+	echo -n "Stopping weston: "
 	start-stop-daemon -K -q -p /var/run/weston.pid
 	[ $? == 0 ] && echo "OK" || echo "FAIL"
 	rm -rf /var/run/weston.pid
