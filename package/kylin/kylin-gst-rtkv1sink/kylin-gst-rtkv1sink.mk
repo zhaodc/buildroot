@@ -9,7 +9,7 @@ KYLIN_GST_RTKV1SINK_SITE_METHOD = git
 KYLIN_GST_RTKV1SINK_SITE = git@github.com:Metrological/kylin-gst-rtkv1sink.git
 KYLIN_GST_RTKV1SINK_INSTALL_STAGING = YES
 
-KYLIN_GST_RTKV1SINK_DEPENDENCIES = kylin-gstreamer1 kylin-gst1-plugins-base kylin-gst-omx kylin-platform-lib
+KYLIN_GST_RTKV1SINK_DEPENDENCIES = gstreamer1 gst1-plugins-base kylin-gst-omx kylin-platform-lib
 
 define KYLIN_GST_RTKV1SINK_BUILD_CMDS
 	echo Building from $(@D)/src

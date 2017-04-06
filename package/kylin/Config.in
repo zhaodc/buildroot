@@ -22,12 +22,15 @@ if BR2_PACKAGE_KYLIN_HARDWARE
 	endchoice
 
 	source "package/kylin/kylin-omx/Config.in"
+	source "package/kylin/kylin-gst-omx/Config.in"
+	source "package/kylin/kylin-gst-rtkv1sink/Config.in"
 	source "package/kylin/kylin-platform-lib/Config.in"
 	if !BR2_PACKAGE_KYLIN_PLATFORM_BIN_KO
 	source "package/kylin/kylin-drivers/Config.in"
 	endif
 	source "package/kylin/kylin-graphics/Config.in"
 	source "package/kylin/kylin-weston/Config.in"
+	source "package/kylin/kylin-tools/Config.in"
 endif
 
 config BR2_PACKAGE_HAS_KYLIN

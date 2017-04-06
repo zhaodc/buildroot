@@ -15,7 +15,8 @@ KYLIN_GST_OMX_AUTORECONF = YES
 
 ifeq ($(BR2_PACKAGE_KYLIN_OMX),y)
 KYLIN_GST_OMX_CONF_OPTS = \
-	--with-omx-target=generic --with-omx-header-path=$(@D)/omx/openmax
+	--with-omx-target=generic \
+        --with-omx-header-path=$(@D)/omx/openmax
 KYLIN_GST_OMX_CONF_ENV = \
     CFLAGS="-I$(STAGING_DIR)/usr/include/realtek/genericLinux/include"
 endif
@@ -42,9 +43,9 @@ KYLIN_GST_OMX_CONF_ENV = \
 endif
 
 ifeq ($(BR2_PACKAGE_KYLIN_OMX),y)
-KYLIN_GST_OMX_DEPENDENCIES = kylin-gstreamer1 kylin-gst1-plugins-base libopenmax kylin-platform-lib
+KYLIN_GST_OMX_DEPENDENCIES = gstreamer1 gst1-plugins-base libopenmax kylin-platform-lib
 else
-KYLIN_GST_OMX_DEPENDENCIES = kylin-gstreamer1 kylin-gst1-plugins-base libopenmax
+KYLIN_GST_OMX_DEPENDENCIES = gstreamer1 gst1-plugins-base libopenmax
 endif
 
 # adjust library paths to where buildroot installs them
