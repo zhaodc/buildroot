@@ -8,7 +8,7 @@ KYLIN_GRAPHICS_VERSION = fe73a30c2cf337299cbb31a278dff0c1cb4e56e5
 KYLIN_GRAPHICS_SITE_METHOD = git
 KYLIN_GRAPHICS_SITE = git@github.com:Metrological/kylin-graphics.git
 KYLIN_GRAPHICS_INSTALL_STAGING = YES
-KYLIN_GRAPHICS_DEPENDENCIES += wayland
+KYLIN_GRAPHICS_DEPENDENCIES += wayland kylin-platform-libs
 
 define KYLIN_GRAPHICS_BUILD_CMDS
     @echo  ' - Precompiled Binaries.'
