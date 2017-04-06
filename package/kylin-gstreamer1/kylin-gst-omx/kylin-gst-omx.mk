@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-KYLIN_GST_OMX_VERSION = e69f705c1cde2ef2b3f7f593b9741da3be3d6259
+KYLIN_GST_OMX_VERSION = 7b1cccfe80d2a27b9d42c40856c05c32ba3ef0a5
 KYLIN_GST_OMX_SITE_METHOD = git
 KYLIN_GST_OMX_SITE = git@github.com:Metrological/kylin-gst-omx.git
 
