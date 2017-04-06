@@ -1,0 +1,70 @@
+From 3d7fa2ff9e7bf4c82da44fe91dfd8407922720a1 Mon Sep 17 00:00:00 2001
+From: Zan Dobersek <zdobersek@igalia.com>
+Date: Tue, 4 Apr 2017 14:57:21 +0200
+Subject: [PATCH] Add WKPreferences{Set,Get}AllowScriptsToCloseWindow().
+
+---
+ Source/WebKit2/Shared/WebPreferencesDefinitions.h |  1 +
+ Source/WebKit2/UIProcess/API/C/WKPreferences.cpp  | 10 ++++++++++
+ Source/WebKit2/UIProcess/API/C/WKPreferencesRef.h |  4 ++++
+ Source/WebKit2/WebProcess/WebPage/WebPage.cpp     |  2 ++
+ 4 files changed, 17 insertions(+)
+
+diff --git a/Source/WebKit2/Shared/WebPreferencesDefinitions.h b/Source/WebKit2/Shared/WebPreferencesDefinitions.h
+index f438585..df4069a 100644
+--- a/Source/WebKit2/Shared/WebPreferencesDefinitions.h
++++ b/Source/WebKit2/Shared/WebPreferencesDefinitions.h
+@@ -296,6 +296,7 @@
+     macro(CustomElementsEnabled, customElementsEnabled, Bool, bool, true, "Custom Elements", "HTML Custom Elements prototype") \
+     macro(WebGL2Enabled, webGL2Enabled, Bool, bool, true, "WebGL 2.0", "WebGL 2 prototype") \
+     macro(SpringTimingFunctionEnabled, springTimingFunctionEnabled, Bool, bool, true, "CSS Spring Animations", "CSS Spring Animation prototype") \
++    macro(AllowScriptsToCloseWindows, allowScriptsToCloseWindows, Bool, bool, false, "", "") \
+     \
+ 
+ #if PLATFORM(COCOA)
+diff --git a/Source/WebKit2/UIProcess/API/C/WKPreferences.cpp b/Source/WebKit2/UIProcess/API/C/WKPreferences.cpp
+index c667c32..2bb6f57 100644
+--- a/Source/WebKit2/UIProcess/API/C/WKPreferences.cpp
++++ b/Source/WebKit2/UIProcess/API/C/WKPreferences.cpp
+@@ -1600,3 +1600,13 @@ bool WKPreferencesGetAllowDisplayOfInsecureContent(WKPreferencesRef preferencesR
+ {
+     return toImpl(preferencesRef)->allowDisplayOfInsecureContent();
+ }
++
++void WKPreferencesSetAllowScriptsToCloseWindow(WKPreferencesRef preferencesRef, bool allow)
++{
++    toImpl(preferencesRef)->setAllowScriptsToCloseWindows(allow);
++}
++
++bool WKPreferencesGetAllowScriptsToCloseWindow(WKPreferencesRef preferencesRef)
++{
++    return toImpl(preferencesRef)->allowScriptsToCloseWindows();
++}
+diff --git a/Source/WebKit2/UIProcess/API/C/WKPreferencesRef.h b/Source/WebKit2/UIProcess/API/C/WKPreferencesRef.h
+index f1ecfc6..fe13a7b 100644
+--- a/Source/WebKit2/UIProcess/API/C/WKPreferencesRef.h
++++ b/Source/WebKit2/UIProcess/API/C/WKPreferencesRef.h
+@@ -300,6 +300,10 @@ WK_EXPORT bool WKPreferencesGetLogsPageMessagesToSystemConsoleEnabled(WKPreferen
+ WK_EXPORT void WKPreferencesSetGamepadsEnabled(WKPreferencesRef preferencesRef, bool enabled);
+ WK_EXPORT bool WKPreferencesGetGamepadsEnabled(WKPreferencesRef preferencesRef);
+ 
++// Default to false.
++WK_EXPORT void WKPreferencesSetAllowScriptsToCloseWindow(WKPreferencesRef preferencesRef, bool allow);
++WK_EXPORT bool WKPreferencesGetAllowScriptsToCloseWindow(WKPreferencesRef preferencesRef);
++
+ #ifdef __cplusplus
+ }
+ #endif
+diff --git a/Source/WebKit2/WebProcess/WebPage/WebPage.cpp b/Source/WebKit2/WebProcess/WebPage/WebPage.cpp
+index 855f4271..8619f4e 100644
+--- a/Source/WebKit2/WebProcess/WebPage/WebPage.cpp
++++ b/Source/WebKit2/WebProcess/WebPage/WebPage.cpp
+@@ -3245,6 +3245,8 @@ void WebPage::updatePreferences(const WebPreferencesStore& store)
+ 
+     RuntimeEnabledFeatures::sharedFeatures().setModernMediaControlsEnabled(store.getBoolValueForKey(WebPreferencesKey::modernMediaControlsEnabledKey()));
+ 
++    settings.setAllowScriptsToCloseWindows(store.getBoolValueForKey(WebPreferencesKey::allowScriptsToCloseWindowsKey()));
++
+     platformPreferencesDidChange(store);
+ 
+     if (m_drawingArea)
