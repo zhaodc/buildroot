@@ -34,3 +34,15 @@ menuconfig BR2_PACKAGE_WPEFRAMEWORK_RESOURCECENTER
 	help
 	   WPE Platform Resource Center plugin
 
+menuconfig BR2_PACKAGE_WPEFRAMEWORK_SWITCHBOARD
+	bool "WPEFramework-SwitchBoard"
+
+	help
+	   WPE Platform Switch Board plugin
+
+menuconfig BR2_PACKAGE_WPEFRAMEWORK_DICTIONARY
+	bool "WPEFramework-Dictionary"
+
+	help
+	   WPE Platform Dictionary plugin
+
