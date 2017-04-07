@@ -4,5 +4,7 @@ WPEFRAMEWORK_MONITOR_SITE = git@github.com:Metrological/webbridge.git
 WPEFRAMEWORK_MONITOR_INSTALL_STAGING = YES
 WPEFRAMEWORK_MONITOR_DEPENDENCIES = WPEFramework
 
+WPEFRAMEWORK_CONF_OPTS += -DBUILDREF_WPEFRAMEWORK=$(shell $(GIT) rev-parse HEAD)
+
 $(eval $(cmake-package))
 

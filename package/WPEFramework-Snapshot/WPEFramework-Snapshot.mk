@@ -4,5 +4,7 @@ WPEFRAMEWORK_SNAPSHOT_SITE = git@github.com:Metrological/webbridge.git
 WPEFRAMEWORK_SNAPSHOT_INSTALL_STAGING = YES
 WPEFRAMEWORK_SNAPSHOT_DEPENDENCIES = WPEFramework rpi-userland
 
+WPEFRAMEWORK_CONF_OPTS += -DBUILDREF_WPEFRAMEWORK=$(shell $(GIT) rev-parse HEAD)
+
 $(eval $(cmake-package))
 

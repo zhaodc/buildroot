@@ -4,5 +4,7 @@ WPEFRAMEWORK_NETFLIX_SITE = git@github.com:Metrological/webbridge.git
 WPEFRAMEWORK_NETFLIX_INSTALL_STAGING = YES
 WPEFRAMEWORK_NETFLIX_DEPENDENCIES = WPEFramework netflix
 
+WPEFRAMEWORK_CONF_OPTS += -DBUILDREF_WPEFRAMEWORK=$(shell $(GIT) rev-parse HEAD)
+
 $(eval $(cmake-package))
 
