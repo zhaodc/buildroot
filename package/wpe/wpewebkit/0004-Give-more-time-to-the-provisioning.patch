@@ -1,0 +1,25 @@
+From 7165b6cf93fc778bc6b35895b3bd5e0561f354e4 Mon Sep 17 00:00:00 2001
+From: Bram Oosterhuis <bram.oosterhuis.nl@gmail.com>
+Date: Fri, 7 Apr 2017 17:10:07 +0200
+Subject: [PATCH] Give more time to the provisioning
+
+---
+ .../graphics/gstreamer/eme/WebKitCommonEncryptionDecryptorGStreamer.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Source/WebCore/platform/graphics/gstreamer/eme/WebKitCommonEncryptionDecryptorGStreamer.cpp b/Source/WebCore/platform/graphics/gstreamer/eme/WebKitCommonEncryptionDecryptorGStreamer.cpp
+index dcd876b..a3678e4 100644
+--- a/Source/WebCore/platform/graphics/gstreamer/eme/WebKitCommonEncryptionDecryptorGStreamer.cpp
++++ b/Source/WebCore/platform/graphics/gstreamer/eme/WebKitCommonEncryptionDecryptorGStreamer.cpp
+@@ -195,7 +195,7 @@ static GstFlowReturn webkitMediaCommonEncryptionDecryptTransformInPlace(GstBaseT
+             GST_ERROR_OBJECT(self, "can't process key requests in less than PAUSED state");
+             return GST_FLOW_NOT_SUPPORTED;
+         }
+-        priv->condition.waitFor(priv->mutex, Seconds(5), [priv] {
++        priv->condition.waitFor(priv->mutex, Seconds(20), [priv] {
+             return priv->keyReceived;
+         });
+         if (!priv->keyReceived) {
+-- 
+2.7.4
+
