@@ -4,9 +4,9 @@
 #
 ################################################################################
 
-WESTEROS_SOC_VERSION = 87bc367344f7aab820b74e8fd01f4cf104807ab8
+WESTEROS_SOC_VERSION = fe2b010f6ab8114801b235e18a0741af61a01556
 WESTEROS_SOC_SITE_METHOD = git
-WESTEROS_SOC_SITE = git://github.com/rdkcmf/westeros
+WESTEROS_SOC_SITE = git://github.com/metrological/westeros
 WESTEROS_SOC_INSTALL_STAGING = YES
 WESTEROS_SOC_AUTORECONF = YES
 WESTEROS_SOC_AUTORECONF_OPTS = "-Icfg"
