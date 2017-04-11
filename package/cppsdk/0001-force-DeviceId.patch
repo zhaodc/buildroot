@@ -1,0 +1,52 @@
+diff --git a/generics/SystemInfo.cpp b/generics/SystemInfo.cpp
+index cd570b2..4fd695a 100644
+--- a/generics/SystemInfo.cpp
++++ b/generics/SystemInfo.cpp
+@@ -140,7 +140,7 @@ static string ConstructHostname()
+     }
+ 
+ //-----------------------------------------------------------------------------------------------------------------------------
+-#elif CPPSDK_PLATFORM(EOS) || CPPSDK_PLATFORM(DAWN) || CPPSDK_PLATFORM(XI5) || CPPSDK_PLATFORM(CWC) || CPPSDK_PLATFORM(PC_UNIX) || CPPSDK_PLATFORM(KYLIN) || CPPSDK_PLATFORM(SPECTRUM)
++#elif CPPSDK_PLATFORM(EOS) || CPPSDK_PLATFORM(DAWN) || CPPSDK_PLATFORM(XI5) || CPPSDK_PLATFORM(CWC) || CPPSDK_PLATFORM(PC_UNIX) CPPSDK_PLATFORM(SPECTRUM)
+ //-----------------------------------------------------------------------------------------------------------------------------
+ 
+ #if CPPSDK_PLATFORM(EOS)
+@@ -190,7 +190,37 @@ static string ConstructHostname()
+                                   _systemPrefix, sizeof(_systemPrefix) - 1,
+                                   KeyLength));
+     }
+-  
++ 
++//-----------------------------------------------------------------------------------------------------------------------------
++#elif  CPPSDK_PLATFORM(KYLIN)
++//-----------------------------------------------------------------------------------------------------------------------------
++
++    static const TCHAR _systemPrefix[] = _T("EOS");
++
++    // Use MAC address and let webbridge handle the OTP ID.
++    const uint8* SystemInfo::RawDeviceId() const
++    {
++        static uint8* id = nullptr;
++        static uint8 idBuffer[13] = {0};
++
++        idBuffer[0] = 12;
++
++        id = &idBuffer[0];
++
++        return id;
++    }
++
++    string SystemInfo::Id(const uint8 RawDeviceId[], const uint8 KeyLength)
++    {
++        string id ="0000000000000";
++
++        // ToString(&RawDeviceId[1], RawDeviceId[0], false, id);
++
++        return (ConstructUniqueId(id.c_str(), id.size(),
++                                  _systemPrefix, sizeof(_systemPrefix) - 1,
++                                  KeyLength));
++    }
++
+ //----------------------------------------------------------------------------------------------------------
+ #elif CPPSDK_PLATFORM(INTELCE)
+ //----------------------------------------------------------------------------------------------------------
