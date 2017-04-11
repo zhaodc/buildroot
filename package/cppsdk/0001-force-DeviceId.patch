@@ -7,7 +7,7 @@ index cd570b2..4fd695a 100644
  
  //-----------------------------------------------------------------------------------------------------------------------------
 -#elif CPPSDK_PLATFORM(EOS) || CPPSDK_PLATFORM(DAWN) || CPPSDK_PLATFORM(XI5) || CPPSDK_PLATFORM(CWC) || CPPSDK_PLATFORM(PC_UNIX) || CPPSDK_PLATFORM(KYLIN) || CPPSDK_PLATFORM(SPECTRUM)
-+#elif CPPSDK_PLATFORM(EOS) || CPPSDK_PLATFORM(DAWN) || CPPSDK_PLATFORM(XI5) || CPPSDK_PLATFORM(CWC) || CPPSDK_PLATFORM(PC_UNIX) CPPSDK_PLATFORM(SPECTRUM)
++#elif CPPSDK_PLATFORM(EOS) || CPPSDK_PLATFORM(DAWN) || CPPSDK_PLATFORM(XI5) || CPPSDK_PLATFORM(CWC) || CPPSDK_PLATFORM(PC_UNIX) || CPPSDK_PLATFORM(SPECTRUM)
  //-----------------------------------------------------------------------------------------------------------------------------
  
  #if CPPSDK_PLATFORM(EOS)
