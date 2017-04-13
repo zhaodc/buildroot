@@ -13,7 +13,7 @@ KYLIN_GST_OMX_LICENSE_FILES = COPYING
 
 KYLIN_GST_OMX_AUTORECONF = YES
 
-ifeq ($(BR2_PACKAGE_KYLIN_OMX),y)
+ifeq ($(BR2_PACKAGE_HAS_KYLIN),y)
 KYLIN_GST_OMX_CONF_OPTS = \
 	--with-omx-target=generic \
         --with-omx-header-path=$(@D)/omx/openmax
@@ -42,7 +42,7 @@ KYLIN_GST_OMX_CONF_ENV = \
 		-DOMX_VERSION_STEP=0"
 endif
 
-ifeq ($(BR2_PACKAGE_KYLIN_OMX),y)
+ifeq ($(BR2_PACKAGE_HAS_KYLIN),y)
 KYLIN_GST_OMX_DEPENDENCIES = gstreamer1 gst1-plugins-base libopenmax kylin-platform-lib
 else
 KYLIN_GST_OMX_DEPENDENCIES = gstreamer1 gst1-plugins-base libopenmax
