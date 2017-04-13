@@ -1,7 +1,5 @@
 #!/bin/sh
 
-PERSISTENT=@@WEBBRIDGE_PERSISTENT_PATH@@
-
 start() {
 	# Core dumps
 	#echo 1 > /proc/sys/kernel/core_uses_pid
@@ -9,14 +7,10 @@ start() {
 	#echo "/root/cores/core-pid_%p--process%E" > /proc/sys/kernel/core_pattern
 	#mkdir -p /root/cores
 	#ulimit -c unlimited
-	if [ ! -d $PERSISTENT/WebBridge ]; then
-		mkdir -p $PERSISTENT/WebBridge
+	if [ ! -d /root/Netflix/dpi ]; then
+		mkdir -p /root/Netflix/dpi
+		ln -sfn /etc/playready /root/Netflix/dpi/playready
 	fi
-	if [ ! -d $PERSISTENT/Netflix/dpi ]; then
-		mkdir -p $PERSISTENT/Netflix/dpi
-		ln -sfn /etc/playready $PERSISTENT/Netflix/dpi/playready
-	fi
-	mount -a
 	export TZ=$(wget -qO- http://jsonip.metrological.com/ | sed -e 's/^.*"tz":"\([^"]*\)".*$/\1/')
 	echo -n "Starting webbridge: "
 	start-stop-daemon -S -q -b -m -p /var/run/webbridge.pid --exec /usr/bin/webbridge -- -b </dev/null >/dev/null 2>&1
@@ -30,7 +24,7 @@ stop() {
 }
 restart() {
 	stop
-	sleep 1
+	sleep 3
 	start
 }
 

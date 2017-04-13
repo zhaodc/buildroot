@@ -57,14 +57,14 @@ config BR2_PACKAGE_WEBBRIDGE_OOM_ADJUST
 
 endmenu
 
-menuconfig BR2_PACKAGE_WEBBRIDGE_PLUGIN_RESOURCECENTER
-	bool "resourcecenter"
+config BR2_PACKAGE_WEBBRIDGE_PLUGIN_NXRESOURCECENTER
+	bool "nxresourcecenter"
+	depends on BR2_PACKAGE_BCM_REFSW
 	help
-	  Select a resource center for the platfom.
+	  Nexus resource center for bcm platfoms.
 
-if BR2_PACKAGE_WEBBRIDGE_PLUGIN_RESOURCECENTER
-    source "package/webbridge/plugins/ResourceCenter/Config.in"
-endif
+comment "nxresource centre depends on package bcm-refsw package."
+	depends on !BR2_PACKAGE_WEBBRIDGE_PLUGIN_NXRESOURCECENTER
 
 config BR2_PACKAGE_WEBBRIDGE_PLUGIN_TRACECONTROL
 	bool "tracecontrol"
@@ -76,32 +76,12 @@ config BR2_PACKAGE_WEBBRIDGE_PLUGIN_TRACECONTROL
 	  NOTE: Tracing does NOT replace logging but is a tool for 
 	  developpers to analyse there code. 
 
-
-menuconfig BR2_PACKAGE_WEBBRIDGE_PLUGIN_MONITOR
+config BR2_PACKAGE_WEBBRIDGE_PLUGIN_MONITOR
 	bool "monitor"
 	help
 	  A plugin that allows for a monitoring plugins with respect to 
 	  memory usage. Hard limits can be set on the maximum memory usage 
 	  and in case the limits are violated, the plugin can be restarted.
-
-if BR2_PACKAGE_WEBBRIDGE_PLUGIN_MONITOR
-
-config BR2_PACKAGE_WEBBRIDGE_PLUGIN_MONITOR_WEBKITBROWSER_MEMORYLIMIT
-	depends on BR2_PACKAGE_WEBBRIDGE_PLUGIN_MONITOR
-	string "WebKitBrowser memory limit"
-	default 409600
-
-config BR2_PACKAGE_WEBBRIDGE_PLUGIN_MONITOR_YOUTUBE_MEMORYLIMIT
-	depends on BR2_PACKAGE_WEBBRIDGE_PLUGIN_MONITOR
-	string "YouTube memory limit"
-	default 307200
-
-config BR2_PACKAGE_WEBBRIDGE_PLUGIN_MONITOR_NETFLIX_MEMORYLIMIT
-	depends on BR2_PACKAGE_WEBBRIDGE_PLUGIN_MONITOR
-	string "Netflix memory limit"
-	default 307200
-
-endif
 
 config BR2_PACKAGE_WEBBRIDGE_PLUGIN_DICTIONARY
 	bool "dictionary"
@@ -154,28 +134,7 @@ config BR2_PACKAGE_WEBBRIDGE_PLUGIN_REMOTECONTROL
 	  different source into the linux key system. 
 
 	  Current implementations supports:
-	  - GreenPeak RF4CE chip (510) with RF4CE remotes.
-	  - IR Remotes
-
-if BR2_PACKAGE_WEBBRIDGE_PLUGIN_REMOTECONTROL
-
-config BR2_PACKAGE_WEBBRIDGE_PLUGIN_IRNEXUS
-	bool "BCM Nexus remote control"
-	depends on BR2_PACKAGE_BCM_REFSW
-	help
-		Enable the Nexus IR remote input
-
-if BR2_PACKAGE_WEBBRIDGE_PLUGIN_IRNEXUS
-
-config BR2_PACKAGE_WEBBRIDGE_PLUGIN_IRNEXUS_MODE
-	string "IR mode"
-	default "23"
-	help
-	  Sets the IR Mode to be used with IR Nexus. Every remote has a different mode and key mapping.
-
-endif
-
-endif
+	  - GreeenPeak RF4CE chip (510) with RF4CE remotes.
 
 comment "remotecontrol requires the GreenPeak GP501 or GP711 to be selected and userland lib to be build."
 	depends on !BR2_PACKAGE_GREENPEAK || !BR2_PACKAGE_GREENPEAK_USERLANDLIB || (!BR2_PACKAGE_GREENPEAK_GP501 && !BR2_PACKAGE_GREENPEAK_GP711)
@@ -191,20 +150,16 @@ config BR2_PACKAGE_WEBBRIDGE_PLUGIN_VOICECONTROL
 comment "voicecontrol requires the GreenPeak GP501 or GP711 to be selected and userland lib to be build."
 	depends on !BR2_PACKAGE_GREENPEAK || !BR2_PACKAGE_GREENPEAK_USERLANDLIB || (!BR2_PACKAGE_GREENPEAK_GP501 && !BR2_PACKAGE_GREENPEAK_GP711)
 
+config BR2_PACKAGE_WEBBRIDGE_PLUGIN_IR_REMOTE
+	bool "irremote"
+	help
+	  A remote control implementation that translates keys coming in from a
+	  IR remote into the linux key system.
+
 config BR2_PACKAGE_WEBBRIDGE_PLUGIN_DEVICEINFO
 	bool "deviceinfo"
 	help
 	  A plugin displaying information on system resources
-
-config BR2_PACKAGE_WEBBRIDGE_PLUGIN_LOCATIONSYNC
-	bool "locationsync"
-	help
-	  A plugin to synchronize the device location from an internet source.
-
-config BR2_PACKAGE_WEBBRIDGE_PLUGIN_TIMESYNC
-	bool "timesync"
-	help
-	  A plugin to synchronize the clock time from an internet source.
 
 config BR2_PACKAGE_WEBBRIDGE_PLUGIN_BROWSER
 	bool "browser"
@@ -225,6 +180,11 @@ if BR2_PACKAGE_WEBBRIDGE_PLUGIN_NETFLIX
 config BR2_PACKAGE_WEBBRIDGE_PLUGIN_NETFLIX_AUTOSTART
 	depends on BR2_PACKAGE_WEBBRIDGE_PLUGIN_NETFLIX
 	bool "autostart"
+	default n
+
+config BR2_PACKAGE_WEBBRIDGE_PLUGIN_NETFLIX_STARTSUSPENDED
+	depends on BR2_PACKAGE_WEBBRIDGE_PLUGIN_NETFLIX
+	bool "startsuspended"
 	default n
 
 config BR2_PACKAGE_WEBBRIDGE_PLUGIN_NETFLIX_MODEL
@@ -248,26 +208,18 @@ comment "netflix is dependent on the netflix package compiled as library"
 	depends on !BR2_PACKAGE_NETFLIX_LIB
 
 menuconfig BR2_PACKAGE_WEBBRIDGE_PLUGIN_OPENCDMI
-    bool "opencdmi"
-    select BR2_PACKAGE_CPPSDK_PROCESS
-    depends on BR2_PACKAGE_OPENCDMI
-    default y
-    help
-      A Plugin to interact with CDM Services.
+	bool "opencdmi"
+	depends on BR2_PACKAGE_WPE
+	help
+	  A plugin that controls the open source content decryption module
 
-if BR2_PACKAGE_WEBBRIDGE_PLUGIN_OPENCDMI
-
-config BR2_PACKAGE_WEBBRIDGE_PLUGIN_OPENCDMI_AUTOSTART
-    depends on BR2_PACKAGE_WEBBRIDGE_PLUGIN_OPENCDMI
-    bool "autostart"
-    default y
-
-endif
+comment "OpenCDMi is dependent on the opencdmi package compiled as library"
+	depends on !BR2_PACKAGE_WPE 
 
 menuconfig BR2_PACKAGE_WEBBRIDGE_PLUGIN_WEBKITBROWSER
 	bool "webkitbrowser"
 	select BR2_PACKAGE_CPPSDK_PROCESS
-	depends on BR2_PACKAGE_WPEWEBKIT
+	depends on BR2_PACKAGE_WPE
 	help
 	  A plugin that manages the webkit browser functionality
 
@@ -313,11 +265,6 @@ config BR2_PACKAGE_WEBBRIDGE_PLUGIN_WEBKITBROWSER_XHRCACHE
 	bool "xhr-cache"
 	default false
 
-config BR2_PACKAGE_WEBBRIDGE_PLUGIN_WEBKITBROWSER_TRANSPARENT
-	depends on BR2_PACKAGE_WEBBRIDGE_PLUGIN_WEBKITBROWSER
-	bool "transparent"
-	default false
-
 config BR2_PACKAGE_WEBBRIDGE_PLUGIN_YOUTUBE
 	bool "youtube"
 	depends on BR2_PACKAGE_WEBBRIDGE_PLUGIN_WEBKITBROWSER
@@ -357,46 +304,6 @@ config BR2_PACKAGE_WEBBRIDGE_PLUGIN_QUEUECOMMUNICATOR
 	  A plugin that receives and sends messages into a queue to interact
 		  with specific middleware.
 
-config BR2_PACKAGE_WEBBRIDGE_PLUGIN_SWITCHBOARD
-	bool "switchboard"
-        depends on BR2_PACKAGE_WEBBRIDGE_PLUGIN_WEBKITBROWSER || BR2_PACKAGE_WEBBRIDGE_PLUGIN_NETFLIX || BR2_PACKAGE_WEBBRIDGE_PLUGIN_YOUTUBE
-	help
-	  A plugin that can be configured to activate 1 callsign out of a group of 
-          selected callsigns. Using an external interface a new callsign can be selected. 
-          the currently active callsignin the group will be automatically deactivated.
-
-if BR2_PACKAGE_WEBBRIDGE_PLUGIN_SWITCHBOARD
-
-config BR2_PACKAGE_WEBBRIDGE_PLUGIN_SWITCHBOARD_WEBKITBROWSER
-        depends on BR2_PACKAGE_WEBBRIDGE_PLUGIN_WEBKITBROWSER
-        bool "webkitbrowser"
-
-config BR2_PACKAGE_WEBBRIDGE_PLUGIN_SWITCHBOARD_NETFLIX
-        depends on BR2_PACKAGE_WEBBRIDGE_PLUGIN_NETFLIX
-        bool "netflix"
-
-config BR2_PACKAGE_WEBBRIDGE_PLUGIN_SWITCHBOARD_YOUTUBE
-        depends on BR2_PACKAGE_WEBBRIDGE_PLUGIN_YOUTUBE
-        bool "youtube"
-
-choice
-	prompt "Default"
-
-config BR2_PACKAGE_WEBBRIDGE_PLUGIN_SWITCHBOARD_DEFAULT_WEBKITBROWSER
-	bool "webkitbrowser"
-	depends on BR2_PACKAGE_WEBBRIDGE_PLUGIN_SWITCHBOARD_WEBKITBROWSER
-
-config BR2_PACKAGE_WEBBRIDGE_PLUGIN_SWITCHBOARD_DEFAULT_NETFLIX
-	bool "netflix"
-	depends on BR2_PACKAGE_WEBBRIDGE_PLUGIN_SWITCHBOARD_NETFLIX
-
-config BR2_PACKAGE_WEBBRIDGE_PLUGIN_SWITCHBOARD_DEFAULT_YOUTUBE
-	bool "youtube"
-	depends on BR2_PACKAGE_WEBBRIDGE_PLUGIN_SWITCHBOARD_YOUTUBE
-
-endchoice
-
-endif
 
 menuconfig BR2_PACKAGE_WEBBRIDGE_PLUGIN_DIALSERVER
 	bool "dialserver"
@@ -469,25 +376,5 @@ config BR2_PACKAGE_WEBBRIDGE_PLUGIN_SNAPSHOT
 	depends on BR2_PACKAGE_RPI_USERLAND
 	help
 	  A plugin that exposes a screenshot API
-
-menuconfig BR2_PACKAGE_WEBBRIDGE_PLUGIN_WINDOWMANAGER
-    bool "windowmanager"
-    select BR2_PACKAGE_CPPSDK_PROCESS
-    depends on BR2_PACKAGE_WAYLAND
-    default n
-    help
-      A Plugin that enables the WindowManager.
-
-if BR2_PACKAGE_WEBBRIDGE_PLUGIN_WINDOWMANAGER
-
-config BR2_PACKAGE_WEBBRIDGE_PLUGIN_WINDOWMANAGER_AUTOSTART
-    depends on BR2_PACKAGE_WEBBRIDGE_PLUGIN_WINDOWMANAGER
-    bool "autostart"
-    default y
-
-endif
-
-comment "window manager needs wayland to be enabled."
-	depends on !BR2_PACKAGE_WAYLAND
 
 endif
