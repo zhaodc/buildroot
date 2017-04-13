@@ -65,6 +65,7 @@ ln -sfn $SOURCE/usr/share/fonts/ttf-bitstream-vera /usr/share/fonts/ttf-bitstrea
 rm -rf $SOURCE/root
 mkdir -p $STORAGE_PATH/app
 ln -sfn $STORAGE_PATH/app $SOURCE/root
+mkdir -p $SOURCE/root/QueueCommunicator
 
 # Netflix
 if [ ! -d $SOURCE/root/Netflix ]; then
@@ -95,11 +96,21 @@ export PATH=$SOURCE/usr/bin:/bin:/usr/bin
 export GST_PLUGIN_PATH=$SOURCE/usr/lib/gstreamer-1.0
 export GST_PLUGIN_SCANNER=$SOURCE/usr/libexec/gstreamer-1.0/gst-plugin-scanner
 export LD_LIBRARY_PATH=$SOURCE/lib:$SOURCE/usr/lib:$SOURCE/usr/lib/gstreamer-1.0:/lib/:/usr/lib
-export DISABLE_FRAMERATE_UPDATE=1
+#export DISABLE_FRAMERATE_UPDATE=1
+export MODEL_NAME=$(cat /dev/nds/versioninformation | sed -n s/^MODEL_NAME://p | cut -c1-9)
 
 # Clock
 if [ -f /NDS/lib/libextClock.so ]; then
 	export LD_PRELOAD=/NDS/lib/libextClock.so
+fi
+
+if [ "x$MODEL_NAME" == "xSMT-C5400" ]; then                                                    
+    # wait till we, at least, have the eth0 interface before we continue                       
+    while [ $(eval ip link show eth0 | grep UP | wc -l) == 0 ];                                
+    do                                                                                         
+       sleep 10                                                                                
+       echo "Sleeping to wait for the eth0 interface to become available..."                   
+    done                                                                                       
 fi
 
 # Short sleep
