@@ -4,11 +4,13 @@
 #
 ################################################################################
 
-KYLIN_PLATFORM_LIB_VERSION = 1b918c1ce262844d053f56f06ad750ff0286bf01
+KYLIN_PLATFORM_LIB_VERSION = e3649f80a876db18547d82e27f1386267be55d01
 KYLIN_PLATFORM_LIB_SITE_METHOD = git
 KYLIN_PLATFORM_LIB_SITE = git@github.com:Metrological/kylin-platform-lib.git
 KYLIN_PLATFORM_LIB_INSTALL_STAGING = YES
 KYLIN_PLATFORM_LIB_DEPENDENCIES += wayland
+
+KYLIN_PLATFORM_LIB_PROVIDES = libopenmax
 
 define KYLIN_PLATFORM_LIB_BUILD_CMDS
     @echo  'Nothing to build - Precompiled Binaries.'
@@ -19,12 +21,14 @@ define KYLIN_PLATFORM_LIB_INSTALL_STAGING_CMDS
 	$(call KYLIN_PLATFORM_LIB_INSTALL_HEADERS,$(STAGING_DIR))
 	$(call KYLIN_PLATFORM_LIB_INSTALL_ARCHIVES,$(STAGING_DIR))
 	$(call KYLIN_PLATFORM_LIB_INSTALL_PKGCNF,$(STAGING_DIR))
+	$(call KYLIN_PLATFORM_LIB_INSTALL_CONFIGS,$(STAGING_DIR))
 endef
 
 define KYLIN_PLATFORM_LIB_INSTALL_TARGET_CMDS
 	$(call KYLIN_PLATFORM_LIB_INSTALL_LIBS,$(TARGET_DIR))
 	$(call KYLIN_PLATFORM_LIB_INSTALL_MISC_BINARIES,$(TARGET_DIR))
 	$(call KYLIN_PLATFORM_LIB_INSTALL_KERNEL_MODULES,$(TARGET_DIR))
+	$(call KYLIN_PLATFORM_LIB_INSTALL_CONFIGS,$(TARGET_DIR))
 endef
 
 ################################################################################
@@ -65,9 +69,19 @@ define KYLIN_PLATFORM_LIB_INSTALL_KERNEL_MODULES
   $(INSTALL) -d -m 0755 ${1}/lib/modules/4.1.35
   cp -av $(@D)/modules/4.1.35 ${1}/lib/modules
 endef
-else
-  define KYLIN_PLATFORM_LIB_INSTALL_KERNEL_MODULES
-  endef
+
+ifeq ($(BR2_PACKAGE_GSTREAMER1),y)
+define KYLIN_PLATFORM_LIB_INSTALL_CONFIGS
+	$(INSTALL) -m 0755 -d $(1)/etc/xdg
+	$(INSTALL) -D -m 0644 $(@D)/openmax/gstomx.conf $(1)/etc/xdg/gstomx.conf
+endef
+endif
+
+ifeq ($(BR2_PACKAGE_GSTREAMER),y)
+define KYLIN_PLATFORM_LIB_INSTALL_CONFIGS
+	$(INSTALL) -m 0755 -d $(1)/etc/xdg/gstreamer-0.10
+	$(INSTALL) -D -m 0644 $(@D)/openmax/gst-openmax.conf $(1)/etc/xdg/gstreamer-0.10/gst-openmax.conf
+endef
 endif
 
 ifeq ($(KYLIN_PLATFORM_LIB_INSTALL_BINARIES),y)
@@ -91,9 +105,6 @@ ifeq ($(KYLIN_PLATFORM_LIB_INSTALL_BINARIES),y)
   $(INSTALL) -d -m 0755 ${1}/usr/sbin
   $(INSTALL) -m 0755 $(@D)/rootfs-overlay/usr/sbin/ALSADaemon ${1}/usr/sbin
   $(INSTALL) -m 0755 $(@D)/rootfs-overlay/usr/sbin/se_status ${1}/usr/sbin
-  endef
-else
-  define KYLIN_PLATFORM_LIB_INSTALL_MISC_BINARIES
   endef
 endif
 

@@ -21,7 +21,6 @@ if BR2_PACKAGE_KYLIN_HARDWARE
 			  Needed if platform has a Linux kernel v4.1.35 
 	endchoice
 
-	source "package/kylin/kylin-omx/Config.in"
 	source "package/kylin/kylin-gst-omx/Config.in"
 	source "package/kylin/kylin-gst-rtkv1sink/Config.in"
 	source "package/kylin/kylin-platform-lib/Config.in"

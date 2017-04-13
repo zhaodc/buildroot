@@ -1,8 +1,12 @@
 menuconfig BR2_PACKAGE_KYLIN_PLATFORM_LIB
 	bool "Platform Options"
+	depends on (BR2_arm && BR2_ARM_EABIHF) || BR2_aarch64
+	depends on BR2_TOOLCHAIN_HAS_THREADS
+	select BR2_PACKAGE_HAS_LIBOPENMAX
+	select BR2_PACKAGE_HAS_KYLIN
 	help
          Realtek Kylin hardware options
-         
+	
 if BR2_PACKAGE_KYLIN_PLATFORM_LIB
 
 config BR2_PACKAGE_KYLIN_PLATFORM_BIN_KO
@@ -16,6 +20,9 @@ config KYLIN_PLATFORM_LIB_INSTALL_BINARIES
          Install a bunch of realtek provided binaries
 
 config BR2_PACKAGE_PROVIDES_KYLIN
+	default "kylin-platform-lib"
+	
+config BR2_PACKAGE_PROVIDES_LIBOPENMAX
 	default "kylin-platform-lib"
 	
 endif

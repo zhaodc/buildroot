@@ -1,0 +1,13 @@
+menuconfig BR2_PACKAGE_KYLIN_TOOLS
+	bool "Platform Tools"
+	help
+         Realtek Kylin hardware options
+         
+if BR2_PACKAGE_KYLIN_TOOLS
+
+config BR2_PACKAGE_KYLIN_TOOLS_DISPLAY
+	bool "display"
+	help
+         Install a tool to controll the HDMI
+endif
+	
