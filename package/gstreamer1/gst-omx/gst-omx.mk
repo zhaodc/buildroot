@@ -25,6 +25,14 @@ GST_OMX_LICENSE_FILES = COPYING
 
 GST_OMX_DEPENDENCIES = gstreamer1 gst1-plugins-base libopenmax
 
+ifeq ($(BR2_PACKAGE_HAS_KYLIN),y)
+GST_OMX_CONF_OPTS = \
+	--with-omx-target=generic \
+    --with-omx-header-path=$(@D)/omx/openmax
+GST_OMX_CONF_ENV = \
+    CFLAGS="-I$(STAGING_DIR)/usr/include/realtek/genericLinux/include"
+endif
+
 ifeq ($(BR2_PACKAGE_RPI_USERLAND),y)
 GST_OMX_CONF_OPTS = \
 	--with-omx-target=rpi
