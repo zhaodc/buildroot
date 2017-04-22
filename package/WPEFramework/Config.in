@@ -28,11 +28,11 @@ menuconfig BR2_PACKAGE_WPEFRAMEWORK_NETFLIX
 	help
 	   WPE Platform Netflix plugin
 
-menuconfig BR2_PACKAGE_WPEFRAMEWORK_RESOURCECENTER
-	bool "WPEFramework-ResourceCenter"
+menuconfig BR2_PACKAGE_WPEFRAMEWORK_COMPOSITOR
+	bool "WPEFramework-Compositor"
 
 	help
-	   WPE Platform Resource Center plugin
+	   WPE Platform Compositor plugin
 
 menuconfig BR2_PACKAGE_WPEFRAMEWORK_SWITCHBOARD
 	bool "WPEFramework-SwitchBoard"
