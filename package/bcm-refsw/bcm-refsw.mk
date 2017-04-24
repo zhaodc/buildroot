@@ -7,13 +7,13 @@
 ifeq ($(BR2_PACKAGE_BCM_REFSW_16_1),y)
 BCM_REFSW_VERSION = 16.1-2
 else ifeq ($(BR2_PACKAGE_BCM_REFSW_16_2),y)
-BCM_REFSW_VERSION = 16.2-5
+BCM_REFSW_VERSION = 16.2-6
 else ifeq ($(BR2_PACKAGE_BCM_REFSW_16_3),y)
 BCM_REFSW_VERSION = 16.3
 else ifeq ($(BR2_PACKAGE_BCM_REFSW_15_2),y)
 BCM_REFSW_VERSION = 15.2
 else
-BCM_REFSW_VERSION = 16.2-5
+BCM_REFSW_VERSION = 16.2-6
 endif
 
 BCM_REFSW_SITE = git@github.com:Metrological/bcm-refsw.git
@@ -187,6 +187,19 @@ define BCM_REFSW_BUILD_WAYLAND_EGL
 			APPLIBS_TARGET_LIB_DIR=${BCM_REFSW_BIN} \
 			APPLIBS_TARGET_INC_DIR=${BCM_REFSW_BIN}/include
 endef
+ifeq ($(BCM_REFSW_PLATFORM_VC),vc5)
+# will define VCX version before the last endif in eglext.h
+define BCM_REFSW_INSERT_VCX_VERSION
+    tac $(STAGING_DIR)/usr/include/EGL/eglext.h | awk '/endif/ { a = 1; print; next } a && !f++ { print "\n#define VCX 5" } 1' | tac > $(STAGING_DIR)/usr/include/EGL/eglext.h.new && mv $(STAGING_DIR)/usr/include/EGL/eglext.h.new $(STAGING_DIR)/usr/include/EGL/eglext.h
+endef
+endif
+# will add eglext_brcm include before the last endif in eglext.h
+define BCM_REFSW_INSERT_WAYLAND_EGL_EXTENSION
+    $(BCM_REFSW_INSERT_VCX_VERSION)
+    tac $(STAGING_DIR)/usr/include/EGL/eglext.h | awk '/endif/ { a = 1; print; next } a && !f++ { print "\n#include \"eglext_brcm.h\"" } 1' | tac > $(STAGING_DIR)/usr/include/EGL/eglext.h.new && mv $(STAGING_DIR)/usr/include/EGL/eglext.h.new $(STAGING_DIR)/usr/include/EGL/eglext.h
+endef
+
+BCM_REFSW_POST_INSTALL_TARGET_HOOKS += BCM_REFSW_INSERT_WAYLAND_EGL_EXTENSION
 
 define BCM_REFSW_INSTALL_STAGING_WAYLAND_EGL
 	$(INSTALL) -m 644 -D $(WAYLAND_EGL_DIR)/wayland-egl/libwayland-egl.so $(STAGING_DIR)/usr/lib
