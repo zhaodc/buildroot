@@ -1,0 +1,17 @@
+diff --git a/Source/WebCore/platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.cpp b/Source/WebCore/platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.cpp
+index f839f32..8a056b9 100644
+--- a/Source/WebCore/platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.cpp
++++ b/Source/WebCore/platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.cpp
+@@ -381,7 +381,11 @@ double MediaPlayerPrivateGStreamer::playbackPosition() const
+     GstElement* videoDec = nullptr;
+     GstQuery* query = gst_query_new_position(GST_FORMAT_TIME);
+ #if USE(FUSION_SINK)
+-    g_object_get(m_pipeline.get(), "video-sink", &videoDec, nullptr);
++    if(m_hasVideo)
++	g_object_get(m_pipeline.get(), "video-sink", &videoDec, nullptr);
++    else if(m_hasAudio)
++	g_object_get(m_pipeline.get(), "audio-sink", &videoDec, nullptr);
++
+     if (!GST_IS_ELEMENT(videoDec))
+         return 0.0f;
+ #else
