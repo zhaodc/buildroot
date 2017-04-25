@@ -99,3 +99,4 @@ libWPEBackend.so
 libWPEBackend-default.so
 libWPEBackend-rdk.so
 libwebpdemux.so
+NetworkInfo

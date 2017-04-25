@@ -104,14 +104,10 @@ if [ -f /NDS/lib/libextClock.so ]; then
 	export LD_PRELOAD=/NDS/lib/libextClock.so
 fi
 
-#if [ "x$MODEL_NAME" == "xSMT-C5400" ]; then                                                    
-#    # wait till we, at least, have the eth0 interface before we continue                       
-#    while [ $(eval ip link show eth0 | grep UP | wc -l) == 0 ];                                
-#    do                                                                                         
-#       sleep 10                                                                                
-#       echo "Sleeping to wait for the eth0 interface to become available..."                   
-#    done                                                                                       
-#fi
+if [ "x$MODEL_NAME" == "xSMT-E6400" ]; then                                                    
+   echo "Start wait for network app"
+   /NDS/metrological/usr/bin/NetworkInfo
+fi
 
 # Short sleep
 sleep 3
