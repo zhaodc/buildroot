@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-KYLIN_GRAPHICS_VERSION = f2d0d1f6e476e4b4667a8dd3cbb2f04d13398853
+KYLIN_GRAPHICS_VERSION = 184caf231a764d24aeb8df8112235a5bed6de757
 KYLIN_GRAPHICS_SITE_METHOD = git
 KYLIN_GRAPHICS_SITE = git@github.com:Metrological/kylin-graphics.git
 KYLIN_GRAPHICS_INSTALL_STAGING = YES
@@ -43,6 +43,7 @@ define KYLIN_GRAPHICS_INSTALL_HEADERS
   $(INSTALL) -m 0755 $(@D)/include/EGL/* ${1}/usr/include/EGL
   $(INSTALL) -m 0755 $(@D)/include/GLES2/* ${1}/usr/include/GLES2
   $(INSTALL) -m 0755 $(@D)/include/KHR/* ${1}/usr/include/KHR
+  $(INSTALL) -m 0755 $(@D)/include/*.h ${1}/usr/include
 endef
 
 define KYLIN_GRAPHICS_INSTALL_PKGCNF
