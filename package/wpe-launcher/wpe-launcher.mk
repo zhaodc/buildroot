@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-WPE_LAUNCHER_VERSION = 6a76e07d3fbf96a6a9eab6808a2cf839be745247
+WPE_LAUNCHER_VERSION = d80eb51505963eb8955f23d9e5cc34a4d1c61f23
 WPE_LAUNCHER_SITE = $(call github,aperezdc,WPEWebKitLauncher,$(WPE_LAUNCHER_VERSION))
 
 WPE_LAUNCHER_DEPENDENCIES = wpe
