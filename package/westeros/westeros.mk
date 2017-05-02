@@ -12,7 +12,8 @@ WESTEROS_AUTORECONF = YES
 WESTEROS_AUTORECONF_OPTS = "-Icfg"
 
 WESTEROS_DEPENDENCIES = host-pkgconf host-autoconf wayland \
-	libxkbcommon westeros-simpleshell westeros-simplebuffer westeros-soc
+	libxkbcommon westeros-simpleshell westeros-simplebuffer westeros-soc \
+	gstreamer1
 
 WESTEROS_CONF_OPTS = \
 	--prefix=/usr/ \
