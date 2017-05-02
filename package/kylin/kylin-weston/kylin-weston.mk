@@ -58,16 +58,14 @@ KYLIN_WESTON_DEPENDENCIES += libegl
 # Needs wayland-egl, provided by mali
 else ifeq ($(BR2_PACKAGE_KYLIN_GRAPHICS),y)
 KYLIN_WESTON_CONF_OPTS += --enable-egl \
-                    --enable-simple-egl-clients
+	--enable-simple-egl-clients
 KYLIN_WESTON_DEPENDENCIES += libegl
 KYLIN_WESTON_CONF_ENV += \
-       EGL_CFLAGS="-DEGL_FBDEV=1 -I$(STAGING_DIR)/usr/include -I$(STAGING_DIR)/usr/include/GLES2" \
-       EGL_LIBS="-L$(STAGING_DIR)/usr/lib/server -lEGL -lGLESv2 -lmali" \
-       EGL_TESTS_LIBS="-L$(STAGING_DIR)/usr/lib -lEGL -lGLESv2 -lmali" \
-       EGL_TESTS_CFLAGS="-I$(STAGING_DIR)/usr/include" \
-       GL_RENDERER_CFLAGS="-I$(STAGING_DIR)/usr/include/drm" \
-       GL_RENDERER_LIBS="-L$(STAGING_DIR)/usr/lib -lEGL -lGLESv2 -lmali"
-       
+	EGL_LIBS="-L$(STAGING_DIR)/usr/lib/server -lEGL -lGLESv2 -lmali" \
+	EGL_TESTS_LIBS="-L$(STAGING_DIR)/usr/lib -lEGL -lGLESv2 -lmali" \
+	EGL_TESTS_CFLAGS="-I$(STAGING_DIR)/usr/include" \
+	GL_RENDERER_CFLAGS="-I$(STAGING_DIR)/usr/include/drm" \
+	GL_RENDERER_LIBS="-L$(STAGING_DIR)/usr/lib -lEGL -lGLESv2 -lmali"
 else
 KYLIN_WESTON_CONF_OPTS += \
 	--disable-egl \
@@ -91,6 +89,8 @@ ifeq ($(BR2_PACKAGE_KYLIN_WESTON_FBDEV),y)
 KYLIN_WESTON_CONF_OPTS += \
 	--enable-fbdev-compositor \
 	WESTON_NATIVE_BACKEND=fbdev-backend.so
+KYLIN_WESTON_CONF_ENV += \
+	EGL_CFLAGS="-DEGL_FBDEV=1 -I$(STAGING_DIR)/usr/include -I$(STAGING_DIR)/usr/include/GLES2"
 else
 KYLIN_WESTON_CONF_OPTS += --disable-fbdev-compositor
 endif
@@ -100,6 +100,10 @@ KYLIN_WESTON_CONF_OPTS += \
 	--enable-drm-compositor \
 	WESTON_NATIVE_BACKEND=drm-backend.so
 KYLIN_WESTON_DEPENDENCIES += libdrm
+KYLIN_WESTON_CONF_ENV += \
+	EGL_CFLAGS="-DEGL_WINSYS_GBM=1 -I$(STAGING_DIR)/usr/include -I$(STAGING_DIR)/usr/include/GLES2" \
+	DRM_COMPOSITOR_LIBS="-L$(STAGING_DIR)/usr/lib/server -lgbm" \
+	DRM_COMPOSITOR_CFLAGS="-L$(STAGING_DIR)/usr/lib/server -lgbm -I$(STAGING_DIR)/usr/include -I$(STAGING_DIR)/usr/include/drm"
 else
 KYLIN_WESTON_CONF_OPTS += --disable-drm-compositor
 endif

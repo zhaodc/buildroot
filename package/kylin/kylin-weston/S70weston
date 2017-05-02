@@ -7,7 +7,7 @@ WESTON_PATH=/tmp/weston
 WESTON_LOG=/tmp/weston.log
 
 start() {
-        modprobe dma-buf-test-exporter
+        modprobe rtk_drm
 	mkdir -p $WESTON_PATH
         chmod 700 $WESTON_PATH
         export XDG_RUNTIME_DIR=$WESTON_PATH
