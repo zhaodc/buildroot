@@ -58,7 +58,7 @@ config BR2_PACKAGE_WEBBRIDGE_OOM_ADJUST
 endmenu
 
 menuconfig BR2_PACKAGE_WEBBRIDGE_PLUGIN_RESOURCECENTER
-	bool "ResourceCenter"
+	bool "resourcecenter"
 	help
 	  Select a resource center for the platfom.
 
@@ -169,7 +169,7 @@ if BR2_PACKAGE_WEBBRIDGE_PLUGIN_IRNEXUS
 
 config BR2_PACKAGE_WEBBRIDGE_PLUGIN_IRNEXUS_MODE
 	string "IR mode"
-	default "23"
+	default "16"
 	help
 	  Sets the IR Mode to be used with IR Nexus. Every remote has a different mode and key mapping.
 
@@ -190,7 +190,6 @@ config BR2_PACKAGE_WEBBRIDGE_PLUGIN_VOICECONTROL
 
 comment "voicecontrol requires the GreenPeak GP501 or GP711 to be selected and userland lib to be build."
 	depends on !BR2_PACKAGE_GREENPEAK || !BR2_PACKAGE_GREENPEAK_USERLANDLIB || (!BR2_PACKAGE_GREENPEAK_GP501 && !BR2_PACKAGE_GREENPEAK_GP711)
-
 
 config BR2_PACKAGE_WEBBRIDGE_PLUGIN_DEVICEINFO
 	bool "deviceinfo"
@@ -249,19 +248,19 @@ comment "netflix is dependent on the netflix package compiled as library"
 	depends on !BR2_PACKAGE_NETFLIX_LIB
 
 menuconfig BR2_PACKAGE_WEBBRIDGE_PLUGIN_OPENCDMI
-        bool "opencdmi"
-        select BR2_PACKAGE_CPPSDK_PROCESS
-        depends on BR2_PACKAGE_OPENCDMI
-        default y
-        help
-          A Plugin to interact with CDM Services.
+    bool "opencdmi"
+    select BR2_PACKAGE_CPPSDK_PROCESS
+    depends on BR2_PACKAGE_OPENCDMI
+    default y
+    help
+      A Plugin to interact with CDM Services.
 
 if BR2_PACKAGE_WEBBRIDGE_PLUGIN_OPENCDMI
 
 config BR2_PACKAGE_WEBBRIDGE_PLUGIN_OPENCDMI_AUTOSTART
-        depends on BR2_PACKAGE_WEBBRIDGE_PLUGIN_OPENCDMI
-        bool "autostart"
-        default y
+    depends on BR2_PACKAGE_WEBBRIDGE_PLUGIN_OPENCDMI
+    bool "autostart"
+    default y
 
 endif
 
@@ -312,6 +311,11 @@ config BR2_PACKAGE_WEBBRIDGE_PLUGIN_WEBKITBROWSER_DISKCACHE
 config BR2_PACKAGE_WEBBRIDGE_PLUGIN_WEBKITBROWSER_XHRCACHE
 	depends on BR2_PACKAGE_WEBBRIDGE_PLUGIN_WEBKITBROWSER
 	bool "xhr-cache"
+	default false
+
+config BR2_PACKAGE_WEBBRIDGE_PLUGIN_WEBKITBROWSER_TRANSPARENT
+	depends on BR2_PACKAGE_WEBBRIDGE_PLUGIN_WEBKITBROWSER
+	bool "transparent"
 	default false
 
 config BR2_PACKAGE_WEBBRIDGE_PLUGIN_YOUTUBE
@@ -465,5 +469,25 @@ config BR2_PACKAGE_WEBBRIDGE_PLUGIN_SNAPSHOT
 	depends on BR2_PACKAGE_RPI_USERLAND
 	help
 	  A plugin that exposes a screenshot API
+
+menuconfig BR2_PACKAGE_WEBBRIDGE_PLUGIN_WINDOWMANAGER
+    bool "windowmanager"
+    select BR2_PACKAGE_CPPSDK_PROCESS
+    depends on BR2_PACKAGE_WAYLAND
+    default n
+    help
+      A Plugin that enables the WindowManager.
+
+if BR2_PACKAGE_WEBBRIDGE_PLUGIN_WINDOWMANAGER
+
+config BR2_PACKAGE_WEBBRIDGE_PLUGIN_WINDOWMANAGER_AUTOSTART
+    depends on BR2_PACKAGE_WEBBRIDGE_PLUGIN_WINDOWMANAGER
+    bool "autostart"
+    default y
+
+endif
+
+comment "window manager needs wayland to be enabled."
+	depends on !BR2_PACKAGE_WAYLAND
 
 endif

@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-CPPSDK_VERSION = 7e5d97a5a5e62951ebd0d24ad6e731f77f136935
+CPPSDK_VERSION = 688575d5813ec29da62dc7a73ba64f23171922a8
 CPPSDK_SITE_METHOD = git
 CPPSDK_SITE = git@github.com:Metrological/cppsdk.git
 CPPSDK_INSTALL_STAGING = YES
@@ -19,6 +19,9 @@ else ifeq ($(BR2_PACKAGE_BCM_REFSW)$(BR2_arm),yy)
 ifeq ($(BR2_PACKAGE_BCM_REFSW_PLATFORM_7437),y)
 # fixme by adding proper support for 74371 XID without OTP support
 CPPSDK_CONF_OPTS += -DSTUB_HARDWARE=ON
+else ifeq ($(BR2_PACKAGE_BCM_REFSW_PLATFORM_7250),y)
+CPPSDK_CONF_OPTS += -DCPPSDK_PLATFORM=SPECTRUM
+CPPSDK_DEPENDENCIES += bcm-refsw
 else
 CPPSDK_CONF_OPTS += -DCPPSDK_PLATFORM=EOS
 CPPSDK_DEPENDENCIES += bcm-refsw
