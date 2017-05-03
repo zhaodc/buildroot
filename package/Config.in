@@ -5,7 +5,6 @@ menu "Target packages"
 
 menu "WPE Framework"
    source "package/WPEFramework/Config.in"
-   source "package/WPEFramework-Open/Config.in"
 endmenu
 
 menu "Audio and video applications"

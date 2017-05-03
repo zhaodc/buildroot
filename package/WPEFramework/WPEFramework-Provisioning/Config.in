@@ -1,0 +1,5 @@
+menuconfig BR2_PACKAGE_WPEFRAMEWORK_PROVISIONING
+	bool "WPEFramework-Provisioning"
+	select BR2_PACKAGE_LIBPROVISION
+	help
+	   WPE Platform Provisioning plugin

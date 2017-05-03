@@ -1,54 +1,27 @@
 menuconfig BR2_PACKAGE_WPEFRAMEWORK
 	bool "WPEFramework"
-
 	help
-	   Base WPE Framework
-
-menuconfig BR2_PACKAGE_WPEFRAMEWORK_DEBUG
+	   Base WPE Framework	  
+	  
+if BR2_PACKAGE_WPEFRAMEWORK
+config BR2_PACKAGE_WPEFRAMEWORK_DEBUG
 	bool "Debug"
 	help
 	   Allow the WPE Framework to be more verbose. All development traces
            are turned on.
-
-menuconfig BR2_PACKAGE_WPEFRAMEWORK_VIRTUALINPUT
+           
+config BR2_PACKAGE_WPEFRAMEWORK_VIRTUALINPUT
 	bool "VirtualInput"
 	help
 	   If the dynamic uinput system can not be used for security reasons, this
-           allows for relaying keys to plugins.
+           allows for relaying keys to plugins
 
-menuconfig BR2_PACKAGE_WPEFRAMEWORK_PROVISIONING
-	bool "WPEFramework-Provisioning"
-	select BR2_PACKAGE_LIBPROVISION
-	help
-	   WPE Platform Provisioning plugin
-
-menuconfig BR2_PACKAGE_WPEFRAMEWORK_DIALSERVER
-	bool "WPEFramework-DIALServer"
-
-	help
-	   WPE Platform DIALServer plugin
-
-menuconfig BR2_PACKAGE_WPEFRAMEWORK_NETFLIX
-	bool "WPEFramework-Netflix"
-
-	help
-	   WPE Platform Netflix plugin
-
-menuconfig BR2_PACKAGE_WPEFRAMEWORK_COMPOSITOR
-	bool "WPEFramework-Compositor"
-
-	help
-	   WPE Platform Compositor plugin
-
-menuconfig BR2_PACKAGE_WPEFRAMEWORK_SWITCHBOARD
-	bool "WPEFramework-SwitchBoard"
-
-	help
-	   WPE Platform Switch Board plugin
-
-menuconfig BR2_PACKAGE_WPEFRAMEWORK_DICTIONARY
-	bool "WPEFramework-Dictionary"
-
-	help
-	   WPE Platform Dictionary plugin
+source "package/WPEFramework/WPEFramework-Provisioning/Config.in"
+source "package/WPEFramework/WPEFramework-DIALServer/Config.in"
+source "package/WPEFramework/WPEFramework-Netflix/Config.in"
+source "package/WPEFramework/WPEFramework-Compositor/Config.in"
+source "package/WPEFramework/WPEFramework-SwitchBoard/Config.in"
+source "package/WPEFramework/WPEFramework-Dictionary/Config.in"
+source "package/WPEFramework/WPEFramework-Open/Config.in"
+endif
 

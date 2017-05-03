@@ -38,4 +38,4 @@ WPEFRAMEWORK_POST_INSTALL_TARGET_HOOKS += WPEFRAMEWORK_POST_TARGET_INITD
 
 $(eval $(cmake-package))
 
-
+include package/wpe/*/*.mk

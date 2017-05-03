@@ -1,0 +1,31 @@
+config BR2_PACKAGE_WPEFRAMEWORK_OPEN
+	bool "WPEFramework Open plugins"
+
+	help
+	   Commander Plugin
+	   
+if BR2_PACKAGE_WPEFRAMEWORK_OPEN
+config BR2_PACKAGE_WPEFRAMEWORK_OPEN_COMMANDER
+	bool "Commander"
+
+	help
+	   Commander Plugin
+
+source "package/WPEFramework/WPEFramework-DeviceInfo/Config.in"
+source "package/WPEFramework/WPEFramework-Monitor/Config.in"
+source "package/WPEFramework/WPEFramework-RemoteControl/Config.in"
+source "package/WPEFramework/WPEFramework-Snapshot/Config.in"
+source "package/WPEFramework/WPEFramework-TraceControl/Config.in"
+source "package/WPEFramework/WPEFramework-WebKitBrowser/Config.in"
+source "package/WPEFramework/WPEFramework-WebProxy/Config.in"
+source "package/WPEFramework/WPEFramework-WebServer/Config.in"
+
+config BR2_PACKAGE_WPEFRAMEWORK_OPEN_WEBSHELL
+	bool "WebShell"
+
+	help
+	   WebShell Plugin
+
+endif
+
+

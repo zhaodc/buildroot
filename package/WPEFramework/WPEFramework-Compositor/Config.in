@@ -1,0 +1,5 @@
+menuconfig BR2_PACKAGE_WPEFRAMEWORK_COMPOSITOR
+	bool "WPEFramework-Compositor"
+
+	help
+	   WPE Platform Compositor plugin

@@ -1,0 +1,19 @@
+config BR2_PACKAGE_WPEFRAMEWORK_OPEN_DEVICEINFO
+	bool "DeviceInfo"
+
+	help
+	   DeviceInfo Plugin
+
+config BR2_PACKAGE_WPEFRAMEWORK_OPEN_LOCATIONSYNC
+	bool "LocationSync"
+
+	help
+	   LocationSync Plugin
+	   WPE Platform Dictionary plugin
+
+config BR2_PACKAGE_WPEFRAMEWORK_OPEN_TIMESYNC
+	bool "TimeSync"
+
+	help
+	   TimeSync Plugin
+

@@ -1,0 +1,5 @@
+config BR2_PACKAGE_WPEFRAMEWORK_OPEN_WEBSERVER
+	bool "WebServer"
+
+	help
+	   WebServer Plugin

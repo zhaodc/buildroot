@@ -1,0 +1,5 @@
+config BR2_PACKAGE_WPEFRAMEWORK_OPEN_REMOTECONTROL
+	bool "RemoteControl"
+
+	help
+	   RemoteControl Plugin

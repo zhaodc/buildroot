@@ -1,0 +1,5 @@
+menuconfig BR2_PACKAGE_WPEFRAMEWORK_NETFLIX
+	bool "WPEFramework-Netflix"
+
+	help
+	   WPE Platform Netflix plugin
