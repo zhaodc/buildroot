@@ -98,6 +98,7 @@ export GST_PLUGIN_SCANNER=$SOURCE/usr/libexec/gstreamer-1.0/gst-plugin-scanner
 export LD_LIBRARY_PATH=$SOURCE/lib:$SOURCE/usr/lib:$SOURCE/usr/lib/gstreamer-1.0:/lib/:/usr/lib
 #export DISABLE_FRAMERATE_UPDATE=1
 export MODEL_NAME=$(cat /dev/nds/versioninformation | sed -n s/^MODEL_NAME://p | cut -c1-9)
+export HDMI_AUDIO_APPLICATION=$SOURCE/NDS/audio_hdmi_out
 
 # Clock
 if [ -f /NDS/lib/libextClock.so ]; then
