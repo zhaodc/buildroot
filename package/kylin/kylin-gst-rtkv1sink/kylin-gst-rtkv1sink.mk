@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-KYLIN_GST_RTKV1SINK_VERSION = 4c5887e7bd42580844f2ab5f41bfa48c913bfd8a
+KYLIN_GST_RTKV1SINK_VERSION = 10f8050268edd46dd446fc3022c688319055e1e1
 KYLIN_GST_RTKV1SINK_SITE_METHOD = git
 KYLIN_GST_RTKV1SINK_SITE = git@github.com:Metrological/kylin-gst-rtkv1sink.git
 KYLIN_GST_RTKV1SINK_INSTALL_STAGING = YES
