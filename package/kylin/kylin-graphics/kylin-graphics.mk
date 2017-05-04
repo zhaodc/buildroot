@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-KYLIN_GRAPHICS_VERSION = 184caf231a764d24aeb8df8112235a5bed6de757
+KYLIN_GRAPHICS_VERSION = 6196540e3bab91d3cc61e23ae89349749506ef24
 KYLIN_GRAPHICS_SITE_METHOD = git
 KYLIN_GRAPHICS_SITE = git@github.com:Metrological/kylin-graphics.git
 KYLIN_GRAPHICS_INSTALL_STAGING = YES
