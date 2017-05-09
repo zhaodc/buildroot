@@ -180,3 +180,28 @@ index 852acc0..d9ef319 100644
  
  	if (fbdev_output_create(backend, param->device) < 0)
  		goto out_launcher;
+diff -buN a/libweston/gl-renderer.c b/libweston/gl-renderer.c
+--- a/libweston/gl-renderer.c	2016-09-17 15:06:45.000000000 +0800
++++ b/libweston/gl-renderer.c	2017-04-10 13:30:40.428154485 +0800
+@@ -26,6 +26,8 @@
+ 
+ #include "config.h"
+ 
++#define GL_GLEXT_PROTOTYPES 1
++
+ #include <GLES2/gl2.h>
+ #include <GLES2/gl2ext.h>
+ 
+diff -buN a/libweston/compositor-drm.c b/libweston/compositor-drm.c
+--- a/libweston/compositor-drm.c	2016-09-17 15:06:45.000000000 +0800
++++ b/libweston/compositor-drm.c	2017-04-10 13:35:15.540157086 +0800
+@@ -3110,7 +3110,8 @@
+ 	b->configure_output = config->configure_output;
+ 	b->use_current_mode = config->use_current_mode;
+ 
+-	if (parse_gbm_format(config->gbm_format, GBM_FORMAT_XRGB8888, &b->gbm_format) < 0)
++//	if (parse_gbm_format(config->gbm_format, GBM_FORMAT_XRGB8888, &b->gbm_format) < 0)
++	if (parse_gbm_format(config->gbm_format, GBM_FORMAT_ARGB8888, &b->gbm_format) < 0)
+ 		goto err_compositor;
+ 
+ 	if (config->seat_id)
