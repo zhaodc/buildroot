@@ -5,8 +5,8 @@
 ################################################################################
 
 # Tip of the aperezdc/webrtc branch from
-# https://github.com/WebPlatformForEmbedded/WPEWebKit/tree/aperez/webrtc
-WPE_VERSION = 4d64e300a9e552e5648789c43bc4e46168e17c77
+# https://github.com/WebPlatformForEmbedded/WPEWebKit/tree/openwebrtc-rpi
+WPE_VERSION = c927f507ac8e96e93b8873322d164da633f92001
 WPE_SITE = $(call github,WebPlatformForEmbedded,WPEWebKit,$(WPE_VERSION))
 
 WPE_INSTALL_STAGING = YES
