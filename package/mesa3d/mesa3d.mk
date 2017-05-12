@@ -22,6 +22,17 @@ MESA3D_DEPENDENCIES = \
 	expat \
 	libdrm
 
+ifeq ($(BR2_PACKAGE_HOST_LLVM),y)
+MESA3D_DEPENDENCIES += elfutils host-llvm
+MESA3D_CONF_OPTS += --enable-gallium-llvm=yes \
+					--enable-r600-llvm-compiler=yes \
+					--with-llvm-prefix=$(HOST_DIR)/usr
+else
+MESA3D_CONF_OPTS += --enable-llvm-shared-libs=no \
+					--enable-r600-llvm-compiler=no \
+					--enable-gallium-llvm=no
+endif
+
 # The Sourcery MIPS toolchain has a special (non-upstream) feature to
 # have "compact exception handling", which unfortunately breaks with
 # mesa3d, so we disable it here by passing -mno-compact-eh.
