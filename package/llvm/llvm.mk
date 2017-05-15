@@ -11,8 +11,11 @@ LLVM_LICENSE = University of Illinois/NCSA Open Source License
 LLVM_LICENSE_FILES = LICENSE.TXT
 
 HOST_LLVM_DEPENDENCIES = host-libxml2 host-zlib host-python
-LLVM_DEPENDENCIES = libxml2 zlib host-python
+LLVM_DEPENDENCIES = libxml2 zlib host-python host-llvm
 
+# Determine the name of the LLVM target to enable depending on
+# the Buildroot target settings.
+#
 ifeq ($(BR2_i386),y)
   _LLVM_TARGET_ARCH := X86
 else ifeq ($(BR2_x86_64),y)
@@ -43,16 +46,24 @@ else
   $(error Target architecture not supported by LLVM)
 endif
 
-_LLVM_COMMON_CONF_OPTS := -DLLVM_TARGETS_TO_BUILD=$(_LLVM_TARGET_ARCH) \
-						  -DLLVM_ENABLE_ZLIB=YES \
-						  -DLLVM_INCLUDE_TOOLS=NO \
-						  -DLLVM_INCLUDE_EXAMPLES=NO \
-						  -DLLVM_INCLUDE_TESTS=NO \
-						  -DLLVM_BUILD_TESTS=NO \
-						  -DLLVM_ENABLE_PROJECTS=''
 
-LLVM_CONF_OPTS = $(_LLVM_COMMON_CONF_OPTS)
+# List of build options at:
+#    http://llvm.org/docs/CMake.html
+#
+_LLVM_COMMON_CONF_OPTS := \
+  -DLLVM_TARGETS_TO_BUILD=$(_LLVM_TARGET_ARCH) \
+  -DLLVM_ENABLE_ZLIB=YES \
+  -DLLVM_INCLUDE_TOOLS=NO \
+  -DLLVM_INCLUDE_EXAMPLES=NO \
+  -DLLVM_INCLUDE_TESTS=NO \
+  -DLLVM_BUILD_TESTS=NO \
+  -DLLVM_ENABLE_PROJECTS=''
+
 HOST_LLVM_CONF_OPTS = $(_LLVM_COMMON_CONF_OPTS)
+LLVM_CONF_OPTS = $(_LLVM_COMMON_CONF_OPTS) \
+  -DLLVM_TABLEGEN='$(HOST_DIR)/usr/bin/llvm-tblgen'
+
+# LLVM expects to always be built in a separate directory.
 LLVM_SUPPORTS_IN_SOURCE_BUILD = NO
 
 $(eval $(host-cmake-package))
