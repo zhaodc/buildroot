@@ -155,6 +155,7 @@ menu "Development tools"
 	source "package/subversion/Config.in"
 	source "package/tree/Config.in"
 	source "package/yasm/Config.in"
+	source "package/llvm/Config.in"
 endmenu
 
 menu "Digital rights management"
