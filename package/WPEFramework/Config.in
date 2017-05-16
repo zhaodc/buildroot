@@ -3,7 +3,6 @@ config BR2_PACKAGE_WPEFRAMEWORK
 	help
 	   Base WPE Framework	  
 	   
-	   
 menu "Options"
 
 config BR2_PACKAGE_WPEFRAMEWORK_PORT
@@ -59,6 +58,23 @@ config BR2_PACKAGE_WPEFRAMEWORK_VIRTUALINPUT
 	help
 	   If the dynamic uinput system can not be used for security reasons, this
            allows for relaying keys to plugins
+           
+menu "development tools"
+
+config BR2_PACKAGE_WPEFRAMEWORK_DISABLE_INITD
+	bool "Disable init.d"
+	help
+		If enabled the init.d script will NOT be installed.
+		
+config BR2_PACKAGE_WPEFRAMEWORK_TEST_CYCLICINSPECTOR
+	bool "CyclicBuffer inspector"
+	help
+		CyclicInspector is a small tool that allows you to inspect the
+		contents of the memory mapped file used by the CyclicBuffer.
+		This can be helpful during a post-mortem of a crashed program or
+		when tracing failed.
+
+endmenu
 
 source "package/WPEFramework/WPEFramework-Provisioning/Config.in"
 source "package/WPEFramework/WPEFramework-DIALServer/Config.in"
