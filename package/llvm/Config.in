@@ -11,3 +11,31 @@ config BR2_PACKAGE_LLVM
 		and toolchain technologies.
 
 		http://llvm.org
+
+if BR2_PACKAGE_LLVM
+
+menu "LLVM Options"
+
+config BR2_PACKAGE_LLVM_ENABLE_FFI
+	bool "Support libffi"
+	default n
+	select BR2_PACKAGE_LIBFFI
+	help
+		Use libffi in the LLVM Interpreter in order to enable calling
+		external functions.
+
+config BR2_PACKAGE_LLVM_ENABLE_RTTI
+	bool "C++: Support RTTI"
+	default n
+	help
+		Enable support for C++ Run-Time Type Information (RTTI)
+
+config BR2_PACKAGE_LLVM_ENABLE_EH
+	bool "C++: Support exception handling"
+	default n
+	help
+		Enable support for C++ exception handling (try/catch)
+
+endmenu
+
+endif
