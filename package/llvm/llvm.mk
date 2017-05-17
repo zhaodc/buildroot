@@ -74,6 +74,13 @@ _LLVM_COMMON_CONF_OPTS += \
   -DOCAMLFIND=OCAMLFIND-NOTFOUND
 
 
+# Building per-component shared libraries is NOT recommended by upstream.
+# The all-in-one libLLVM-<version>.so is enabled with a different setting.
+_LLVM_COMMON_CONF_OPTS += \
+  -DBUILD_SHARED_LIBS=NO \
+  -DLLVM_BUILD_LLVM_DYLIB=$(if $(BR2_STATIC_LIBS),NO,YES)
+
+
 # Start with the common configuration options for both host and target builds.
 HOST_LLVM_CONF_OPTS = $(_LLVM_COMMON_CONF_OPTS)
 LLVM_CONF_OPTS = $(_LLVM_COMMON_CONF_OPTS)
