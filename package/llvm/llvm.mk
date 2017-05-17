@@ -61,6 +61,13 @@ _LLVM_COMMON_CONF_OPTS := \
   -DLLVM_BUILD_TESTS=NO \
   -DLLVM_ENABLE_PROJECTS=''
 
+# The Go bindings have no CMake rules at the moment, but better remove the
+# check preventively. For now building the Go bindings is not supported.
+#
+_LLVM_COMMON_CONF_OPTS += \
+  -DGO_EXECUTABLE=GO_EXECUTABLE-NOTFOUND \
+  -DOCAMLFIND=OCAMLFIND-NOTFOUND
+
 HOST_LLVM_CONF_OPTS = $(_LLVM_COMMON_CONF_OPTS)
 
 LLVM_CONF_OPTS = $(_LLVM_COMMON_CONF_OPTS) \
