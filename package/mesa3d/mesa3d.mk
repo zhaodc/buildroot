@@ -22,14 +22,11 @@ MESA3D_DEPENDENCIES = \
 	expat \
 	libdrm
 
-ifeq ($(BR2_PACKAGE_HOST_LLVM),y)
-MESA3D_DEPENDENCIES += elfutils host-llvm
-MESA3D_CONF_OPTS += --enable-gallium-llvm=yes \
-					--enable-r600-llvm-compiler=yes \
-					--with-llvm-prefix=$(HOST_DIR)/usr
+ifeq ($(BR2_PACKAGE_LLVM),y)
+MESA3D_DEPENDENCIES += elfutils llvm
+MESA3D_CONF_OPTS += --enable-gallium-llvm=yes
 else
 MESA3D_CONF_OPTS += --enable-llvm-shared-libs=no \
-					--enable-r600-llvm-compiler=no \
 					--enable-gallium-llvm=no
 endif
 
@@ -195,6 +192,6 @@ MESA3D_CONF_OPTS += --disable-gles1 --disable-gles2
 endif
 
 # Avoid automatic search of llvm-config
-MESA3D_CONF_OPTS += --with-llvm-prefix=$(STAGING_DIR)/usr/bin
+MESA3D_CONF_OPTS += --with-llvm-prefix=$(STAGING_DIR)/usr
 
 $(eval $(autotools-package))
