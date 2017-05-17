@@ -58,10 +58,13 @@ _LLVM_COMMON_CONF_OPTS := \
   -DLLVM_TARGET_ARCH=$(_LLVM_TARGET_ARCH) \
   -DLLVM_ENABLE_ZLIB=YES \
   -DLLVM_INCLUDE_TOOLS=YES \
+  -DLLVM_INCLUDE_UTILS=NO \
   -DLLVM_INCLUDE_EXAMPLES=NO \
   -DLLVM_INCLUDE_TESTS=NO \
   -DLLVM_BUILD_TESTS=NO \
+  -DLLVM_BUILD_RUNTIME=NO \
   -DLLVM_ENABLE_PROJECTS=''
+
 
 # The Go bindings have no CMake rules at the moment, but better remove the
 # check preventively. For now building the Go bindings is not supported.
