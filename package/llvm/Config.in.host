@@ -21,4 +21,8 @@ config BR2_PACKAGE_HOST_LLVM_TBLGEN_ONLY
 		target. If LLVM is not needed by any host tools, if it possible to
 		select this option to speed up the build.
 
+		NOTE: Normally LLVM builds a native llvm-tblgen as part of the normal
+		build procedure. Using this option should not be normally needed, use
+		it only if you know what you are doing!
+
 endif

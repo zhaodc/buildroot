@@ -13,7 +13,7 @@ LLVM_INSTALL_STAGING = YES
 LLVM_INSTALL_TARGET = YES
 
 HOST_LLVM_DEPENDENCIES = host-libxml2 host-zlib host-python
-LLVM_DEPENDENCIES = libxml2 zlib host-python host-llvm
+LLVM_DEPENDENCIES = libxml2 zlib host-python
 
 # Determine the name of the LLVM target to enable depending on
 # the Buildroot target settings.
@@ -70,11 +70,20 @@ _LLVM_COMMON_CONF_OPTS += \
   -DGO_EXECUTABLE=GO_EXECUTABLE-NOTFOUND \
   -DOCAMLFIND=OCAMLFIND-NOTFOUND
 
-HOST_LLVM_CONF_OPTS = $(_LLVM_COMMON_CONF_OPTS)
 
-LLVM_CONF_OPTS = $(_LLVM_COMMON_CONF_OPTS) \
-  -DLLVM_TABLEGEN='$(HOST_DIR)/usr/bin/llvm-tblgen' \
-  -DCMAKE_CROSSCOMPILING=ON
+# Start with the common configuration options for both host and target builds.
+HOST_LLVM_CONF_OPTS = $(_LLVM_COMMON_CONF_OPTS)
+LLVM_CONF_OPTS = $(_LLVM_COMMON_CONF_OPTS)
+
+
+# If a host-build of LLVM has been done, use its llvm-tblgen executable and
+# save a bit of build time. The LLVM build system itself builds a host-native
+# version if this option is not passed.
+#
+ifeq ($(BR2_PACKAGE_HOST_LLVM),y)
+  LLVM_DEPENDENCIES += host-llvm
+  LLVM_CONF_OPTS += -DLLVM_TABLEGEN='$(HOST_DIR)/usr/bin/llvm-tblgen'
+endif
 
 ifeq ($(BR2_PACKAGE_LLVM_ENABLE_FFI),y)
   LLVM_DEPENDENCIES += libffi
