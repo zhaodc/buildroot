@@ -9,6 +9,8 @@ LLVM_SITE = http://llvm.org/releases/$(LLVM_VERSION)
 LLVM_SOURCE = llvm-$(LLVM_VERSION).src.tar.xz
 LLVM_LICENSE = University of Illinois/NCSA Open Source License
 LLVM_LICENSE_FILES = LICENSE.TXT
+LLVM_INSTALL_STAGING = YES
+LLVM_INSTALL_TARGET = YES
 
 HOST_LLVM_DEPENDENCIES = host-libxml2 host-zlib host-python
 LLVM_DEPENDENCIES = libxml2 zlib host-python host-llvm
@@ -98,6 +100,41 @@ LLVM_SUPPORTS_IN_SOURCE_BUILD = NO
 
 $(eval $(cmake-package))
 
+
+# XXX: LLVM does include some support for building native tools. This is used
+#      to build e.g. llvm-config, and a host-native llvm-tblgen if needed.
+#      Unfortunately, Buildroot is overzealous about passing the parameters
+#      needed for cross-building, and the CMake configuration for the native
+#      tools ends up using the cross-toolchain. Once "cmake-package" has
+#      defined LLVM_*_CMDS, this adds:
+#
+#        - A call to CMake which resets CMAKE_{C,CXX,ASM}_COMPILER with the
+#          paths to the host-native ones. Note that using the *_NOCCACHE
+#          variables is needed, otherwise CMake will choke.
+#
+#        - The file "BuildVariables.inc" is copied over from the cross-build
+#          directory to the native one. This way the version of "llvm-config"
+#          which can run on the build host returns information about the
+#          target build which gets installed in the sysroot.
+#
+#        - Last but not least, "llvm-config" is copied into the sysroot with
+#          the target triple prefix, because packages using sane build systems
+#          will first try that.
+#
+# This is one of those disgusting hacks of which one ends up being proud of.
+#
+LLVM_CONFIGURE_CMDS += \
+  && cd $(LLVM_BUILDDIR)/NATIVE \
+  && PATH=$(BR_PATH) $(LLVM_CONF_ENV) $(BR2_CMAKE) $(LLVM_SRCDIR) \
+     -DCMAKE_C_COMPILER='$(HOSTCC_NOCCACHE)' \
+     -DCMAKE_ASM_COMPILER='$(HOSTCC_NOCCACHE)' \
+     -DCMAKE_CXX_COMPILER='$(HOSTCXX_NOCCACHE)' \
+  && cp $(LLVM_BUILDDIR)/tools/llvm-config/BuildVariables.inc \
+     $(LLVM_BUILDDIR)/NATIVE/tools/llvm-config/BuildVariables.inc
+
+LLVM_INSTALL_STAGING_CMDS += \
+  && install -Dm755 $(LLVM_BUILDDIR)/NATIVE/bin/llvm-config \
+     $(STAGING_DIR)/usr/bin/$(GNU_TARGET_NAME)-llvm-config
 
 # If only llvm-tblgen is to be built, define the install commands to directly
 # copy over the binary, and fixup the commands using for building it *after*
