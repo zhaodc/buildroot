@@ -11,3 +11,14 @@ menuconfig BR2_PACKAGE_HOST_LLVM
 		and toolchain technologies.
 
 		http://llvm.org
+
+if BR2_PACKAGE_HOST_LLVM
+
+config BR2_PACKAGE_HOST_LLVM_TBLGEN_ONLY
+	bool "Build only llvm-tblgen"
+	help
+		The llvm-tblgen tool is needed when cross-compiling LLVM for the
+		target. If LLVM is not needed by any host tools, if it possible to
+		select this option to speed up the build.
+
+endif

@@ -88,5 +88,21 @@ endif
 # LLVM expects to always be built in a separate directory.
 LLVM_SUPPORTS_IN_SOURCE_BUILD = NO
 
-$(eval $(host-cmake-package))
 $(eval $(cmake-package))
+
+
+# If only llvm-tblgen is to be built, define the install commands to directly
+# copy over the binary, and fixup the commands using for building it *after*
+# cmake-package has created the variables and targets.
+#
+ifeq ($(BR2_PACKAGE_HOST_LLVM_TBLGEN_ONLY),y)
+  define HOST_LLVM_INSTALL_CMDS
+  install -Dm755 $(HOST_LLVM_BUILDDIR)/bin/llvm-tblgen $(HOST_DIR)/usr/bin/llvm-tblgen
+  endef
+endif
+
+$(eval $(host-cmake-package))
+
+ifeq ($(BR2_PACKAGE_HOST_LLVM_TBLGEN_ONLY),y)
+  HOST_LLVM_BUILD_CMDS += llvm-tblgen
+endif
