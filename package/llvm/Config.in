@@ -6,11 +6,15 @@ menuconfig BR2_PACKAGE_LLVM
 		BR2_mips64 || BR2_mips64el || \
 		BR2_powerpc || BR2_powerpc64 || BR2_powerpc64le || \
 		BR2_sparc
+	depends on BR2_INSTALL_LIBSTDCPP
 	help
 		The LLVM Project is a collection of modular and reusable compiler
 		and toolchain technologies.
 
 		http://llvm.org
+
+comment "llvm requires a toolchain with C++ support"
+	depends on !BR2_INSTALL_LIBSTDCPP
 
 if BR2_PACKAGE_LLVM
 
