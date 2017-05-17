@@ -132,9 +132,11 @@ $(eval $(cmake-package))
 #          variables is needed, otherwise CMake will choke.
 #
 #        - The file "BuildVariables.inc" is copied over from the cross-build
-#          directory to the native one. This way the version of "llvm-config"
-#          which can run on the build host returns information about the
-#          target build which gets installed in the sysroot.
+#          directory to the native one. This way a new "llvm-config" which
+#          can run on the build host returns information about the target
+#          build which gets installed in the sysroot. This is done as an
+#          appended build command. Note that Make has to be re-invoked to
+#          rebuild after copying the file over.
 #
 #        - Last but not least, "llvm-config" is copied into the sysroot with
 #          the target triple prefix, because packages using sane build systems
@@ -147,9 +149,13 @@ LLVM_CONFIGURE_CMDS += \
   && PATH=$(BR_PATH) $(LLVM_CONF_ENV) $(BR2_CMAKE) $(LLVM_SRCDIR) \
      -DCMAKE_C_COMPILER='$(HOSTCC_NOCCACHE)' \
      -DCMAKE_ASM_COMPILER='$(HOSTCC_NOCCACHE)' \
-     -DCMAKE_CXX_COMPILER='$(HOSTCXX_NOCCACHE)' \
+     -DCMAKE_CXX_COMPILER='$(HOSTCXX_NOCCACHE)'
+
+LLVM_BUILD_CMDS += \
   && cp $(LLVM_BUILDDIR)/tools/llvm-config/BuildVariables.inc \
-     $(LLVM_BUILDDIR)/NATIVE/tools/llvm-config/BuildVariables.inc
+     $(LLVM_BUILDDIR)/NATIVE/tools/llvm-config/BuildVariables.inc \
+  && $(HOST_MAKE_ENV) $(LLVM_MAKE_ENV) $(LLVM_MAKE) $(LLVM_MAKE_OPTS) \
+     -C $(LLVM_BUILDDIR)/NATIVE llvm-config
 
 LLVM_INSTALL_STAGING_CMDS += \
   && install -Dm755 $(LLVM_BUILDDIR)/NATIVE/bin/llvm-config \
