@@ -11,6 +11,23 @@ config BR2_PACKAGE_WPEFRAMEWORK_OPEN_COMMANDER
 	help
 	   Commander Plugin
 
+menuconfig BR2_PACKAGE_WPEFRAMEWORK_OPEN_LOCATIONSYNC
+	bool "LocationSync"
+	help
+	   LocationSync Plugin
+	   WPE Platform Dictionary plugin
+	   
+if BR2_PACKAGE_WPEFRAMEWORK_OPEN_LOCATIONSYNC
+config BR2_PACKAGE_WPEFRAMEWORK_OPEN_LOCATIONSYNC_URI
+	string "location URI"
+	default "location.webplatformforembedded.org"
+endif	   
+
+config BR2_PACKAGE_WPEFRAMEWORK_OPEN_TIMESYNC
+	bool "TimeSync"
+	help
+	   TimeSync Plugin
+	   
 source "package/WPEFramework/WPEFramework-DeviceInfo/Config.in"
 source "package/WPEFramework/WPEFramework-Monitor/Config.in"
 source "package/WPEFramework/WPEFramework-RemoteControl/Config.in"
