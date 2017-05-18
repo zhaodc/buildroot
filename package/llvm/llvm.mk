@@ -12,8 +12,8 @@ LLVM_LICENSE_FILES = LICENSE.TXT
 LLVM_INSTALL_STAGING = YES
 LLVM_INSTALL_TARGET = YES
 
-HOST_LLVM_DEPENDENCIES = host-libxml2 host-zlib host-python
-LLVM_DEPENDENCIES = libxml2 zlib host-python
+HOST_LLVM_DEPENDENCIES = host-libxml2 host-zlib host-python host-cmake
+LLVM_DEPENDENCIES = libxml2 zlib host-python host-cmake
 
 # Determine the name of the LLVM target to enable depending on
 # the Buildroot target settings.
