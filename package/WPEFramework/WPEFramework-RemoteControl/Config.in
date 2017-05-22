@@ -1,5 +1,32 @@
-config BR2_PACKAGE_WPEFRAMEWORK_OPEN_REMOTECONTROL
+menuconfig BR2_PACKAGE_WPEFRAMEWORK_OPEN_REMOTECONTROL
 	bool "RemoteControl"
-
 	help
 	   RemoteControl Plugin
+
+if BR2_PACKAGE_WPEFRAMEWORK_OPEN_REMOTECONTROL
+
+config BR2_PACKAGE_WPEFRAMEWORK_OPEN_REMOTECONTROL_IR
+    bool "IR (Infrared)"
+    help
+       Select devices which are based on Infrared (IR) technology
+
+config BR2_PACKAGE_WPEFRAMEWORK_OPEN_REMOTECONTROL_IRNEXUS
+    bool "BCM Nexus IR Remote Control Unit"
+    default false
+    depends on BR2_PACKAGE_BCM_REFSW && BR2_PACKAGE_WPEFRAMEWORK_OPEN_REMOTECONTROL_IR
+    help
+       Enable the Nexus IR remote input
+
+config BR2_PACKAGE_WPEFRAMEWORK_OPEN_REMOTECONTROL_IRNEXUS_MODE
+    string "IR mode"
+    default "16"
+    depends on BR2_PACKAGE_WPEFRAMEWORK_OPEN_REMOTECONTROL_IRNEXUS
+    help
+       Sets the IR Mode to be used with IR Nexus. Every remote has a different mode and key mapping.
+
+config BR2_PACKAGE_WPEFRAMEWORK_OPEN_REMOTECONTROL_RF
+    bool "RF (Radio Frequency)"
+    help
+       Select devices which are based on Radio Frequency (RF) technology
+
+endif
