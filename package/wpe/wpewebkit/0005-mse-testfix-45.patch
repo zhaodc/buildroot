@@ -1,0 +1,16 @@
+diff --git a/Source/WebCore/Modules/mediasource/SourceBuffer.cpp b/Source/WebCore/Modules/mediasource/SourceBuffer.cpp
+index f55e322003f..9f1d3598c29 100644
+--- a/Source/WebCore/Modules/mediasource/SourceBuffer.cpp
++++ b/Source/WebCore/Modules/mediasource/SourceBuffer.cpp
+@@ -130,7 +130,7 @@ SourceBuffer::~SourceBuffer()
+ MediaTime& SourceBuffer::currentTimeFudgeFactor() const
+ {
+     static NeverDestroyed<MediaTime> fudgeFactorVideo(2002, 24000);
+-    static NeverDestroyed<MediaTime> fudgeFactorAudio(MediaTime::createWithDouble(0.03));
++    static NeverDestroyed<MediaTime> fudgeFactorAudio(MediaTime::createWithDouble(0.029));
+ 
+     return (hasAudio())?fudgeFactorAudio:fudgeFactorVideo;
+ }
+-- 
+2.11.0
+
