@@ -197,6 +197,12 @@ mkdir -p \
 cp -a "${WPE_BINARIES[@]}" "${OPTDIR}/bin"
 inspect-elf-objects "${WPE_BINARIES[@]}"
 
+# WPE backends
+while read -r path ; do
+	cp -a "${path}" "${OPTDIR}/lib/"
+	inspect-elf-objects "${path}"
+done < <( find "${TARGET}/usr/lib/" -name 'libWPEBackend*.so' )
+
 # Mesa3D drivers.
 while read -r path ; do
 	cp -a "${path}" "${OPTDIR}/lib/dri/"
