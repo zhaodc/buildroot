@@ -1,5 +1,0 @@
-config BR2_PACKAGE_WPEFRAMEWORK_OPEN_SNAPSHOT
-	bool "Snapshot"
-
-	help
-	   Snapshot Plugin

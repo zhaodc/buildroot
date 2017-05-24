@@ -1,5 +1,0 @@
-config BR2_PACKAGE_WPEFRAMEWORK_OPEN_WEBPROXY
-	bool "WebProxy"
-
-	help
-	   WebProxy Plugin

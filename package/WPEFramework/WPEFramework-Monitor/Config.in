@@ -1,6 +1,0 @@
-config BR2_PACKAGE_WPEFRAMEWORK_OPEN_MONITOR
-	bool "Monitor"
-
-	help
-	   Monitor Plugin
-

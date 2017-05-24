@@ -1,6 +1,0 @@
-config BR2_PACKAGE_WPEFRAMEWORK_OPEN_DEVICEINFO
-	bool "DeviceInfo"
-	help
-	   DeviceInfo Plugin
-
-

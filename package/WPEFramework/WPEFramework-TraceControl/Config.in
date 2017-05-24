@@ -1,5 +1,0 @@
-config BR2_PACKAGE_WPEFRAMEWORK_OPEN_TRACECONTROL
-	bool "TraceControl"
-
-	help
-	   TraceControl Plugin
