@@ -187,6 +187,7 @@ inspect-elf-objects () {
 info "Calculating dependencies..."
 
 # Create target directories.
+rm -rf "${OPTDIR}"
 mkdir -p \
 	"${OPTDIR}/bin" \
 	"${OPTDIR}/lib/dri" \
