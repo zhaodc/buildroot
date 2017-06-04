@@ -44,41 +44,46 @@ config-has () {
 # The logic for the following functions follows that of "package/Makefile.in"
 #
 
-OS=linux
-if config-has BR2_BINFMT_FLAT ; then
-	OS=uclinux
-fi
-readonly OS
+if config-has BR2_PACKAGE_HAS_TOOLCHAIN_EXTERNAL ; then
+	readonly TARGET_TRIPLE=$(config-value BR2_TOOLCHAIN_EXTERNAL_PREFIX)
+else
 
-LIBC=gnu
-if config-has BR2_TOOLCHAIN_USES_UCLIBC ; then
-	LIBC=uclibc
-elif config-has BR2_TOOLCHAIN_USES_MUSL ; then
-	LIBC=musl
-fi
-readonly LIBC
-
-ABI=''
-if config-has BR2_arm || config-has BR2_armeb ; then
-	if [[ ${LIBC} = uclibc ]] ; then
-		ABI=gnueabi
-	else
-		ABI=eabi
+	OS=linux
+	if config-has BR2_BINFMT_FLAT ; then
+		OS=uclinux
 	fi
-	if config-has BR2_ARM_EABIHF ; then
-		ABI=${ABI}hf
+	readonly OS
+
+	LIBC=gnu
+	if config-has BR2_TOOLCHAIN_USES_UCLIBC ; then
+		LIBC=uclibc
+	elif config-has BR2_TOOLCHAIN_USES_MUSL ; then
+		LIBC=musl
 	fi
-elif config-has BR2_powerpc_SPE ; then
-	ABI=spe
+	readonly LIBC
+
+	ABI=''
+	if config-has BR2_arm || config-has BR2_armeb ; then
+		if [[ ${LIBC} = uclibc ]] ; then
+			ABI=gnueabi
+		else
+			ABI=eabi
+		fi
+		if config-has BR2_ARM_EABIHF ; then
+			ABI=${ABI}hf
+		fi
+	elif config-has BR2_powerpc_SPE ; then
+		ABI=spe
+	fi
+	readonly ABI
+
+	# Read configuration values needed to assemble GNU_TARGET_TRIPLE
+	readonly ARCH=$(config-value BR2_ARCH)
+	readonly VENDOR=$(config-value BR2_TOOLCHAIN_VENDOR buildroot)
+
+	# ...and assemble the target triple
+	readonly TARGET_TRIPLE="${ARCH}-${VENDOR}-${OS}-${LIBC}${ABI}"
 fi
-readonly ABI
-
-# Read configuration values needed to assemble GNU_TARGET_TRIPLE
-readonly ARCH=$(config-value BR2_ARCH)
-readonly VENDOR=$(config-value BR2_TOOLCHAIN_VENDOR buildroot)
-
-# ...and assemble the target triple
-readonly TARGET_TRIPLE="${ARCH}-${VENDOR}-${OS}-${LIBC}${ABI}"
 
 tc-get-tool () {
 	local path="output/host/usr/bin/${TARGET_TRIPLE}-$1"
