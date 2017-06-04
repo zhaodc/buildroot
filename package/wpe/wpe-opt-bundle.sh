@@ -168,7 +168,7 @@ inspect-elf-objects () {
 
 	local libname='' libpath='' abspath=''
 	while read -r libname libpath abspath ; do
-		if [[ -n ${LIBPATH[${abspath}]-} ]] ; then
+		if [[ -n ${LIBPATH[${abspath}]:-} ]] ; then
 			continue
 		fi
 		LIBPATH[${abspath}]=${libpath}
