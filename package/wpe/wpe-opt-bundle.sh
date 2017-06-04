@@ -95,6 +95,11 @@ readonly TC_READELF=$(tc-get-tool readelf)
 
 elf-dependency-find () {
 	local path libpath libname=$1 ; shift
+	case ${libname} in
+		libc.so.* | libm.so.* | libdl.so.* | librt.so.* | libselinux.so.* | libgcc_s.so.* | libresolv.so.* | libtinfo.so.* )
+			return
+			;;
+	esac
 	for libpath in lib usr/lib "$@" ; do
 		path="${TARGET}/${libpath}/${libname}"
 		if [[ -r ${path} ]] ; then
@@ -175,7 +180,7 @@ inspect-elf-objects () {
 		pending+=( "${abspath}" )
 		case ${libpath} in
 			lib)
-				copy-lib "${abspath}" "${OPTDIR}/lib-base/"
+				copy-lib "${abspath}" "${OPTDIR}/lib/"
 				;;
 			usr/*)
 				copy-lib "${abspath}" "${OPTDIR}/${libpath#usr/}/"
