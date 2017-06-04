@@ -201,6 +201,7 @@ mkdir -p \
 
 # Main WPE binaries.
 cp -a "${WPE_BINARIES[@]}" "${OPTDIR}/bin"
+cp -a "${0%/*}/wpe-opt-launcher.sh" "${OPTDIR}/bin/wpe-launch"
 inspect-elf-objects "${WPE_BINARIES[@]}"
 
 # WPE backends
