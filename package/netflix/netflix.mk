@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-NETFLIX_VERSION = 79f893f0708ae79a175fa33e619e1c69eb505d89
+NETFLIX_VERSION = c33c275a9569981655095e8a2f9475d97cc762c6
 NETFLIX_SITE = git@github.com:Metrological/netflix.git
 NETFLIX_SITE_METHOD = git
 NETFLIX_LICENSE = PROPRIETARY
@@ -143,6 +143,10 @@ NETFLIX_DEPENDENCIES += libprovision
 endif
 else
 NETFLIX_CONF_OPTS += -DDPI_REFERENCE_DRM=none
+endif
+
+ifneq ($(BR2_PACKAGE_NETFLIX_KEYMAP),"")
+NETFLIX_CONF_OPTS += -DNETFLIX_USE_KEYMAP=$(call qstrip,$(BR2_PACKAGE_NETFLIX_KEYMAP))
 endif
 
 NETFLIX_CONF_OPTS += \

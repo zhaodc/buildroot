@@ -3,8 +3,7 @@
 # open cdmi
 #
 ################################################################################
-
-OPENCDMI_VERSION = c147d47cfe30b0e8c93c5e5e72caec7d733db05c
+OPENCDMI_VERSION = 190d5eeb860a045134a118cce0576d327db4eab4
 OPENCDMI_SITE_METHOD = git
 OPENCDMI_SITE = git@github.com:Metrological/open-content-decryption-module-cdmi.git
 
@@ -17,6 +16,11 @@ ifeq ($(BR2_PACKAGE_WIDEVINE), y)
 export CDMI_WV=1;
 OPENCDMI_DEPENDENCIES += widevine
 endif #BR2_PACKAGE_WIDEVINE
+
+ifeq ($(BR2_PACKAGE_PLAYREADY), y)
+export CDMI_PR=1;
+OPENCDMI_DEPENDENCIES += playready
+endif #BR2_PACKAGE_PLAYREADY
 
 ifeq ($(BR2_PACKAGE_OPENCDMI_SERVICE), y)
 OPENCDMI_TARGET=all
