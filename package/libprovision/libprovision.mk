@@ -4,13 +4,13 @@
 #
 ################################################################################
 
-LIBPROVISION_VERSION = 47ecb7154c43215a4f4e8096da9e182b3e884532
+LIBPROVISION_VERSION = 0822c06193c0bf8d815781fe37cda1cba1df1740
 LIBPROVISION_SITE_METHOD = git
 LIBPROVISION_SITE = git@github.com:Metrological/libprovision.git
 LIBPROVISION_LICENSE = PROPRIETARY
 LIBPROVISION_REDISTRIBUTE = NO
 LIBPROVISION_INSTALL_STAGING = YES
 
-LIBPROVISION_DEPENDENCIES = openssl cppsdk
+LIBPROVISION_DEPENDENCIES = openssl
 
 $(eval $(cmake-package))
