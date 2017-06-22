@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-KYLIN_GST_OMX_VERSION = 86597c767641117e6416ca2202d9545f4dfff1ad
+KYLIN_GST_OMX_VERSION = e9cf73cf719c04b748efa57f716f4ba315d15a51
 KYLIN_GST_OMX_SITE_METHOD = git
 KYLIN_GST_OMX_SITE = git@github.com:Metrological/kylin-gst-omx.git
 
@@ -18,7 +18,10 @@ KYLIN_GST_OMX_CONF_OPTS = \
 	--with-omx-target=generic \
         --with-omx-header-path=$(@D)/omx/openmax
 KYLIN_GST_OMX_CONF_ENV = \
-    CFLAGS="-I$(STAGING_DIR)/usr/include/realtek/genericLinux/include"
+    CFLAGS="-I$(STAGING_DIR)/usr/include/realtek/genericLinux/include \
+            -I$(STAGING_DIR)/usr/include/realtek/device/realtek/proprietary/libs/rtk_libs/common/IPC/include \
+            -DKYLIN_TARGET_BOARD \
+           "
 endif
 
 ifeq ($(BR2_PACKAGE_RPI_USERLAND),y)

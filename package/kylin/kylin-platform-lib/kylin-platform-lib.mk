@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-KYLIN_PLATFORM_LIB_VERSION = 4a4eaccba8995840eeb004a737b1d7238dc50ef9
+KYLIN_PLATFORM_LIB_VERSION = 7d56b21f25586c5b788e39042b1880cb20afd765
 KYLIN_PLATFORM_LIB_SITE_METHOD = git
 KYLIN_PLATFORM_LIB_SITE = git@github.com:Metrological/kylin-platform-lib.git
 KYLIN_PLATFORM_LIB_INSTALL_STAGING = YES
