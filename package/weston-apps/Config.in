@@ -1,3 +1,6 @@
+comment "Weston-apps is only supporting Linux desktop configurations (x86_64), Raspberry pi, and Kylin platforms."
+	depends on !BR2_x86_64 && !BR2_PACKAGE_HAS_KYLIN && !BR2_PACKAGE_RPI_USERLAND
+
 config BR2_PACKAGE_WESTON_APPS
 	bool "weston-apps"
 	help
@@ -5,10 +8,8 @@ config BR2_PACKAGE_WESTON_APPS
 
 if BR2_PACKAGE_WESTON_APPS	
 
-config BR2_PACKAGE_WESTON_SIMPLE_APP
-	bool "weston-simple-app"
-	help
-	  Simple Weston app.
+comment "westeros needs XORG7 when building for X86_64"
+	depends on BR2_x86_64 && !BR2_PACKAGE_XORG7
 
 config BR2_PACKAGE_WESTEROS_EXTENDED
 	bool "westeros"
@@ -16,8 +17,67 @@ config BR2_PACKAGE_WESTEROS_EXTENDED
 	select BR2_PACKAGE_WAYLAND_PROTOCOLS
 	select BR2_PACKAGE_GSTREAMER1
 	select BR2_PACKAGE_GST1_PLUGINS_BASE
-	select BR2_PACKAGE_XORG7 if BR2_x86_64
 	help
-	  Westeros implementation with Kylin support.
+	  Westeros implementation with support for Linux desktop x86_64, raspberry pi 3 and Kylin.
+
+if BR2_PACKAGE_WESTEROS_EXTENDED
+
+config BR2_PACKAGE_WESTEROS_APP
+	bool "westeros application"
+	help
+	  Westeros main application.
+
+config BR2_PACKAGE_WESTEROS_PLAYER
+	bool "westeros player"
+	help
+	  Westeros GStreamer player.
+
+config BR2_PACKAGE_WESTEROS_TEST
+	bool "westeros test"
+	help
+	  Westeros test application.
+
+comment "Only XDG V4 or V5 shell can be selected, not both"
+	depends on BR2_PACKAGE_WESTEROS_XDGV4_SHELL && BR2_PACKAGE_WESTEROS_XDGV5_SHELL
+
+config BR2_PACKAGE_WESTEROS_XDGV4_SHELL
+	bool "westeros using XDGV4 shell"
+	help
+	  Westeros XDGV4 shell.
+
+config BR2_PACKAGE_WESTEROS_XDGV5_SHELL
+	bool "westeros using XDGV5 shell"
+	help
+	  Westeros XDGV5 shell.
+
+config BR2_PACKAGE_WESTEROS_SB_PROTOCOL
+	bool "westeros using simplebuffer protocol"
+	help
+	  Westeros simplebuffer protocol.
+
+config BR2_PACKAGE_WESTEROS_SB_PROTOCOL
+	bool "westeros using simplebuffer protocol"
+	help
+	  Westeros simplebuffer protocol.
+
+endif
+
+if BR2_PACKAGE_HAS_KYLIN
+
+config BR2_PACKAGE_KYLIN_SIMPLE_APP
+	bool "kylin-simple-app"
+	depends on BR2_PACKAGE_KYLIN_GRAPHICS
+	depends on BR2_PACKAGE_KYLIN_PLATFORM_LIB
+	help
+	  Simple kylin app.
+
+config BR2_PACKAGE_KYLIN_HDMI_INFO
+	bool "kylin-hdmi-info"
+	depends on BR2_PACKAGE_KYLIN_GRAPHICS
+	depends on BR2_PACKAGE_KYLIN_PLATFORM_LIB
+	help
+	  Simple kylin HDMI info.
+
+endif
 
 endif
