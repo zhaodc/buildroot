@@ -29,6 +29,7 @@ if BR2_PACKAGE_KYLIN_HARDWARE
 	endif
 	source "package/kylin/kylin-graphics/Config.in"
 	source "package/kylin/kylin-weston/Config.in"
+	source "package/kylin/kylin-apps/Config.in"
 endif
 
 config BR2_PACKAGE_HAS_KYLIN

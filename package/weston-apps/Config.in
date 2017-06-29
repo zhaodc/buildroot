@@ -62,22 +62,4 @@ config BR2_PACKAGE_WESTEROS_SB_PROTOCOL
 
 endif
 
-if BR2_PACKAGE_HAS_KYLIN
-
-config BR2_PACKAGE_KYLIN_SIMPLE_APP
-	bool "kylin-simple-app"
-	depends on BR2_PACKAGE_KYLIN_GRAPHICS
-	depends on BR2_PACKAGE_KYLIN_PLATFORM_LIB
-	help
-	  Simple kylin app.
-
-config BR2_PACKAGE_KYLIN_HDMI_INFO
-	bool "kylin-hdmi-info"
-	depends on BR2_PACKAGE_KYLIN_GRAPHICS
-	depends on BR2_PACKAGE_KYLIN_PLATFORM_LIB
-	help
-	  Simple kylin HDMI info.
-
-endif
-
 endif

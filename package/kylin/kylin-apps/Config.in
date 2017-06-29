@@ -1,0 +1,40 @@
+config BR2_PACKAGE_KYLIN_APPS
+	depends on BR2_PACKAGE_KYLIN_PLATFORM_LIB
+	bool "kylin-apps"
+	help
+	  Kylin apps are some convenience and testing apps for the Kylin platform.
+
+if BR2_PACKAGE_KYLIN_APPS	
+
+config BR2_PACKAGE_KYLIN_SIMPLE_APP
+	bool "kylin-simple-app"
+	depends on BR2_PACKAGE_KYLIN_GRAPHICS
+	depends on BR2_PACKAGE_KYLIN_PLATFORM_LIB
+	help
+	  Simple kylin app.
+
+config BR2_PACKAGE_KYLIN_HDMI_INFO
+	bool "kylin-hdmi-info"
+	depends on BR2_PACKAGE_KYLIN_GRAPHICS
+	depends on BR2_PACKAGE_KYLIN_PLATFORM_LIB
+	help
+	  Display kylin HDMI info.
+
+config BR2_PACKAGE_KYLIN_HDMI_MODESET
+	bool "kylin-hdmi-modeset"
+	depends on BR2_PACKAGE_KYLIN_GRAPHICS
+	depends on BR2_PACKAGE_KYLIN_PLATFORM_LIB
+	help
+	  Set kylin HDMI mode.
+
+config BR2_PACKAGE_KYLIN_VIDEO_INFO
+	bool "kylin-video-info"
+	depends on BR2_PACKAGE_KYLIN_GRAPHICS
+	depends on BR2_PACKAGE_KYLIN_PLATFORM_LIB
+	help
+	  Display kylin video info.
+
+endif
+
+comment "kylin-apps requires kylin-platform-lib"
+	depends on !BR2_PACKAGE_KYLIN_PLATFORM_LIB
