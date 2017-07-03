@@ -55,11 +55,6 @@ config BR2_PACKAGE_WESTEROS_SB_PROTOCOL
 	help
 	  Westeros simplebuffer protocol.
 
-config BR2_PACKAGE_WESTEROS_SB_PROTOCOL
-	bool "westeros using simplebuffer protocol"
-	help
-	  Westeros simplebuffer protocol.
-
 endif
 
 endif
