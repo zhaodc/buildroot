@@ -4,36 +4,31 @@
 #
 ################################################################################
 
-WESTEROS_VERSION = 9345a77d2e547c0ea6e625a65d9de76c03948322
+WESTEROS_VERSION = 0b853a6ae0d84cedbe141189d658fae70f8474cc
 WESTEROS_SITE_METHOD = git
-WESTEROS_SITE = git://github.com/rdkcmf/westeros
+WESTEROS_SITE = git://github.com/Metrological/westeros
 WESTEROS_INSTALL_STAGING = YES
 WESTEROS_AUTORECONF = YES
 WESTEROS_AUTORECONF_OPTS = "-Icfg"
 
 WESTEROS_DEPENDENCIES = host-pkgconf host-autoconf wayland \
-	libxkbcommon westeros-simpleshell westeros-simplebuffer westeros-soc
+	libxkbcommon westeros-simpleshell westeros-simplebuffer westeros-soc gstreamer1
 
 WESTEROS_CONF_OPTS = \
 	--prefix=/usr/ \
 	--enable-app=yes \
 	--enable-test=yes \
 	--enable-rendergl=yes \
-	--enable-sbprotocol=yes
+	--enable-sbprotocol=yes \
+	--enable-xdgv5=yes
 
 
 ifeq ($(BR2_PACKAGE_RPI_USERLAND),y)
-	WESTEROS_CONF_OPTS += \
-		--enable-xdgv4=yes
 	WESTEROS_CONF_ENV += CXXFLAGS="$(TARGET_CXXFLAGS) -DWESTEROS_PLATFORM_RPI -DWESTEROS_INVERTED_Y -DBUILD_WAYLAND -I${STAGING_DIR}/usr/include/interface/vmcs_host/linux"
 	WESTEROS_LDFLAGS += -lEGL -lGLESv2 -lbcm_host
 else ifeq ($(BR2_PACKAGE_HAS_NEXUS),y)
-	WESTEROS_CONF_OPTS += \
-		--enable-xdgv4=yes
 	WESTEROS_CONF_ENV += CXXFLAGS="$(TARGET_CXXFLAGS) -I${STAGING_DIR}/usr/include/refsw"
 else ifeq ($(BR2_PACKAGE_LIBDRM),y)
-	WESTEROS_CONF_OPTS += \
-		--enable-xdgv5=yes
 	WESTEROS_CONF_ENV += CXXFLAGS="$(TARGET_CXXFLAGS) -DWESTEROS_PLATFORM_DRM -I${STAGING_DIR}/usr/include/interface/vmcs_host/linux"
 endif # BR2_PACKAGE_WESTEROS_SOC_RPI
 
