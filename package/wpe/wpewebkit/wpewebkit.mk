@@ -23,8 +23,8 @@ endif
 WPEWEBKIT_DEPENDENCIES = host-bison host-cmake host-flex host-gperf host-ruby icu pcre
 
 ifeq ($(WPEWEBKIT_BUILD_WEBKIT),y)
-WPEWEBKIT_DEPENDENCIES += wpebackend libgcrypt libgles libegl cairo freetype fontconfig \
-	harfbuzz libxml2 libxslt sqlite libsoup jpeg libpng
+WPEWEBKIT_DEPENDENCIES += wpebackend libgcrypt libgles libegl libepoxy cairo freetype \
+	fontconfig harfbuzz libxml2 libxslt sqlite libsoup jpeg libpng
 endif
 
 WPEWEBKIT_EXTRA_FLAGS = -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
@@ -51,7 +51,7 @@ ifeq ($(WPEWEBKIT_BUILD_WEBKIT),y)
 WPEWEBKIT_FLAGS = \
 	-DEXPORT_DEPRECATED_WEBKIT2_C_API=ON \
 	-DENABLE_ACCELERATED_2D_CANVAS=ON \
-	-DENABLE_GEOLOCATION=ON \
+	-DENABLE_GEOLOCATION=OFF \
 	-DENABLE_DEVICE_ORIENTATION=ON \
 	-DENABLE_GAMEPAD=ON \
 	-DENABLE_SUBTLE_CRYPTO=ON \
@@ -206,7 +206,7 @@ WPEWEBKIT_BUILD_TARGETS += jsc
 endif
 ifeq ($(WPEWEBKIT_BUILD_WEBKIT),y)
 WPEWEBKIT_BUILD_TARGETS += libWPEWebKit.so libWPEWebInspectorResources.so \
-	WPE{Database,Network,Web}Process
+	WPE{Network,Storage,Web}Process
 
 endif
 
@@ -226,10 +226,10 @@ endif
 
 ifeq ($(WPEWEBKIT_BUILD_WEBKIT),y)
 define WPEWEBKIT_INSTALL_STAGING_CMDS_WEBKIT
-	cp $(WPEWEBKIT_BUILDDIR)/bin/WPE{Database,Network,Web}Process $(STAGING_DIR)/usr/bin/ && \
+	cp $(WPEWEBKIT_BUILDDIR)/bin/WPE{Network,Storage,Web}Process $(STAGING_DIR)/usr/bin/ && \
 	cp -d $(WPEWEBKIT_BUILDDIR)/lib/libWPE* $(STAGING_DIR)/usr/lib/ && \
 	DESTDIR=$(STAGING_DIR) $(HOST_DIR)/usr/bin/cmake -DCOMPONENT=Development -P $(WPEWEBKIT_BUILDDIR)/Source/JavaScriptCore/cmake_install.cmake > /dev/null && \
-	DESTDIR=$(STAGING_DIR) $(HOST_DIR)/usr/bin/cmake -DCOMPONENT=Development -P $(WPEWEBKIT_BUILDDIR)/Source/WebKit2/cmake_install.cmake > /dev/null
+	DESTDIR=$(STAGING_DIR) $(HOST_DIR)/usr/bin/cmake -DCOMPONENT=Development -P $(WPEWEBKIT_BUILDDIR)/Source/WebKit/cmake_install.cmake > /dev/null
 endef
 else
 WPEWEBKIT_INSTALL_STAGING_CMDS_WEBKIT = true
@@ -251,7 +251,7 @@ endif
 
 ifeq ($(WPEWEBKIT_BUILD_WEBKIT),y)
 define WPEWEBKIT_INSTALL_TARGET_CMDS_WEBKIT
-	cp $(WPEWEBKIT_BUILDDIR)/bin/WPE{Database,Network,Web}Process $(TARGET_DIR)/usr/bin/ && \
+	cp $(WPEWEBKIT_BUILDDIR)/bin/WPE{Network,Storage,Web}Process $(TARGET_DIR)/usr/bin/ && \
 	cp -d $(WPEWEBKIT_BUILDDIR)/lib/libWPE* $(TARGET_DIR)/usr/lib/ && \
 	$(STRIPCMD) $(TARGET_DIR)/usr/lib/libWPEWebKit.so.0.0.*
 endef
