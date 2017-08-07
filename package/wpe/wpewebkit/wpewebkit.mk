@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-WPEWEBKIT_VERSION = 94cec55d7ed7d2ba3fb3a06cdefa6f4f2a4566da
+WPEWEBKIT_VERSION = 36810f8449c9dd732884d4d010897e98dada27ce
 WPEWEBKIT_SITE = $(call github,WebPlatformForEmbedded,WPEWebKit,$(WPEWEBKIT_VERSION))
 
 WPEWEBKIT_INSTALL_STAGING = YES
@@ -23,8 +23,8 @@ endif
 WPEWEBKIT_DEPENDENCIES = host-bison host-cmake host-flex host-gperf host-ruby icu pcre
 
 ifeq ($(WPEWEBKIT_BUILD_WEBKIT),y)
-WPEWEBKIT_DEPENDENCIES += wpebackend libgcrypt libgles libegl cairo freetype fontconfig \
-	harfbuzz libxml2 libxslt sqlite libsoup jpeg libpng
+WPEWEBKIT_DEPENDENCIES += wpebackend libgcrypt libgles libegl libepoxy cairo freetype \
+	fontconfig harfbuzz libxml2 libxslt sqlite libsoup jpeg libpng
 endif
 
 WPEWEBKIT_EXTRA_FLAGS = -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
@@ -49,8 +49,9 @@ endif
 
 ifeq ($(WPEWEBKIT_BUILD_WEBKIT),y)
 WPEWEBKIT_FLAGS = \
+	-DEXPORT_DEPRECATED_WEBKIT2_C_API=ON \
 	-DENABLE_ACCELERATED_2D_CANVAS=ON \
-	-DENABLE_GEOLOCATION=ON \
+	-DENABLE_GEOLOCATION=OFF \
 	-DENABLE_DEVICE_ORIENTATION=ON \
 	-DENABLE_GAMEPAD=ON \
 	-DENABLE_SUBTLE_CRYPTO=ON \
@@ -74,6 +75,12 @@ ifeq ($(BR2_PACKAGE_WPEWEBKIT_ENABLE_NATIVE_VIDEO),y)
 WPEWEBKIT_FLAGS += -DENABLE_NATIVE_VIDEO=ON
 else
 WPEWEBKIT_FLAGS += -DENABLE_NATIVE_VIDEO=OFF
+endif
+
+ifeq ($(BR2_PACKAGE_WPEWEBKIT_ENABLE_NATIVE_AUDIO),y)
+WPEWEBKIT_FLAGS += -DENABLE_NATIVE_AUDIO=ON
+else
+WPEWEBKIT_FLAGS += -DENABLE_NATIVE_AUDIO=OFF
 endif
 
 ifeq ($(BR2_PACKAGE_WPEWEBKIT_ENABLE_TEXT_SINK),y)
@@ -103,7 +110,7 @@ WPEWEBKIT_FLAGS += -DENABLE_WEB_AUDIO=OFF
 endif
 endif
 
-ifeq ($(BR2_PACKAGE_GST1_PLUGINS_GOOD_PLUGIN_ISOMP4),y)
+ifeq ($(BR2_PACKAGE_WPEWEBKIT_ENABLE_MEDIA_SOURCE),y)
 WPEWEBKIT_FLAGS += -DENABLE_MEDIA_SOURCE=ON
 else
 WPEWEBKIT_FLAGS += -DENABLE_MEDIA_SOURCE=OFF
@@ -126,7 +133,7 @@ endif
 
 ifeq ($(BR2_PACKAGE_WPEWEBKIT_USE_OPENCDM),y)
 WPEWEBKIT_DEPENDENCIES += opencdm
-WPEWEBKIT_FLAGS += -DENABLE_OCDM=ON
+WPEWEBKIT_FLAGS += -DENABLE_OPENCDM=ON
 endif
 
 ifeq ($(BR2_PACKAGE_WPEWEBKIT_ENABLE_MEDIA_STREAM),y)
@@ -170,7 +177,8 @@ ifeq ($(BR2_PACKAGE_WPEWEBKIT_ONLY_JSC), y)
 WPEWEBKIT_FLAGS += -DENABLE_STATIC_JSC=ON
 endif
 
-ifeq ($(BR2_ENABLE_DEBUG),y)
+ifeq ($(BR2_PACKAGE_WPEWEBKIT_DEBUG)$(BR2_PACKAGE_WPEWEBKIT_DEBUG_WITHOUT_JSC_OPTIMIZATIONS),y)
+WPEWEBKIT_FLAGS += -DCMAKE_BUILD_TYPE=Debug
 WPEWEBKIT_EXTRA_FLAGS += \
 	-DCMAKE_C_FLAGS_DEBUG="-O0 -g -Wno-cast-align" \
 	-DCMAKE_CXX_FLAGS_DEBUG="-O0 -g -Wno-cast-align"
@@ -178,7 +186,10 @@ ifeq ($or $(BR2_BINUTILS_VERSION_2_25_X),$(BR2_BINUTILS_VERSION_2_26_X),y)
 WPEWEBKIT_EXTRA_FLAGS += \
 	-DDEBUG_FISSION=TRUE
 endif
-else ifeq ($(BR2_PACKAGE_WPEWEBKIT_DEBUG_SYMBOLS),y)
+ifeq ($(BR2_PACKAGE_WPEWEBKIT_DEBUG_WITHOUT_JSC_OPTIMIZATIONS),y)
+WPEWEBKIT_FLAGS += -DENABLE_JIT=OFF -DENABLE_FTL_JIT=OFF
+endif
+else ifeq ($(BR2_PACKAGE_WPEWEBKIT_RELEASE_WITH_SYMBOLS),y)
 WPEWEBKIT_EXTRA_FLAGS += \
 	-DCMAKE_C_FLAGS_RELEASE="-O2 -g -DNDEBUG -Wno-cast-align" \
 	-DCMAKE_CXX_FLAGS_RELEASE="-O2 -g -DNDEBUG -Wno-cast-align"
@@ -193,7 +204,7 @@ WPEWEBKIT_CONF_OPTS = \
 	$(WPEWEBKIT_EXTRA_FLAGS) \
 	$(WPEWEBKIT_FLAGS)
 
-WPEWEBKIT_BUILDDIR = $(@D)/build-$(if $(BR2_ENABLE_DEBUG),Debug,Release)
+WPEWEBKIT_BUILDDIR = $(@D)/build-$(if $(BR2_PACKAGE_WPEWEBKIT_DEBUG)$(BR2_PACKAGE_WPEWEBKIT_DEBUG_WITHOUT_JSC_OPTIMIZATIONS),Debug,Release)
 
 ifeq ($(BR2_PACKAGE_NINJA),y)
 
@@ -203,7 +214,7 @@ WPEWEBKIT_BUILD_TARGETS += jsc
 endif
 ifeq ($(WPEWEBKIT_BUILD_WEBKIT),y)
 WPEWEBKIT_BUILD_TARGETS += libWPEWebKit.so libWPEWebInspectorResources.so \
-	WPE{Database,Network,Web}Process
+	WPE{Network,Storage,Web}Process
 
 endif
 
@@ -223,10 +234,10 @@ endif
 
 ifeq ($(WPEWEBKIT_BUILD_WEBKIT),y)
 define WPEWEBKIT_INSTALL_STAGING_CMDS_WEBKIT
-	cp $(WPEWEBKIT_BUILDDIR)/bin/WPE{Database,Network,Web}Process $(STAGING_DIR)/usr/bin/ && \
+	cp $(WPEWEBKIT_BUILDDIR)/bin/WPE{Network,Storage,Web}Process $(STAGING_DIR)/usr/bin/ && \
 	cp -d $(WPEWEBKIT_BUILDDIR)/lib/libWPE* $(STAGING_DIR)/usr/lib/ && \
 	DESTDIR=$(STAGING_DIR) $(HOST_DIR)/usr/bin/cmake -DCOMPONENT=Development -P $(WPEWEBKIT_BUILDDIR)/Source/JavaScriptCore/cmake_install.cmake > /dev/null && \
-	DESTDIR=$(STAGING_DIR) $(HOST_DIR)/usr/bin/cmake -DCOMPONENT=Development -P $(WPEWEBKIT_BUILDDIR)/Source/WebKit2/cmake_install.cmake > /dev/null
+	DESTDIR=$(STAGING_DIR) $(HOST_DIR)/usr/bin/cmake -DCOMPONENT=Development -P $(WPEWEBKIT_BUILDDIR)/Source/WebKit/cmake_install.cmake > /dev/null
 endef
 else
 WPEWEBKIT_INSTALL_STAGING_CMDS_WEBKIT = true
@@ -248,7 +259,7 @@ endif
 
 ifeq ($(WPEWEBKIT_BUILD_WEBKIT),y)
 define WPEWEBKIT_INSTALL_TARGET_CMDS_WEBKIT
-	cp $(WPEWEBKIT_BUILDDIR)/bin/WPE{Database,Network,Web}Process $(TARGET_DIR)/usr/bin/ && \
+	cp $(WPEWEBKIT_BUILDDIR)/bin/WPE{Network,Storage,Web}Process $(TARGET_DIR)/usr/bin/ && \
 	cp -d $(WPEWEBKIT_BUILDDIR)/lib/libWPE* $(TARGET_DIR)/usr/lib/ && \
 	$(STRIPCMD) $(TARGET_DIR)/usr/lib/libWPEWebKit.so.0.0.*
 endef
