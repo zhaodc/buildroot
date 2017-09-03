@@ -1,0 +1,36 @@
+menuconfig BR2_PACKAGE_WPEFRAMEWORK_DOMOTICA
+	bool "Domotica"
+	help 
+	  Plugins facilitating home-automation
+
+if BR2_PACKAGE_WPEFRAMEWORK_DOMOTICA
+
+config BR2_PACKAGE_WPEFRAMEWORK_DICTIONARY
+	bool "Dictionary"
+	help
+	   Dictionary Plugin, The bookkeeper that translates all technical IElement names to Human Readable names.
+
+config BR2_PACKAGE_WPEFRAMEWORK_BUTLER
+	bool "Butler"
+	help
+	   Bulter Plugin, create logic for all information coming in, via IElement interfaces, to set IElement interfaces.
+
+config BR2_PACKAGE_WPEFRAMEWORK_IOCONTROL
+	bool "IOControl"
+	help
+	   (G)PIO Control Plugin
+	   Expose the RaspberryPi GPIO port as IElement interfaces
+
+config BR2_PACKAGE_WPEFRAMEWORK_TEMPCONTROL
+	bool "TempControl"
+	help
+	   Temperature Control Plugin
+	   Expose the Dallas 1-Wire DS1820 as IElement interface
+
+config BR2_PACKAGE_WPEFRAMEWORK_ZWAVECONTROL
+	bool "ZWaveControl"
+	help
+	   ZWave Control Plugin
+	   Expose ZWave enabled modules as IElement interfaces
+
+endif
