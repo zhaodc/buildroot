@@ -15,6 +15,11 @@ config BR2_PACKAGE_WPEFRAMEWORK_BUTLER
 	help
 	   Bulter Plugin, create logic for all information coming in, via IElement interfaces, to set IElement interfaces.
 
+config BR2_PACKAGE_WPEFRAMEWORK_BARN
+	bool "Barn"
+	help
+	   Barn Plugin, dedicated logic to control RPI pins directly, including the business logic.
+
 config BR2_PACKAGE_WPEFRAMEWORK_IOCONTROL
 	bool "IOControl"
 	help
