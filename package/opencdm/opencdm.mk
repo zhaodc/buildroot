@@ -8,8 +8,8 @@ OPENCDM_SITE_METHOD = git
 OPENCDM_SITE = https://github.com/WebPlatformForEmbedded/WPEOpenCDM.git
 
 OPENCDM_INSTALL_STAGING = YES
-OPENCDMI_LICENSE = Apache-2.0
-OPENCDMI_LICENSE_FILES = LICENSE
+OPENCDM_LICENSE = Apache-2.0
+OPENCDM_LICENSE_FILES = LICENSE
 
 #Apply WPE specific patches using opencdm.patch
 
