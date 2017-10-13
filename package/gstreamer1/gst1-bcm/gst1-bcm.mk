@@ -28,7 +28,8 @@ GST1_BCM_DEPENDENCIES += bcm-refsw
 else
 ifeq ($(BR2_PACKAGE_VIP_SDK),y)
 BCM_REFSW_MAKE_ENV = \
-	REFSW_DIR="refsw"
+	REFSW_DIR="refsw" \
+	B_REFSW_CROSS_COMPILE=${BR2_TOOLCHAIN_EXTERNAL_PREFIX}-
 
 NEXUS_CFLAGS=$(shell cat ${STAGING_DIR}/usr/include/refsw/platform_app.inc | grep NEXUS_CFLAGS | cut -d' ' -f3- | awk -F "-std=c89" '{print $$1 $$2}')
 NEXUS_LDFLAGS=$(shell cat ${STAGING_DIR}/usr/include/refsw/platform_app.inc | grep NEXUS_LDFLAGS | cut -d' ' -f3-)
