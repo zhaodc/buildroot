@@ -1,0 +1,14 @@
+diff --git a/Source/WebCore/platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.cpp b/Source/WebCore/platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.cpp
+index 0ded38c..139e235 100644
+--- a/Source/WebCore/platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.cpp
++++ b/Source/WebCore/platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.cpp
+@@ -584,7 +584,7 @@ void MediaPlayerPrivateGStreamer::seek(const MediaTime& mediaTime)
+         return;
+ 
+     GstClockTime clockTime = toGstClockTime(time);
+-    GST_INFO("[Seek] seeking to %" GST_TIME_FORMAT " (%f)", GST_TIME_ARGS(clockTime), time);
++    //GST_INFO("[Seek] seeking to %" GST_TIME_FORMAT " (%f)", GST_TIME_ARGS(clockTime), time);
+ 
+     if (m_seeking) {
+         m_timeOfOverlappingSeek = time;
+
