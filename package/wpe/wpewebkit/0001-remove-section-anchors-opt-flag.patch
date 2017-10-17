@@ -1,0 +1,11 @@
+--- a/Source/cmake/OptionsWPE.cmake	2017-09-28 15:29:16.000000000 +0200
++++ b/Source/cmake/OptionsWPE.cmake	2017-10-10 11:50:05.239959825 +0200
+@@ -200,7 +200,7 @@
+ # Optimize binary size for release builds by removing dead sections on unix/gcc.
+ if (COMPILER_IS_GCC_OR_CLANG AND UNIX AND NOT APPLE)
+     if (CMAKE_COMPILER_IS_GNUCC)
+-        set(CMAKE_COMPILER_SIZE_OPT_FLAGS " -finline-limit=90 -fsection-anchors")
++        set(CMAKE_COMPILER_SIZE_OPT_FLAGS " -finline-limit=90")
+     endif ()
+     set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}${CMAKE_COMPILER_SIZE_OPT_FLAGS} -ffunction-sections -fdata-sections")
+     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}${CMAKE_COMPILER_SIZE_OPT_FLAGS} -ffunction-sections -fdata-sections -fno-rtti")

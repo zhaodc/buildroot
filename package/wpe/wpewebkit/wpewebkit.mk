@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-WPEWEBKIT_VERSION = 36810f8449c9dd732884d4d010897e98dada27ce
+WPEWEBKIT_VERSION = 31ea481d3ef42061bd78bbabb62e40b9e6eff822
 WPEWEBKIT_SITE = $(call github,WebPlatformForEmbedded,WPEWebKit,$(WPEWEBKIT_VERSION))
 
 WPEWEBKIT_INSTALL_STAGING = YES
@@ -143,6 +143,8 @@ endif
 
 ifeq ($(BR2_PACKAGE_WPEWEBKIT_USE_GSTREAMER_GL),y)
 WPEWEBKIT_FLAGS += -DUSE_GSTREAMER_GL=ON
+else
+WPEWEBKIT_FLAGS += -DUSE_GSTREAMER_GL=OFF
 endif
 
 ifeq ($(BR2_PACKAGE_WPEWEBKIT_USE_GSTREAMER_WEBKIT_HTTP_SRC),y)
