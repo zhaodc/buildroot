@@ -1,6 +1,5 @@
 WPENetworkProcess
 WPEWebProcess
-WPEDatabaseProcess
 webbridge
 rpcprocess
 gst-plugin-scanner
@@ -101,3 +100,5 @@ libWPEBackend-rdk.so
 libwebpdemux.so
 NetworkInfo
 libepoxy.so
+WPEStorageProcess
+
