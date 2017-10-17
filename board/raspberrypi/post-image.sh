@@ -2,8 +2,10 @@
 
 BOARD_DIR="$(dirname $0)"
 BOARD_NAME="$(basename ${BOARD_DIR})"
-GENIMAGE_CFG="${BOARD_DIR}/genimage-${BOARD_NAME}.cfg"
+GENIMAGE_CFG="${BOARD_DIR}/genimage-${BOARD_NAME}-noinitramfs.cfg"
 GENIMAGE_TMP="${BUILD_DIR}/genimage.tmp"
+
+echo "Post-image: processing $@"
 
 for i in "$@"
 do
@@ -69,28 +71,60 @@ __EOF__
 	fi
 	;;
 	--i2c)
+	if ! grep -qE '^dtparam=i2c_arm=on' "${BINARIES_DIR}/rpi-firmware/config.txt"; then
 		echo "Adding 'i2c' functionality to config.txt."
 		cat << __EOF__ >> "${BINARIES_DIR}/rpi-firmware/config.txt"
 
 # Enable i2c functionality
 dtparam=i2c_arm=on,i2c_arm_baudrate=400000
 __EOF__
+	fi
 	;;
 	--spi)
+	if ! grep -qE '^dtparam=spi=on' "${BINARIES_DIR}/rpi-firmware/config.txt"; then
 		echo "Adding 'spi' functionality to config.txt."
 		cat << __EOF__ >> "${BINARIES_DIR}/rpi-firmware/config.txt"
 
 # Enable spi functionality
 dtparam=spi=on
 __EOF__
+	fi
 	;;
 	--1w)
+	if ! grep -qE '^dtoverlay=w1-gpio' "${BINARIES_DIR}/rpi-firmware/config.txt"; then
 		echo "Adding '1w' functionality to config.txt."
 		cat << __EOF__ >> "${BINARIES_DIR}/rpi-firmware/config.txt"
 
 # Enable 1Wire functionality
 dtoverlay=w1-gpio,gpiopin=7
 __EOF__
+	fi
+	;;
+	--lirc)
+	if ! grep -qE '^dtoverlay=lirc-rpi' "${BINARIES_DIR}/rpi-firmware/config.txt"; then
+		echo "Adding 'lirc' functionality to config.txt."
+		cat << __EOF__ >> "${BINARIES_DIR}/rpi-firmware/config.txt"
+
+# Enable 1Wire functionality
+dtoverlay=lirc-rpi,gpio_in_pin=23,gpio_out_pin=22
+__EOF__
+	fi
+	;;
+	--rpi-wifi*)
+	if ! grep -qE '^dtoverlay=sdtweak' "${BINARIES_DIR}/rpi-firmware/config.txt"; then
+		echo "Adding 'rpi wifi' functionality to config.txt."
+		cat << __EOF__ >> "${BINARIES_DIR}/rpi-firmware/config.txt"
+
+# Enable overlay for wifi functionality
+dtoverlay=sdtweak,overclock_50=80
+__EOF__
+	fi
+	if grep -qE '^dtoverlay=mmc' "${BINARIES_DIR}/rpi-firmware/config.txt"; then
+		echo "Removing overlay for mmc due to wifi compatibilityin config.txt."
+		cat "${BINARIES_DIR}/rpi-firmware/config.txt" | sed '/^# Enable mmc by default/,+2d' > "${BINARIES_DIR}/rpi-firmware/config_.txt"
+		rm "${BINARIES_DIR}/rpi-firmware/config.txt"
+		mv "${BINARIES_DIR}/rpi-firmware/config_.txt" "${BINARIES_DIR}/rpi-firmware/config.txt"
+	fi
 	;;
 esac
 done
