@@ -1,0 +1,42 @@
+diff -Naur a/generics/SerialPort.cpp b/generics/SerialPort.cpp
+--- a/generics/SerialPort.cpp	2017-04-25 17:15:32.000000000 +0200
++++ b/generics/SerialPort.cpp	2017-10-17 17:03:37.656304545 +0200
+@@ -181,7 +181,7 @@
+ #ifdef __LINUX__
+         ASSERT (m_ThreadInstance != NULL);
+ 
+-        m_ThreadInstance->Signal(SIGUSR1);
++        m_ThreadInstance->Signal(SIGUSR2);
+ #endif
+ 
+ #ifdef __WIN32__
+@@ -198,7 +198,7 @@
+         /* Create a sigset of all the signals that we're interested in */
+         err = sigemptyset(&sigset);
+         ASSERT (err == 0);
+-        err = sigaddset(&sigset, SIGUSR1);
++        err = sigaddset(&sigset, SIGUSR2);
+         ASSERT (err == 0);
+ 
+         /* We must block the signals in order for signalfd to receive them */
+diff -Naur a/generics/SocketPort.cpp b/generics/SocketPort.cpp
+--- a/generics/SocketPort.cpp	2017-04-25 17:15:32.000000000 +0200
++++ b/generics/SocketPort.cpp	2017-10-17 17:03:38.320138740 +0200
+@@ -374,7 +374,7 @@
+ #ifdef __LINUX__
+         ASSERT (m_ThreadInstance != NULL);
+ 
+-        m_ThreadInstance->Signal(SIGUSR1);
++        m_ThreadInstance->Signal(SIGUSR2);
+ #endif
+ 
+ #ifdef __WIN32__
+@@ -391,7 +391,7 @@
+         /* Create a sigset of all the signals that we're interested in */
+         err = sigemptyset(&sigset);
+         ASSERT (err == 0);
+-        err = sigaddset(&sigset, SIGUSR1);
++        err = sigaddset(&sigset, SIGUSR2);
+         ASSERT (err == 0);
+ 
+         /* We must block the signals in order for signalfd to receive them */
