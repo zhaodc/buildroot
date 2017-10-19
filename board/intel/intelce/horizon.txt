@@ -101,4 +101,3 @@ libwebpdemux.so
 NetworkInfo
 libepoxy.so
 WPEStorageProcess
-
