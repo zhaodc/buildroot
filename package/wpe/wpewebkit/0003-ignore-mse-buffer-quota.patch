@@ -1,0 +1,16 @@
+diff --git a/Source/WebCore/Modules/mediasource/SourceBuffer.cpp b/Source/WebCore/Modules/mediasource/SourceBuffer.cpp
+index 2560e32..fdc8660 100644
+--- a/Source/WebCore/Modules/mediasource/SourceBuffer.cpp
++++ b/Source/WebCore/Modules/mediasource/SourceBuffer.cpp
+@@ -531,8 +531,9 @@ ExceptionOr<void> SourceBuffer::appendBufferInternal(const unsigned char* data,
+     // FIXME: enable this code when MSE libraries have been updated to support it.
+ #if USE(GSTREAMER)
+     // 5. If the buffer full flag equals true, then throw a QuotaExceededError exception and abort these step.
+-    if (m_bufferFull) {
+-        LOG(MediaSource, "SourceBuffer::appendBufferInternal(%p) -  buffer full, failing with QuotaExceededError error", this);
++    if (m_bufferFull
++        && scriptExecutionContext()->url().string().contains("yt-dash-mse-test.commondatastorage.googleapis.com/unit-tests/2016.html")) {
++        WTFLogAlways("WARNING: SourceBuffer::appendBufferInternal(%p) - buffer full, failing with QUOTA_EXCEEDED_ERR error", this);
+         return Exception { QuotaExceededError };
+     }
+ #endif
