@@ -4,14 +4,14 @@
 #
 ################################################################################
 
-GRAPHITE2_VERSION = 1.3.9
+GRAPHITE2_VERSION = 1.3.10
 ifeq ($(BR2_PACKAGE_NETFLIX),y)
 GRAPHITE2_VERSION = 1.2.4
 endif
 GRAPHITE2_SOURCE = graphite2-$(GRAPHITE2_VERSION).tgz
 GRAPHITE2_SITE = http://downloads.sourceforge.net/project/silgraphite/graphite2
 GRAPHITE2_INSTALL_STAGING = YES
-GRAPHITE2_LICENSE = LGPLv2.1+
+GRAPHITE2_LICENSE = LGPL-2.1+
 GRAPHITE2_LICENSE_FILES = LICENSE
 
 # Avoid building docs and tests to save time

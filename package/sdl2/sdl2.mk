@@ -4,10 +4,10 @@
 #
 ################################################################################
 
-SDL2_VERSION = 2.0.5
+SDL2_VERSION = 2.0.6
 SDL2_SOURCE = SDL2-$(SDL2_VERSION).tar.gz
 SDL2_SITE = http://www.libsdl.org/release
-SDL2_LICENSE = zlib
+SDL2_LICENSE = Zlib
 SDL2_LICENSE_FILES = COPYING.txt
 SDL2_INSTALL_STAGING = YES
 SDL2_CONFIG_SCRIPTS = sdl2-config
@@ -18,20 +18,11 @@ SDL2_CONF_OPTS += \
 	--disable-esd \
 	--disable-dbus \
 	--disable-pulseaudio \
-	--disable-video-wayland
+	--disable-video-wayland \
+	--disable-video-rpi
 
 # We must enable static build to get compilation successful.
 SDL2_CONF_OPTS += --enable-static
-
-# From https://bugs.debian.org/cgi-bin/bugreport.cgi/?bug=770670
-# "The problem lies within SDL_cpuinfo.h.  It includes altivec.h, which by
-# definition provides an unconditional vector, pixel and bool define in
-# standard-c++ mode.  In GNU-c++ mode this names are only defined
-# context-sensitive by cpp.  SDL_cpuinfo.h is included by SDL.h.
-# Including altivec.h makes arbitrary code break."
-ifeq ($(BR2_POWERPC_CPU_HAS_ALTIVEC),y)
-SDL2_CONF_OPTS += --disable-altivec
-endif
 
 ifeq ($(BR2_PACKAGE_HAS_UDEV),y)
 SDL2_DEPENDENCIES += udev
@@ -58,7 +49,7 @@ SDL2_DEPENDENCIES += xlib_libX11 xlib_libXext
 SDL2_CONF_OPTS += --enable-video-x11 \
 	--with-x=$(STAGING_DIR) \
 	--x-includes=$(STAGING_DIR)/usr/include \
-	--x-libraries=$(STAGING_DIR)/usr/lib  \
+	--x-libraries=$(STAGING_DIR)/usr/lib \
 	--enable-video-x11-xshape
 
 ifeq ($(BR2_PACKAGE_XLIB_LIBXCURSOR),y)
@@ -133,6 +124,13 @@ SDL2_DEPENDENCIES += alsa-lib
 SDL2_CONF_OPTS += --enable-alsa
 else
 SDL2_CONF_OPTS += --disable-alsa
+endif
+
+ifeq ($(BR2_PACKAGE_SDL2_KMSDRM),y)
+SDL2_DEPENDENCIES += libdrm
+SDL2_CONF_OPTS += --enable-video-kmsdrm
+else
+SDL2_CONF_OPTS += --disable-video-kmsdrm
 endif
 
 $(eval $(autotools-package))

@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-HARFBUZZ_VERSION = 1.4.4
+HARFBUZZ_VERSION = 1.5.0
 ifeq ($(BR2_PACKAGE_NETFLIX),y)
 HARFBUZZ_VERSION = 1.0.1
 endif

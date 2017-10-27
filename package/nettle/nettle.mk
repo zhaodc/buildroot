@@ -15,7 +15,7 @@ ifeq ($(BR2_PACKAGE_PLAYREADY),y)
 NETTLE_LICENSE = LGPLv2+
 NETTLE_LICENSE_FILES = COPYING.LIB
 else
-NETTLE_LICENSE = Dual GPLv2+/LGPLv3+
+NETTLE_LICENSE = Dual GPL-2.0+/LGPL-3.0+
 NETTLE_LICENSE_FILES = COPYING.LESSERv3 COPYINGv2
 endif
 # don't include openssl support for (unused) examples as it has problems

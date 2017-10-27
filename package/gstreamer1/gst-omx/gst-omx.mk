@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-GST_OMX_VERSION = 1.10.4
+GST_OMX_VERSION = 1.12.3
 GST_OMX_SOURCE = gst-omx-$(GST_OMX_VERSION).tar.xz
 GST_OMX_SITE = https://gstreamer.freedesktop.org/src/gst-omx
 
@@ -20,7 +20,7 @@ GST_OMX_AUTORECONF = YES
 GST_OMX_AUTORECONF_OPTS = -I $(@D)/common/m4
 endif
 
-GST_OMX_LICENSE = LGPLv2.1
+GST_OMX_LICENSE = LGPL-2.1
 GST_OMX_LICENSE_FILES = COPYING
 
 GST_OMX_DEPENDENCIES = gstreamer1 gst1-plugins-base libopenmax

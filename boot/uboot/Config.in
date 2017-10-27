@@ -38,7 +38,7 @@ choice
 	  Select the specific U-Boot version you want to use
 
 config BR2_TARGET_UBOOT_LATEST_VERSION
-	bool "2017.03"
+	bool "2017.09"
 
 config BR2_TARGET_UBOOT_CUSTOM_VERSION
 	bool "Custom version"
@@ -86,7 +86,7 @@ endif
 
 config BR2_TARGET_UBOOT_VERSION
 	string
-	default "2017.03"	if BR2_TARGET_UBOOT_LATEST_VERSION
+	default "2017.09"	if BR2_TARGET_UBOOT_LATEST_VERSION
 	default BR2_TARGET_UBOOT_CUSTOM_VERSION_VALUE \
 		if BR2_TARGET_UBOOT_CUSTOM_VERSION
 	default "custom"	if BR2_TARGET_UBOOT_CUSTOM_TARBALL
@@ -129,6 +129,12 @@ config BR2_TARGET_UBOOT_CUSTOM_CONFIG_FILE
 	depends on BR2_TARGET_UBOOT_USE_CUSTOM_CONFIG
 	help
 	  Path to the U-Boot configuration file.
+
+config BR2_TARGET_UBOOT_CONFIG_FRAGMENT_FILES
+	string "Additional configuration fragment files"
+	help
+	  A space-separated list of configuration fragment files,
+	  that will be merged to the main U-Boot configuration file.
 endif
 
 config BR2_TARGET_UBOOT_NEEDS_DTC
@@ -137,6 +143,12 @@ config BR2_TARGET_UBOOT_NEEDS_DTC
 	help
 	  Select this option if your U-Boot board configuration
 	  requires the Device Tree compiler to be available.
+
+config BR2_TARGET_UBOOT_NEEDS_PYLIBFDT
+	bool "U-Boot needs pylibfdt"
+	help
+	  Select this option if your U-Boot board configuration
+	  requires the Python libfdt library to be available.
 
 config BR2_TARGET_UBOOT_NEEDS_OPENSSL
 	bool "U-Boot needs OpenSSL"
@@ -406,5 +418,35 @@ config BR2_TARGET_UBOOT_ENVIMAGE_REDUNDANT
 	  mechanism of U-Boot.
 
 endif # BR2_TARGET_UBOOT_ENVIMAGE
+
+config BR2_TARGET_UBOOT_BOOT_SCRIPT
+	bool "Generate a U-Boot boot script"
+	help
+	  Generate a U-Boot boot script, given a file listing U-Boot
+	  commands to be executed at boot time. The generated boot
+	  script will be called 'boot.scr'.
+
+if BR2_TARGET_UBOOT_BOOT_SCRIPT
+
+config BR2_TARGET_UBOOT_BOOT_SCRIPT_SOURCE
+	string "U-Boot boot script source"
+	help
+	  Source file to generate the U-Boot boot script.
+
+endif
+
+if BR2_TARGET_UBOOT_BUILD_SYSTEM_KCONFIG
+
+config BR2_TARGET_UBOOT_CUSTOM_DTS_PATH
+	string "Device Tree Source file paths"
+	help
+	  Space-separated list of paths to device tree source files
+	  that will be copied to arch/ARCH/dts/ before starting the
+	  build.
+
+	  To use this device tree source file, the U-Boot configuration
+	  file must refer to it.
+
+endif
 
 endif # BR2_TARGET_UBOOT

@@ -1,15 +1,14 @@
-
 config BR2_PACKAGE_LIBGPHOTO2
 	bool "libgphoto2"
-	default n
-	select BR2_PACKAGE_LIBUSB
-	select BR2_PACKAGE_GETTEXT
-	select BR2_PACKAGE_LIBEXIF
+	depends on BR2_TOOLCHAIN_HAS_THREADS # libusb
 	select BR2_PACKAGE_LIBTOOL
+	select BR2_PACKAGE_LIBUSB
 	select BR2_PACKAGE_LIBXML2
-	depends on !BR2_COMPILER_PARANOID_UNSAFE_PATH
 	help
-	  libgphoto2 is a library that can be used by applications to access various digital cameras. 
-	  
-comment "libgphoto2 requires the paranoid check to be disabled. (Build options -> Advanced)"
-	depends on BR2_COMPILER_PARANOID_UNSAFE_PATH 
+	  libgphoto2 is the core library designed to allow access to
+	  digital camera by external programs.
+
+	  http://gphoto.org/proj/libgphoto2/
+
+comment "libgphoto needs a toolchain w/ threads"
+	depends on !BR2_TOOLCHAIN_HAS_THREADS

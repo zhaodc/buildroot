@@ -1,4 +1,6 @@
-# From http://ftp.netfilter.org/pub/ipset/ipset-6.31.tar.bz2.md5sum.txt
-md5	231790be940438287438df1f33857376	ipset-6.31.tar.bz2
+# From http://ftp.netfilter.org/pub/ipset/ipset-6.34.tar.bz2.md5sum.txt
+md5 51bd03f976a1501fd45e1d71a1e2e6bf  ipset-6.34.tar.bz2
 # Calculated based on the hash above
-sha256	498e411cc1d134201a31a56def6c0936c642958c2d4b4ce7d9955240047a45fe	ipset-6.31.tar.bz2
+sha256 d70e831b670b7aa25dde81fd994d3a7ce0c0e801559a557105576df66cd8d680  ipset-6.34.tar.bz2
+# Locally calculated
+sha256 231f7edcc7352d7734a96eef0b8030f77982678c516876fcb81e25b32d68564c  COPYING
