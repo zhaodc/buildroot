@@ -5,10 +5,11 @@
 ################################################################################
 
 LIBCURL_VERSION = 7.56.1
+LIBCURL_SOURCE = curl-$(LIBCURL_VERSION).tar.xz
 ifeq ($(BR2_PACKAGE_NETFLIX),y)
 LIBCURL_VERSION = 7.32.0
-endif
 LIBCURL_SOURCE = curl-$(LIBCURL_VERSION).tar.bz2
+endif
 LIBCURL_SITE = https://curl.haxx.se/download
 LIBCURL_DEPENDENCIES = host-pkgconf \
 	$(if $(BR2_PACKAGE_ZLIB),zlib) \
@@ -25,9 +26,7 @@ LIBCURL_INSTALL_STAGING = YES
 LIBCURL_CONF_OPTS = --disable-manual --disable-ntlm-wb \
 	--enable-hidden-symbols --with-random=/dev/urandom --disable-curldebug
 
-ifeq ($(BR2_TOOLCHAIN_HAS_THREADS),y)
-LIBCURL_CONF_OPTS += --enable-threaded-resolver
-else
+ifeq ($(BR2_TOOLCHAIN_HAS_THREADS),n)
 LIBCURL_CONF_OPTS += --disable-threaded-resolver
 endif
 
