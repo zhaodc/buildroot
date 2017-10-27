@@ -419,6 +419,7 @@ ifeq ($(BR2_PACKAGE_LINUX_FIRMWARE_NVIDIA_GK20A),y)
 LINUX_FIRMWARE_DIRS += nvidia
 # No license file; the license is in the file WHENCE
 # which is installed unconditionally
+endif
 
 # ql2xxx
 ifeq ($(BR2_PACKAGE_LINUX_FIRMWARE_QLOGIC_2XXX),y)
