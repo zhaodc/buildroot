@@ -1,0 +1,1986 @@
+From 7a54ac44adc11fbb5c7ff080fb53476b5981eede Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Enrique=20Oca=C3=B1a=20Gonz=C3=A1lez?= <eocanha@igalia.com>
+Date: Wed, 8 Nov 2017 14:02:32 +0000
+Subject: [PATCH] Revert "Use high resolution timestamp for event time"
+
+The reverted commit broke YouTube TV 2016 MSE Conformance Test "51. EventTimestamp":
+
+The generated event timestamps type is DOMHighResTimeStamp (since browser startup),
+while the test expects DOMTimestamp (since the epoch).
+
+See also:
+https://github.com/youtube/js_mse_eme/pull/25
+https://www.flowdock.com/app/metrological/dawn-webkit/threads/PQNeyNTl8gK-uoQQH5XIHxXofir
+
+This reverts commit 8e7403520f2828457611bf784c9e727445631593.
+
+Conflicts:
+	LayoutTests/imported/w3c/ChangeLog
+	Source/WebCore/ChangeLog
+	Source/WebKit/ChangeLog
+	Source/WebKitLegacy/mac/ChangeLog
+---
+ LayoutTests/TestExpectations                       |  1 +
+ .../Event-timestamp-high-resolution-expected.txt   | 10 +++----
+ Source/WebCore/WebCore.xcodeproj/project.pbxproj   |  4 ---
+ Source/WebCore/dom/DOMHighResTimeStamp.h           | 32 ----------------------
+ Source/WebCore/dom/Element.cpp                     |  2 +-
+ Source/WebCore/dom/Event.cpp                       | 28 ++++---------------
+ Source/WebCore/dom/Event.h                         | 10 +++----
+ Source/WebCore/dom/Event.idl                       |  4 +--
+ Source/WebCore/dom/KeyboardEvent.cpp               |  2 +-
+ Source/WebCore/dom/MouseEvent.cpp                  |  9 +++---
+ Source/WebCore/dom/MouseEvent.h                    |  4 +--
+ Source/WebCore/dom/MouseRelatedEvent.cpp           |  2 +-
+ Source/WebCore/dom/MouseRelatedEvent.h             |  2 +-
+ Source/WebCore/dom/SimulatedClick.cpp              |  2 +-
+ Source/WebCore/dom/TouchEvent.cpp                  |  3 +-
+ Source/WebCore/dom/UIEvent.cpp                     |  2 +-
+ Source/WebCore/dom/UIEvent.h                       |  2 +-
+ Source/WebCore/dom/UIEventWithKeyState.h           |  2 +-
+ Source/WebCore/dom/WheelEvent.cpp                  |  2 +-
+ Source/WebCore/html/TypeAhead.cpp                  |  5 ++--
+ Source/WebCore/html/TypeAhead.h                    |  4 +--
+ Source/WebCore/page/AutoscrollController.cpp       |  8 ++++--
+ Source/WebCore/page/AutoscrollController.h         |  5 ++--
+ Source/WebCore/page/ContextMenuController.cpp      |  3 +-
+ Source/WebCore/page/DragController.cpp             |  2 +-
+ Source/WebCore/page/EventHandler.cpp               |  8 +++---
+ Source/WebCore/page/EventHandler.h                 |  4 +--
+ Source/WebCore/page/Performance.cpp                |  8 +-----
+ Source/WebCore/page/Performance.h                  |  5 +---
+ Source/WebCore/page/ios/EventHandlerIOS.mm         |  4 +--
+ Source/WebCore/page/win/EventHandlerWin.cpp        |  2 +-
+ Source/WebCore/platform/PlatformEvent.h            | 11 ++++----
+ Source/WebCore/platform/PlatformKeyboardEvent.h    |  2 +-
+ Source/WebCore/platform/PlatformMouseEvent.h       |  2 +-
+ Source/WebCore/platform/PlatformWheelEvent.h       |  2 +-
+ Source/WebCore/platform/cocoa/ScrollController.mm  |  6 ++--
+ Source/WebCore/platform/glib/EventHandlerGLib.cpp  |  2 +-
+ .../platform/gtk/PlatformKeyboardEventGtk.cpp      |  2 +-
+ .../WebCore/platform/gtk/PlatformMouseEventGtk.cpp |  4 +--
+ .../WebCore/platform/gtk/PlatformWheelEventGtk.cpp |  4 +--
+ Source/WebCore/platform/gtk/ScrollAnimatorGtk.cpp  |  8 +++---
+ .../platform/ios/PlatformEventFactoryIOS.mm        | 12 ++++----
+ .../WebCore/platform/mac/PlatformEventFactoryMac.h |  2 +-
+ .../platform/mac/PlatformEventFactoryMac.mm        |  5 ++--
+ Source/WebCore/platform/win/KeyEventWin.cpp        |  2 +-
+ .../WebCore/platform/win/PlatformMouseEventWin.cpp |  2 +-
+ Source/WebCore/platform/win/WheelEventWin.cpp      |  4 +--
+ Source/WebKit/Shared/WebCoreArgumentCoders.cpp     | 16 -----------
+ Source/WebKit/Shared/WebCoreArgumentCoders.h       |  6 ----
+ Source/WebKit/Shared/WebEvent.cpp                  |  4 +--
+ Source/WebKit/Shared/WebEvent.h                    | 29 ++++++++++----------
+ Source/WebKit/Shared/WebKeyboardEvent.cpp          |  8 +++---
+ Source/WebKit/Shared/WebMouseEvent.cpp             |  4 +--
+ Source/WebKit/Shared/WebTouchEvent.cpp             |  2 +-
+ Source/WebKit/Shared/WebWheelEvent.cpp             |  6 ++--
+ Source/WebKit/Shared/gtk/WebEventFactory.cpp       |  8 +++---
+ Source/WebKit/Shared/ios/NativeWebTouchEventIOS.mm |  2 +-
+ Source/WebKit/Shared/ios/WebIOSEventFactory.mm     |  2 +-
+ .../WebKit/Shared/mac/NativeWebGestureEventMac.mm  |  4 +--
+ Source/WebKit/Shared/mac/WebEventFactory.mm        |  6 ++--
+ Source/WebKit/Shared/mac/WebGestureEvent.h         |  2 +-
+ Source/WebKit/Shared/wpe/WebEventFactory.cpp       |  8 +++---
+ .../InjectedBundle/API/c/WKBundlePage.cpp          |  6 ++--
+ .../InjectedBundle/API/gtk/DOM/WebKitDOMEvent.cpp  |  2 +-
+ .../Plugins/Netscape/x11/NetscapePluginX11.cpp     |  4 +--
+ Source/WebKit/WebProcess/Plugins/PDF/PDFPlugin.mm  |  2 +-
+ Source/WebKit/WebProcess/Plugins/PluginView.cpp    |  2 +-
+ Source/WebKit/WebProcess/WebPage/WebPage.cpp       | 14 +++++-----
+ Source/WebKit/WebProcess/WebPage/WebPage.h         |  7 ++---
+ Source/WebKit/WebProcess/WebPage/ios/WebPageIOS.mm | 10 +++----
+ Source/WebKitLegacy/ios/ChangeLog                  | 13 ---------
+ .../ios/WebView/WebPDFViewPlaceholder.mm           |  4 +--
+ Source/WebKitLegacy/mac/DOM/DOMEvent.mm            |  2 +-
+ Source/WebKitLegacy/mac/WebView/WebFrame.mm        |  2 +-
+ Source/WebKitLegacy/mac/WebView/WebPDFView.mm      |  4 +--
+ Source/WebKitLegacy/win/WebDropSource.cpp          |  2 +-
+ 76 files changed, 166 insertions(+), 266 deletions(-)
+ delete mode 100644 Source/WebCore/dom/DOMHighResTimeStamp.h
+
+diff --git a/LayoutTests/TestExpectations b/LayoutTests/TestExpectations
+index ce62316..2eac051 100644
+--- a/LayoutTests/TestExpectations
++++ b/LayoutTests/TestExpectations
+@@ -177,6 +177,7 @@ imported/w3c/web-platform-tests/css/css-ui-3/text-overflow-012.html [ ImageOnlyF
+ imported/w3c/web-platform-tests/css/css-ui-3/text-overflow-015.html [ ImageOnlyFailure ]
+ imported/w3c/web-platform-tests/css/css-ui-3/text-overflow-017.html [ ImageOnlyFailure ]
+ imported/w3c/web-platform-tests/css/css-ui-3/text-overflow-021.html [ ImageOnlyFailure ]
++imported/w3c/web-platform-tests/dom/events/Event-timestamp-high-resolution.html [ Failure ]
+ imported/w3c/web-platform-tests/dom/nodes/Document-constructor-svg.svg [ Timeout ]
+ imported/w3c/web-platform-tests/fetch/security/dangling-markup-mitigation.tentative.html [ Pass Failure ]
+ imported/w3c/web-platform-tests/hr-time/timeOrigin.html [ Failure ]
+diff --git a/LayoutTests/imported/w3c/web-platform-tests/dom/events/Event-timestamp-high-resolution-expected.txt b/LayoutTests/imported/w3c/web-platform-tests/dom/events/Event-timestamp-high-resolution-expected.txt
+index 2f08b48..f47fa3d 100644
+--- a/LayoutTests/imported/w3c/web-platform-tests/dom/events/Event-timestamp-high-resolution-expected.txt
++++ b/LayoutTests/imported/w3c/web-platform-tests/dom/events/Event-timestamp-high-resolution-expected.txt
+@@ -1,7 +1,7 @@
+ 
+-PASS Constructed MouseEvent timestamp should be high resolution and have the same time origin as performance.now() 
+-PASS Constructed KeyboardEvent timestamp should be high resolution and have the same time origin as performance.now() 
+-PASS Constructed WheelEvent timestamp should be high resolution and have the same time origin as performance.now() 
+-PASS Constructed GamepadEvent timestamp should be high resolution and have the same time origin as performance.now() 
+-PASS Constructed FocusEvent timestamp should be high resolution and have the same time origin as performance.now() 
++FAIL Constructed MouseEvent timestamp should be high resolution and have the same time origin as performance.now() assert_less_than_equal: Event timestamp should be less than performance.now() timestamp taken after its creation expected a number less than or equal to 523.8000000000001 but got 1505770152566
++FAIL Constructed KeyboardEvent timestamp should be high resolution and have the same time origin as performance.now() assert_less_than_equal: Event timestamp should be less than performance.now() timestamp taken after its creation expected a number less than or equal to 524.4 but got 1505770152566
++FAIL Constructed WheelEvent timestamp should be high resolution and have the same time origin as performance.now() assert_less_than_equal: Event timestamp should be less than performance.now() timestamp taken after its creation expected a number less than or equal to 524.5000000000001 but got 1505770152566
++FAIL Constructed GamepadEvent timestamp should be high resolution and have the same time origin as performance.now() Not enough arguments
++FAIL Constructed FocusEvent timestamp should be high resolution and have the same time origin as performance.now() assert_less_than_equal: Event timestamp should be less than performance.now() timestamp taken after its creation expected a number less than or equal to 524.6 but got 1505770152566
+ 
+diff --git a/Source/WebCore/WebCore.xcodeproj/project.pbxproj b/Source/WebCore/WebCore.xcodeproj/project.pbxproj
+index 66aa044..a26f47b 100644
+--- a/Source/WebCore/WebCore.xcodeproj/project.pbxproj
++++ b/Source/WebCore/WebCore.xcodeproj/project.pbxproj
+@@ -1958,7 +1958,6 @@
+ 		460BB6161D0A1BF000221812 /* Base64Utilities.h in Headers */ = {isa = PBXBuildFile; fileRef = 460BB6141D0A1BEC00221812 /* Base64Utilities.h */; settings = {ATTRIBUTES = (Private, ); }; };
+ 		460CBF351D4BCD0E0092E88E /* JSDOMWindowProperties.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 460CBF331D4BCCFE0092E88E /* JSDOMWindowProperties.cpp */; };
+ 		460CBF361D4BCD0E0092E88E /* JSDOMWindowProperties.h in Headers */ = {isa = PBXBuildFile; fileRef = 460CBF341D4BCCFE0092E88E /* JSDOMWindowProperties.h */; };
+-		46218ACB1F72D64E00574FBE /* DOMHighResTimeStamp.h in Headers */ = {isa = PBXBuildFile; fileRef = 46E016AD1F72D61E00282B2C /* DOMHighResTimeStamp.h */; settings = {ATTRIBUTES = (Private, ); }; };
+ 		4634592C1AC2271000ECB71C /* PowerObserverMac.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4634592B1AC2271000ECB71C /* PowerObserverMac.cpp */; };
+ 		463EB6221B8789E00096ED51 /* TagCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 463EB6201B8789CB0096ED51 /* TagCollection.cpp */; };
+ 		463EB6231B8789E00096ED51 /* TagCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = 463EB6211B8789CB0096ED51 /* TagCollection.h */; };
+@@ -9841,7 +9840,6 @@
+ 		46DFF4971DC2601300B80B48 /* ShadowRootMode.idl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ShadowRootMode.idl; sourceTree = "<group>"; };
+ 		46DFF4991DC261F900B80B48 /* JSShadowRootMode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = JSShadowRootMode.cpp; sourceTree = "<group>"; };
+ 		46DFF49A1DC261F900B80B48 /* JSShadowRootMode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JSShadowRootMode.h; sourceTree = "<group>"; };
+-		46E016AD1F72D61E00282B2C /* DOMHighResTimeStamp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DOMHighResTimeStamp.h; sourceTree = "<group>"; };
+ 		46EBEA011B7D4D5D00BE4941 /* CollectionTraversal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CollectionTraversal.h; sourceTree = "<group>"; };
+ 		46EFAF0D1E5FB9C200E7F34B /* LowPowerModeNotifierIOS.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = LowPowerModeNotifierIOS.mm; sourceTree = "<group>"; };
+ 		46EFAF0F1E5FB9E100E7F34B /* LowPowerModeNotifier.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LowPowerModeNotifier.cpp; sourceTree = "<group>"; };
+@@ -26248,7 +26246,6 @@
+ 				BC60D6E80D28D83400B9918F /* DOMException.h */,
+ 				BC60D6EB0D28D99900B9918F /* DOMException.idl */,
+ 				BC9A6141146859D9006057FD /* DOMExceptions.in */,
+-				46E016AD1F72D61E00282B2C /* DOMHighResTimeStamp.h */,
+ 				A8185F3609765765005826D9 /* DOMImplementation.cpp */,
+ 				A8185F3309765765005826D9 /* DOMImplementation.h */,
+ 				93EEC1E909C2877700C515D1 /* DOMImplementation.idl */,
+@@ -27701,7 +27698,6 @@
+ 				BC60D6E90D28D83400B9918F /* DOMException.h in Headers */,
+ 				8399470C1F50B63E00E9D86B /* DOMFileSystem.h in Headers */,
+ 				2ED609BD1145B07100C8684E /* DOMFormData.h in Headers */,
+-				46218ACB1F72D64E00574FBE /* DOMHighResTimeStamp.h in Headers */,
+ 				A8185F3B09765766005826D9 /* DOMImplementation.h in Headers */,
+ 				E3C99A091DC3D41C00794AD3 /* DOMJITCheckDOM.h in Headers */,
+ 				E3150EA71DA7219300194012 /* DOMJITHelpers.h in Headers */,
+diff --git a/Source/WebCore/dom/DOMHighResTimeStamp.h b/Source/WebCore/dom/DOMHighResTimeStamp.h
+deleted file mode 100644
+index 11b6786..0000000
+--- a/Source/WebCore/dom/DOMHighResTimeStamp.h
++++ /dev/null
+@@ -1,32 +0,0 @@
+-/*
+- * Copyright (C) 2017 Apple Inc. All rights reserved.
+- *
+- * Redistribution and use in source and binary forms, with or without
+- * modification, are permitted provided that the following conditions
+- * are met:
+- * 1. Redistributions of source code must retain the above copyright
+- *    notice, this list of conditions and the following disclaimer.
+- * 2. Redistributions in binary form must reproduce the above copyright
+- *    notice, this list of conditions and the following disclaimer in the
+- *    documentation and/or other materials provided with the distribution.
+- *
+- * THIS SOFTWARE IS PROVIDED BY APPLE INC. AND ITS CONTRIBUTORS ``AS IS''
+- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+- * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+- * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL APPLE INC. OR ITS CONTRIBUTORS
+- * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+- * THE POSSIBILITY OF SUCH DAMAGE.
+- */
+-
+-#pragma once
+-
+-namespace WebCore {
+-
+-using DOMHighResTimeStamp = double;
+-
+-}
+diff --git a/Source/WebCore/dom/Element.cpp b/Source/WebCore/dom/Element.cpp
+index c7e85eb..3fcd378 100644
+--- a/Source/WebCore/dom/Element.cpp
++++ b/Source/WebCore/dom/Element.cpp
+@@ -2525,7 +2525,7 @@ bool Element::dispatchMouseForceWillBegin()
+     if (!frame)
+         return false;
+ 
+-    PlatformMouseEvent platformMouseEvent { frame->eventHandler().lastKnownMousePosition(), frame->eventHandler().lastKnownMouseGlobalPosition(), NoButton, PlatformEvent::NoType, 1, false, false, false, false, WallTime::now(), ForceAtClick, NoTap };
++    PlatformMouseEvent platformMouseEvent { frame->eventHandler().lastKnownMousePosition(), frame->eventHandler().lastKnownMouseGlobalPosition(), NoButton, PlatformEvent::NoType, 1, false, false, false, false, WTF::currentTime(), ForceAtClick, NoTap };
+     auto mouseForceWillBeginEvent = MouseEvent::create(eventNames().webkitmouseforcewillbeginEvent, document().defaultView(), platformMouseEvent, 0, nullptr);
+     mouseForceWillBeginEvent->setTarget(this);
+     dispatchEvent(mouseForceWillBeginEvent);
+diff --git a/Source/WebCore/dom/Event.cpp b/Source/WebCore/dom/Event.cpp
+index b97d003..8705951 100644
+--- a/Source/WebCore/dom/Event.cpp
++++ b/Source/WebCore/dom/Event.cpp
+@@ -23,21 +23,17 @@
+ #include "config.h"
+ #include "Event.h"
+ 
+-#include "DOMWindow.h"
+-#include "Document.h"
+ #include "EventNames.h"
+ #include "EventPath.h"
+ #include "EventTarget.h"
+-#include "Performance.h"
+ #include "UserGestureIndicator.h"
+-#include "WorkerGlobalScope.h"
+ #include <wtf/CurrentTime.h>
+ 
+ namespace WebCore {
+ 
+ Event::Event(IsTrusted isTrusted)
+     : m_isTrusted(isTrusted == IsTrusted::Yes)
+-    , m_createTime(MonotonicTime::now())
++    , m_createTime(convertSecondsToDOMTimeStamp(currentTime()))
+ {
+ }
+ 
+@@ -47,17 +43,17 @@ Event::Event(const AtomicString& eventType, bool canBubbleArg, bool cancelableAr
+     , m_canBubble(canBubbleArg)
+     , m_cancelable(cancelableArg)
+     , m_isTrusted(true)
+-    , m_createTime(MonotonicTime::now())
++    , m_createTime(convertSecondsToDOMTimeStamp(currentTime()))
+ {
+ }
+ 
+-Event::Event(const AtomicString& eventType, bool canBubbleArg, bool cancelableArg, MonotonicTime timestamp)
++Event::Event(const AtomicString& eventType, bool canBubbleArg, bool cancelableArg, double timestamp)
+     : m_type(eventType)
+     , m_isInitialized(true)
+     , m_canBubble(canBubbleArg)
+     , m_cancelable(cancelableArg)
+     , m_isTrusted(true)
+-    , m_createTime(timestamp)
++    , m_createTime(convertSecondsToDOMTimeStamp(timestamp))
+ {
+ }
+ 
+@@ -68,7 +64,7 @@ Event::Event(const AtomicString& eventType, const EventInit& initializer, IsTrus
+     , m_cancelable(initializer.cancelable)
+     , m_composed(initializer.composed)
+     , m_isTrusted(isTrusted == IsTrusted::Yes)
+-    , m_createTime(MonotonicTime::now())
++    , m_createTime(convertSecondsToDOMTimeStamp(currentTime()))
+ {
+ }
+ 
+@@ -220,18 +216,4 @@ void Event::setUnderlyingEvent(Event* underlyingEvent)
+     m_underlyingEvent = underlyingEvent;
+ }
+ 
+-DOMHighResTimeStamp Event::timeStampForBindings(ScriptExecutionContext& context) const
+-{
+-    Performance* performance = nullptr;
+-    if (is<WorkerGlobalScope>(context))
+-        performance = &downcast<WorkerGlobalScope>(context).performance();
+-    else if (auto* window = downcast<Document>(context).domWindow())
+-        performance = window->performance();
+-
+-    if (!performance)
+-        return 0;
+-
+-    return performance->relativeTimeFromTimeOriginInReducedResolution(m_createTime);
+-}
+-
+ } // namespace WebCore
+diff --git a/Source/WebCore/dom/Event.h b/Source/WebCore/dom/Event.h
+index c5d4d41..9edb3af 100644
+--- a/Source/WebCore/dom/Event.h
++++ b/Source/WebCore/dom/Event.h
+@@ -23,12 +23,11 @@
+ 
+ #pragma once
+ 
+-#include "DOMHighResTimeStamp.h"
++#include "DOMTimeStamp.h"
+ #include "EventInit.h"
+ #include "EventInterfaces.h"
+ #include "ExceptionOr.h"
+ #include "ScriptWrappable.h"
+-#include <wtf/MonotonicTime.h>
+ #include <wtf/RefCounted.h>
+ #include <wtf/TypeCasts.h>
+ #include <wtf/text/AtomicString.h>
+@@ -97,8 +96,7 @@ public:
+     bool cancelable() const { return m_cancelable; }
+     WEBCORE_EXPORT bool composed() const;
+ 
+-    DOMHighResTimeStamp timeStampForBindings(ScriptExecutionContext&) const;
+-    MonotonicTime timeStamp() const { return m_createTime; }
++    DOMTimeStamp timeStamp() const { return m_createTime; }
+ 
+     void setEventPath(const EventPath& path) { m_eventPath = &path; }
+     void clearEventPath() { m_eventPath = nullptr; }
+@@ -172,7 +170,7 @@ public:
+ protected:
+     Event(IsTrusted = IsTrusted::No);
+     WEBCORE_EXPORT Event(const AtomicString& type, bool canBubble, bool cancelable);
+-    Event(const AtomicString& type, bool canBubble, bool cancelable, MonotonicTime timestamp);
++    Event(const AtomicString& type, bool canBubble, bool cancelable, double timestamp);
+     Event(const AtomicString& type, const EventInit&, IsTrusted);
+ 
+     virtual void receivedTarget();
+@@ -197,7 +195,7 @@ private:
+     RefPtr<EventTarget> m_currentTarget;
+     const EventPath* m_eventPath { nullptr };
+     RefPtr<EventTarget> m_target;
+-    MonotonicTime m_createTime;
++    DOMTimeStamp m_createTime;
+ 
+     RefPtr<Event> m_underlyingEvent;
+ };
+diff --git a/Source/WebCore/dom/Event.idl b/Source/WebCore/dom/Event.idl
+index 87ae1fb..533f31c 100644
+--- a/Source/WebCore/dom/Event.idl
++++ b/Source/WebCore/dom/Event.idl
+@@ -18,8 +18,6 @@
+  * Boston, MA 02110-1301, USA.
+  */
+ 
+-typedef double DOMHighResTimeStamp;
+-
+ [
+     Constructor(DOMString type, optional EventInit eventInitDict),
+     CustomToJSObject,
+@@ -50,7 +48,7 @@ typedef double DOMHighResTimeStamp;
+     [EnabledAtRuntime=ShadowDOM] readonly attribute boolean composed;
+ 
+     [Unforgeable] readonly attribute boolean isTrusted;
+-    [CallWith=ScriptExecutionContext, ImplementedAs=timeStampForBindings] readonly attribute DOMHighResTimeStamp timeStamp;
++    readonly attribute DOMTimeStamp timeStamp;
+ 
+     void initEvent(DOMString type, optional boolean bubbles = false, optional boolean cancelable = false); // Historical.
+ 
+diff --git a/Source/WebCore/dom/KeyboardEvent.cpp b/Source/WebCore/dom/KeyboardEvent.cpp
+index 4804c1d..2bd931f 100644
+--- a/Source/WebCore/dom/KeyboardEvent.cpp
++++ b/Source/WebCore/dom/KeyboardEvent.cpp
+@@ -95,7 +95,7 @@ KeyboardEvent::KeyboardEvent() = default;
+ 
+ KeyboardEvent::KeyboardEvent(const PlatformKeyboardEvent& key, DOMWindow* view)
+     : UIEventWithKeyState(eventTypeForKeyboardEventType(key.type())
+-        , true, true, key.timestamp().approximateMonotonicTime(), view, 0, key.ctrlKey(), key.altKey(), key.shiftKey()
++        , true, true, key.timestamp(), view, 0, key.ctrlKey(), key.altKey(), key.shiftKey()
+         , key.metaKey(), false, key.modifiers().contains(PlatformEvent::Modifier::CapsLockKey))
+     , m_keyEvent(std::make_unique<PlatformKeyboardEvent>(key))
+ #if ENABLE(KEYBOARD_KEY_ATTRIBUTE)
+diff --git a/Source/WebCore/dom/MouseEvent.cpp b/Source/WebCore/dom/MouseEvent.cpp
+index 3c785a7..eb76d6a 100644
+--- a/Source/WebCore/dom/MouseEvent.cpp
++++ b/Source/WebCore/dom/MouseEvent.cpp
+@@ -34,6 +34,7 @@
+ #include "JSEventTargetCustom.h"
+ #include "PlatformMouseEvent.h"
+ #include "RuntimeApplicationChecks.h"
++#include <wtf/CurrentTime.h>
+ 
+ namespace WebCore {
+ 
+@@ -50,7 +51,7 @@ Ref<MouseEvent> MouseEvent::create(const AtomicString& eventType, DOMWindow* vie
+     bool isCancelable = eventType != eventNames().mousemoveEvent && !isMouseEnterOrLeave;
+     bool canBubble = !isMouseEnterOrLeave;
+ 
+-    return MouseEvent::create(eventType, canBubble, isCancelable, event.timestamp().approximateMonotonicTime(), view,
++    return MouseEvent::create(eventType, canBubble, isCancelable, event.timestamp(), view,
+         detail, event.globalPosition().x(), event.globalPosition().y(), event.position().x(), event.position().y(),
+ #if ENABLE(POINTER_LOCK)
+         event.movementDelta().x(), event.movementDelta().y(),
+@@ -59,7 +60,7 @@ Ref<MouseEvent> MouseEvent::create(const AtomicString& eventType, DOMWindow* vie
+         relatedTarget, event.force(), event.syntheticClickType());
+ }
+ 
+-Ref<MouseEvent> MouseEvent::create(const AtomicString& type, bool canBubble, bool cancelable, MonotonicTime timestamp, DOMWindow* view, int detail, int screenX, int screenY, int pageX, int pageY,
++Ref<MouseEvent> MouseEvent::create(const AtomicString& type, bool canBubble, bool cancelable, double timestamp, DOMWindow* view, int detail, int screenX, int screenY, int pageX, int pageY,
+ #if ENABLE(POINTER_LOCK)
+     int movementX, int movementY,
+ #endif
+@@ -82,7 +83,7 @@ MouseEvent::MouseEvent()
+ {
+ }
+ 
+-MouseEvent::MouseEvent(const AtomicString& eventType, bool canBubble, bool cancelable, MonotonicTime timestamp, DOMWindow* view, int detail, const IntPoint& screenLocation, const IntPoint& windowLocation,
++MouseEvent::MouseEvent(const AtomicString& eventType, bool canBubble, bool cancelable, double timestamp, DOMWindow* view, int detail, const IntPoint& screenLocation, const IntPoint& windowLocation,
+ #if ENABLE(POINTER_LOCK)
+         const IntPoint& movementDelta,
+ #endif
+@@ -102,7 +103,7 @@ MouseEvent::MouseEvent(const AtomicString& eventType, bool canBubble, bool cance
+ }
+ 
+ MouseEvent::MouseEvent(const AtomicString& eventType, bool canBubble, bool cancelable, DOMWindow* view, int detail, const IntPoint& screenLocation, const IntPoint& clientLocation, bool ctrlKey, bool altKey, bool shiftKey, bool metaKey, unsigned short button, unsigned short syntheticClickType, EventTarget* relatedTarget)
+-    : MouseRelatedEvent(eventType, canBubble, cancelable, MonotonicTime::now(), view, detail, screenLocation, { },
++    : MouseRelatedEvent(eventType, canBubble, cancelable, WTF::currentTime(), view, detail, screenLocation, { },
+ #if ENABLE(POINTER_LOCK)
+         { },
+ #endif
+diff --git a/Source/WebCore/dom/MouseEvent.h b/Source/WebCore/dom/MouseEvent.h
+index 5f1c03a..e30082b 100644
+--- a/Source/WebCore/dom/MouseEvent.h
++++ b/Source/WebCore/dom/MouseEvent.h
+@@ -33,7 +33,7 @@ class PlatformMouseEvent;
+ 
+ class MouseEvent : public MouseRelatedEvent {
+ public:
+-    WEBCORE_EXPORT static Ref<MouseEvent> create(const AtomicString& type, bool canBubble, bool cancelable, MonotonicTime timestamp, DOMWindow*, int detail, int screenX, int screenY, int pageX, int pageY,
++    WEBCORE_EXPORT static Ref<MouseEvent> create(const AtomicString& type, bool canBubble, bool cancelable, double timestamp, DOMWindow*, int detail, int screenX, int screenY, int pageX, int pageY,
+ #if ENABLE(POINTER_LOCK)
+         int movementX, int movementY,
+ #endif
+@@ -71,7 +71,7 @@ public:
+     int which() const final;
+ 
+ protected:
+-    MouseEvent(const AtomicString& type, bool canBubble, bool cancelable, MonotonicTime timestamp, DOMWindow*,
++    MouseEvent(const AtomicString& type, bool canBubble, bool cancelable, double timestamp, DOMWindow*,
+         int detail, const IntPoint& screenLocation, const IntPoint& windowLocation,
+ #if ENABLE(POINTER_LOCK)
+         const IntPoint& movementDelta,
+diff --git a/Source/WebCore/dom/MouseRelatedEvent.cpp b/Source/WebCore/dom/MouseRelatedEvent.cpp
+index 6915e9c..eba9a7a 100644
+--- a/Source/WebCore/dom/MouseRelatedEvent.cpp
++++ b/Source/WebCore/dom/MouseRelatedEvent.cpp
+@@ -32,7 +32,7 @@
+ 
+ namespace WebCore {
+ 
+-MouseRelatedEvent::MouseRelatedEvent(const AtomicString& eventType, bool canBubble, bool cancelable, MonotonicTime timestamp, DOMWindow* DOMWindow,
++MouseRelatedEvent::MouseRelatedEvent(const AtomicString& eventType, bool canBubble, bool cancelable, double timestamp, DOMWindow* DOMWindow,
+                                      int detail, const IntPoint& screenLocation, const IntPoint& windowLocation,
+ #if ENABLE(POINTER_LOCK)
+                                      const IntPoint& movementDelta,
+diff --git a/Source/WebCore/dom/MouseRelatedEvent.h b/Source/WebCore/dom/MouseRelatedEvent.h
+index e35d293..80a730a 100644
+--- a/Source/WebCore/dom/MouseRelatedEvent.h
++++ b/Source/WebCore/dom/MouseRelatedEvent.h
+@@ -73,7 +73,7 @@ public:
+ 
+ protected:
+     MouseRelatedEvent() = default;
+-    MouseRelatedEvent(const AtomicString& type, bool canBubble, bool cancelable, MonotonicTime timestamp, DOMWindow*,
++    MouseRelatedEvent(const AtomicString& type, bool canBubble, bool cancelable, double timestamp, DOMWindow*,
+         int detail, const IntPoint& screenLocation, const IntPoint& windowLocation,
+ #if ENABLE(POINTER_LOCK)
+         const IntPoint& movementDelta,
+diff --git a/Source/WebCore/dom/SimulatedClick.cpp b/Source/WebCore/dom/SimulatedClick.cpp
+index 4549368..6fb3b4d 100644
+--- a/Source/WebCore/dom/SimulatedClick.cpp
++++ b/Source/WebCore/dom/SimulatedClick.cpp
+@@ -46,7 +46,7 @@ public:
+ 
+ private:
+     SimulatedMouseEvent(const AtomicString& eventType, DOMWindow* view, RefPtr<Event>&& underlyingEvent, Element& target, SimulatedClickSource source)
+-        : MouseEvent(eventType, true, true, underlyingEvent ? underlyingEvent->timeStamp() : MonotonicTime::now(), view, 0, { }, { },
++        : MouseEvent(eventType, true, true, underlyingEvent ? underlyingEvent->timeStamp() : currentTime(), view, 0, { }, { },
+ #if ENABLE(POINTER_LOCK)
+             { },
+ #endif
+diff --git a/Source/WebCore/dom/TouchEvent.cpp b/Source/WebCore/dom/TouchEvent.cpp
+index 873f296..f5cec7c 100644
+--- a/Source/WebCore/dom/TouchEvent.cpp
++++ b/Source/WebCore/dom/TouchEvent.cpp
+@@ -31,6 +31,7 @@
+ #include "TouchEvent.h"
+ 
+ #include "EventDispatcher.h"
++#include <wtf/CurrentTime.h>
+ 
+ namespace WebCore {
+ 
+@@ -42,7 +43,7 @@ TouchEvent::TouchEvent(TouchList* touches, TouchList* targetTouches,
+         TouchList* changedTouches, const AtomicString& type, 
+         DOMWindow* view, int screenX, int screenY, int pageX, int pageY,
+         bool ctrlKey, bool altKey, bool shiftKey, bool metaKey)
+-    : MouseRelatedEvent(type, true, true, MonotonicTime::now(), view, 0, IntPoint(screenX, screenY),
++    : MouseRelatedEvent(type, true, true, currentTime(), view, 0, IntPoint(screenX, screenY),
+                         IntPoint(pageX, pageY),
+ #if ENABLE(POINTER_LOCK)
+                         IntPoint(0, 0),
+diff --git a/Source/WebCore/dom/UIEvent.cpp b/Source/WebCore/dom/UIEvent.cpp
+index e815af9..4cb2239 100644
+--- a/Source/WebCore/dom/UIEvent.cpp
++++ b/Source/WebCore/dom/UIEvent.cpp
+@@ -39,7 +39,7 @@ UIEvent::UIEvent(const AtomicString& eventType, bool canBubbleArg, bool cancelab
+ {
+ }
+ 
+-UIEvent::UIEvent(const AtomicString& eventType, bool canBubbleArg, bool cancelableArg, MonotonicTime timestamp, DOMWindow* viewArg, int detailArg)
++UIEvent::UIEvent(const AtomicString& eventType, bool canBubbleArg, bool cancelableArg, double timestamp, DOMWindow* viewArg, int detailArg)
+     : Event(eventType, canBubbleArg, cancelableArg, timestamp)
+     , m_view(viewArg)
+     , m_detail(detailArg)
+diff --git a/Source/WebCore/dom/UIEvent.h b/Source/WebCore/dom/UIEvent.h
+index baa731f..973d73e 100644
+--- a/Source/WebCore/dom/UIEvent.h
++++ b/Source/WebCore/dom/UIEvent.h
+@@ -66,7 +66,7 @@ public:
+ protected:
+     UIEvent();
+     UIEvent(const AtomicString& type, bool canBubble, bool cancelable, DOMWindow*, int detail);
+-    UIEvent(const AtomicString& type, bool canBubble, bool cancelable, MonotonicTime timestamp, DOMWindow*, int detail);
++    UIEvent(const AtomicString& type, bool canBubble, bool cancelable, double timestamp, DOMWindow*, int detail);
+     UIEvent(const AtomicString&, const UIEventInit&, IsTrusted);
+ 
+ private:
+diff --git a/Source/WebCore/dom/UIEventWithKeyState.h b/Source/WebCore/dom/UIEventWithKeyState.h
+index 0a8e403..bfea387 100644
+--- a/Source/WebCore/dom/UIEventWithKeyState.h
++++ b/Source/WebCore/dom/UIEventWithKeyState.h
+@@ -49,7 +49,7 @@ protected:
+     {
+     }
+ 
+-    UIEventWithKeyState(const AtomicString& type, bool canBubble, bool cancelable, MonotonicTime timestamp, DOMWindow* view,
++    UIEventWithKeyState(const AtomicString& type, bool canBubble, bool cancelable, double timestamp, DOMWindow* view,
+         int detail, bool ctrlKey, bool altKey, bool shiftKey, bool metaKey, bool altGraphKey, bool capsLockKey)
+             : UIEvent(type, canBubble, cancelable, timestamp, view, detail)
+             , m_ctrlKey(ctrlKey)
+diff --git a/Source/WebCore/dom/WheelEvent.cpp b/Source/WebCore/dom/WheelEvent.cpp
+index 80db05a..530e6b0 100644
+--- a/Source/WebCore/dom/WheelEvent.cpp
++++ b/Source/WebCore/dom/WheelEvent.cpp
+@@ -50,7 +50,7 @@ WheelEvent::WheelEvent(const AtomicString& type, const Init& initializer, IsTrus
+ }
+ 
+ WheelEvent::WheelEvent(const PlatformWheelEvent& event, DOMWindow* view)
+-    : MouseEvent(eventNames().wheelEvent, true, true, event.timestamp().approximateMonotonicTime(), view, 0, event.globalPosition(), event.position()
++    : MouseEvent(eventNames().wheelEvent, true, true, event.timestamp(), view, 0, event.globalPosition(), event.position()
+ #if ENABLE(POINTER_LOCK)
+         , { }
+ #endif
+diff --git a/Source/WebCore/html/TypeAhead.cpp b/Source/WebCore/html/TypeAhead.cpp
+index f1ecb7c..d26f57d 100644
+--- a/Source/WebCore/html/TypeAhead.cpp
++++ b/Source/WebCore/html/TypeAhead.cpp
+@@ -37,11 +37,12 @@ namespace WebCore {
+ 
+ TypeAhead::TypeAhead(TypeAheadDataSource* dataSource)
+     : m_dataSource(dataSource)
++    , m_lastTypeTime(0)
+     , m_repeatingChar(0)
+ {
+ }
+ 
+-static const Seconds typeAheadTimeout { 1_s };
++static const DOMTimeStamp typeAheadTimeout = 1000;
+ 
+ static String stripLeadingWhiteSpace(const String& string)
+ {
+@@ -62,7 +63,7 @@ int TypeAhead::handleEvent(KeyboardEvent* event, MatchModeFlags matchMode)
+         return -1;
+ 
+     int optionCount = m_dataSource->optionCount();
+-    Seconds delta = event->timeStamp() - m_lastTypeTime;
++    DOMTimeStamp delta = event->timeStamp() - m_lastTypeTime;
+     m_lastTypeTime = event->timeStamp();
+ 
+     UChar c = event->charCode();
+diff --git a/Source/WebCore/html/TypeAhead.h b/Source/WebCore/html/TypeAhead.h
+index 046c001..610ac78 100644
+--- a/Source/WebCore/html/TypeAhead.h
++++ b/Source/WebCore/html/TypeAhead.h
+@@ -25,7 +25,7 @@
+ 
+ #pragma once
+ 
+-#include <wtf/MonotonicTime.h>
++#include "DOMTimeStamp.h"
+ #include <wtf/text/StringBuilder.h>
+ #include <wtf/text/WTFString.h>
+ 
+@@ -58,7 +58,7 @@ public:
+ 
+ private:
+     TypeAheadDataSource* m_dataSource;
+-    MonotonicTime m_lastTypeTime;
++    DOMTimeStamp m_lastTypeTime;
+     UChar m_repeatingChar;
+     StringBuilder m_buffer;
+ };
+diff --git a/Source/WebCore/page/AutoscrollController.cpp b/Source/WebCore/page/AutoscrollController.cpp
+index e5287c0..e3996fd 100644
+--- a/Source/WebCore/page/AutoscrollController.cpp
++++ b/Source/WebCore/page/AutoscrollController.cpp
+@@ -37,11 +37,12 @@
+ #include "RenderView.h"
+ #include "ScrollView.h"
+ #include "Settings.h"
++#include <wtf/CurrentTime.h>
+ 
+ namespace WebCore {
+ 
+ // Delay time in second for start autoscroll if pointer is in border edge of scrollable element.
+-static const Seconds autoscrollDelay { 200_ms };
++static const double autoscrollDelay = 0.2;
+ 
+ // When the autoscroll or the panScroll is triggered when do the scroll every 50ms to make it smooth.
+ static const Seconds autoscrollInterval { 50_ms };
+@@ -58,6 +59,7 @@ AutoscrollController::AutoscrollController()
+     : m_autoscrollTimer(*this, &AutoscrollController::autoscrollTimerFired)
+     , m_autoscrollRenderer(nullptr)
+     , m_autoscrollType(NoAutoscroll)
++    , m_dragAndDropAutoscrollStartTime(0)
+ {
+ }
+ 
+@@ -138,7 +140,7 @@ void AutoscrollController::updateAutoscrollRenderer()
+     m_autoscrollRenderer = is<RenderBox>(renderer) ? downcast<RenderBox>(renderer) : nullptr;
+ }
+ 
+-void AutoscrollController::updateDragAndDrop(Node* dropTargetNode, const IntPoint& eventPosition, WallTime eventTime)
++void AutoscrollController::updateDragAndDrop(Node* dropTargetNode, const IntPoint& eventPosition, double eventTime)
+ {
+     if (!dropTargetNode) {
+         stopAutoscrollTimer();
+@@ -239,7 +241,7 @@ void AutoscrollController::autoscrollTimerFired()
+     Frame& frame = m_autoscrollRenderer->frame();
+     switch (m_autoscrollType) {
+     case AutoscrollForDragAndDrop:
+-        if (WallTime::now() - m_dragAndDropAutoscrollStartTime > autoscrollDelay)
++        if (WTF::currentTime() - m_dragAndDropAutoscrollStartTime > autoscrollDelay)
+             m_autoscrollRenderer->autoscroll(m_dragAndDropAutoscrollReferencePosition);
+         break;
+     case AutoscrollForSelection: {
+diff --git a/Source/WebCore/page/AutoscrollController.h b/Source/WebCore/page/AutoscrollController.h
+index 71360ba..3cd9dbf 100644
+--- a/Source/WebCore/page/AutoscrollController.h
++++ b/Source/WebCore/page/AutoscrollController.h
+@@ -27,7 +27,6 @@
+ 
+ #include "IntPoint.h"
+ #include "Timer.h"
+-#include <wtf/WallTime.h>
+ 
+ namespace WebCore {
+ 
+@@ -60,7 +59,7 @@ public:
+     void startAutoscrollForSelection(RenderObject*);
+     void stopAutoscrollTimer(bool rendererIsBeingDestroyed = false);
+     void updateAutoscrollRenderer();
+-    void updateDragAndDrop(Node* targetNode, const IntPoint& eventPosition, WallTime eventTime);
++    void updateDragAndDrop(Node* targetNode, const IntPoint& eventPosition, double eventTime);
+ #if ENABLE(PAN_SCROLLING)
+     void didPanScrollStart();
+     void didPanScrollStop();
+@@ -80,7 +79,7 @@ private:
+     RenderBox* m_autoscrollRenderer;
+     AutoscrollType m_autoscrollType;
+     IntPoint m_dragAndDropAutoscrollReferencePosition;
+-    WallTime m_dragAndDropAutoscrollStartTime;
++    double m_dragAndDropAutoscrollStartTime;
+ #if ENABLE(PAN_SCROLLING)
+     IntPoint m_panScrollStartPos;
+ #endif
+diff --git a/Source/WebCore/page/ContextMenuController.cpp b/Source/WebCore/page/ContextMenuController.cpp
+index 322b492..8011c42 100644
+--- a/Source/WebCore/page/ContextMenuController.cpp
++++ b/Source/WebCore/page/ContextMenuController.cpp
+@@ -68,7 +68,6 @@
+ #include "UserTypingGestureIndicator.h"
+ #include "WindowFeatures.h"
+ #include "markup.h"
+-#include <wtf/WallTime.h>
+ #include <wtf/unicode/CharacterNames.h>
+ 
+ using namespace WTF;
+@@ -1441,7 +1440,7 @@ void ContextMenuController::showContextMenuAt(Frame& frame, const IntPoint& clic
+     clearContextMenu();
+     
+     // Simulate a click in the middle of the accessibility object.
+-    PlatformMouseEvent mouseEvent(clickPoint, clickPoint, RightButton, PlatformEvent::MousePressed, 1, false, false, false, false, WallTime::now(), ForceAtClick, NoTap);
++    PlatformMouseEvent mouseEvent(clickPoint, clickPoint, RightButton, PlatformEvent::MousePressed, 1, false, false, false, false, currentTime(), ForceAtClick, NoTap);
+     frame.eventHandler().handleMousePressEvent(mouseEvent);
+     bool handled = frame.eventHandler().sendContextMenuEvent(mouseEvent);
+     if (handled)
+diff --git a/Source/WebCore/page/DragController.cpp b/Source/WebCore/page/DragController.cpp
+index 3f8a206..ef56679 100644
+--- a/Source/WebCore/page/DragController.cpp
++++ b/Source/WebCore/page/DragController.cpp
+@@ -128,7 +128,7 @@ static PlatformMouseEvent createMouseEvent(const DragData& dragData)
+ 
+     return PlatformMouseEvent(dragData.clientPosition(), dragData.globalPosition(),
+                               LeftButton, PlatformEvent::MouseMoved, 0, shiftKey, ctrlKey, altKey,
+-                              metaKey, WallTime::now(), ForceAtClick, NoTap);
++                              metaKey, currentTime(), ForceAtClick, NoTap);
+ }
+ 
+ DragController::DragController(Page& page, DragClient& client)
+diff --git a/Source/WebCore/page/EventHandler.cpp b/Source/WebCore/page/EventHandler.cpp
+index ef069c4..5c848af 100644
+--- a/Source/WebCore/page/EventHandler.cpp
++++ b/Source/WebCore/page/EventHandler.cpp
+@@ -135,7 +135,7 @@ const int ImageDragHysteresis = 5;
+ const int TextDragHysteresis = 3;
+ const int GeneralDragHysteresis = 3;
+ #if PLATFORM(COCOA)
+-const Seconds EventHandler::TextDragDelay { 150_ms };
++const double EventHandler::TextDragDelay = 0.15;
+ #endif
+ #endif // ENABLE(DRAG_SUPPORT)
+ 
+@@ -2190,7 +2190,7 @@ bool EventHandler::dispatchDragEvent(const AtomicString& eventType, Element& dra
+ 
+     view->disableLayerFlushThrottlingTemporarilyForInteraction();
+     Ref<MouseEvent> me = MouseEvent::create(eventType,
+-        true, true, event.timestamp().approximateMonotonicTime(), m_frame.document()->defaultView(),
++        true, true, event.timestamp(), m_frame.document()->defaultView(),
+         0, event.globalPosition().x(), event.globalPosition().y(), event.position().x(), event.position().y(),
+ #if ENABLE(POINTER_LOCK)
+         event.movementDelta().x(), event.movementDelta().y(),
+@@ -2939,7 +2939,7 @@ bool EventHandler::sendContextMenuEventForKey()
+     PlatformEvent::Type eventType = PlatformEvent::MousePressed;
+ #endif
+ 
+-    PlatformMouseEvent platformMouseEvent(position, globalPosition, RightButton, eventType, 1, false, false, false, false, WallTime::now(), ForceAtClick, NoTap);
++    PlatformMouseEvent platformMouseEvent(position, globalPosition, RightButton, eventType, 1, false, false, false, false, WTF::currentTime(), ForceAtClick, NoTap);
+ 
+     return sendContextMenuEvent(platformMouseEvent);
+ }
+@@ -3021,7 +3021,7 @@ void EventHandler::fakeMouseMoveEventTimerFired()
+     bool altKey;
+     bool metaKey;
+     PlatformKeyboardEvent::getCurrentModifierState(shiftKey, ctrlKey, altKey, metaKey);
+-    PlatformMouseEvent fakeMouseMoveEvent(m_lastKnownMousePosition, m_lastKnownMouseGlobalPosition, NoButton, PlatformEvent::MouseMoved, 0, shiftKey, ctrlKey, altKey, metaKey, WallTime::now(), 0, NoTap);
++    PlatformMouseEvent fakeMouseMoveEvent(m_lastKnownMousePosition, m_lastKnownMouseGlobalPosition, NoButton, PlatformEvent::MouseMoved, 0, shiftKey, ctrlKey, altKey, metaKey, currentTime(), 0, NoTap);
+     mouseMoved(fakeMouseMoveEvent);
+ }
+ #endif // !ENABLE(IOS_TOUCH_EVENTS)
+diff --git a/Source/WebCore/page/EventHandler.h b/Source/WebCore/page/EventHandler.h
+index a0aa535..6663c8f 100644
+--- a/Source/WebCore/page/EventHandler.h
++++ b/Source/WebCore/page/EventHandler.h
+@@ -323,7 +323,7 @@ public:
+ private:
+ #if ENABLE(DRAG_SUPPORT)
+     static DragState& dragState();
+-    static const Seconds TextDragDelay;
++    static const double TextDragDelay;
+     Ref<DataTransfer> createDraggingDataTransfer() const;
+ #endif
+ 
+@@ -564,7 +564,7 @@ private:
+     IntPoint m_lastKnownMousePosition;
+     IntPoint m_lastKnownMouseGlobalPosition;
+     IntPoint m_mouseDownPos; // In our view's coords.
+-    WallTime m_mouseDownTimestamp;
++    double m_mouseDownTimestamp { 0 };
+     PlatformMouseEvent m_mouseDown;
+ 
+ #if PLATFORM(COCOA)
+diff --git a/Source/WebCore/page/Performance.cpp b/Source/WebCore/page/Performance.cpp
+index 6c52aaf..1afa364 100644
+--- a/Source/WebCore/page/Performance.cpp
++++ b/Source/WebCore/page/Performance.cpp
+@@ -69,7 +69,7 @@ void Performance::contextDestroyed()
+     ContextDestructionObserver::contextDestroyed();
+ }
+ 
+-DOMHighResTimeStamp Performance::now() const
++double Performance::now() const
+ {
+     Seconds now = MonotonicTime::now() - m_timeOrigin;
+     return reduceTimeResolution(now).milliseconds();
+@@ -82,12 +82,6 @@ Seconds Performance::reduceTimeResolution(Seconds seconds)
+     return Seconds(reduced);
+ }
+ 
+-DOMHighResTimeStamp Performance::relativeTimeFromTimeOriginInReducedResolution(MonotonicTime timestamp) const
+-{
+-    Seconds seconds = timestamp - m_timeOrigin;
+-    return reduceTimeResolution(seconds).milliseconds();
+-}
+-
+ PerformanceNavigation* Performance::navigation()
+ {
+     if (!is<Document>(scriptExecutionContext()))
+diff --git a/Source/WebCore/page/Performance.h b/Source/WebCore/page/Performance.h
+index 438a001..9a60ec0 100644
+--- a/Source/WebCore/page/Performance.h
++++ b/Source/WebCore/page/Performance.h
+@@ -33,7 +33,6 @@
+ #pragma once
+ 
+ #include "ContextDestructionObserver.h"
+-#include "DOMHighResTimeStamp.h"
+ #include "EventTarget.h"
+ #include "ExceptionOr.h"
+ #include "GenericTaskQueue.h"
+@@ -57,7 +56,7 @@ public:
+     static Ref<Performance> create(ScriptExecutionContext& context, MonotonicTime timeOrigin) { return adoptRef(*new Performance(context, timeOrigin)); }
+     ~Performance();
+ 
+-    DOMHighResTimeStamp now() const;
++    double now() const;
+ 
+     PerformanceNavigation* navigation();
+     PerformanceTiming* timing();
+@@ -83,8 +82,6 @@ public:
+ 
+     static Seconds reduceTimeResolution(Seconds);
+ 
+-    DOMHighResTimeStamp relativeTimeFromTimeOriginInReducedResolution(MonotonicTime) const;
+-
+     ScriptExecutionContext* scriptExecutionContext() const final { return ContextDestructionObserver::scriptExecutionContext(); }
+ 
+     using RefCounted::ref;
+diff --git a/Source/WebCore/page/ios/EventHandlerIOS.mm b/Source/WebCore/page/ios/EventHandlerIOS.mm
+index 9f9758b..8f0fb4e 100644
+--- a/Source/WebCore/page/ios/EventHandlerIOS.mm
++++ b/Source/WebCore/page/ios/EventHandlerIOS.mm
+@@ -587,8 +587,8 @@ bool EventHandler::tryToBeginDataInteractionAtPoint(const IntPoint& clientPositi
+     IntPoint adjustedClientPosition = roundedIntPoint(adjustedClientPositionAsFloatPoint);
+     IntPoint adjustedGlobalPosition = protectedFrame->view()->windowToContents(adjustedClientPosition);
+ 
+-    PlatformMouseEvent syntheticMousePressEvent(adjustedClientPosition, adjustedGlobalPosition, LeftButton, PlatformEvent::MousePressed, 1, false, false, false, false, WallTime::now(), 0, NoTap);
+-    PlatformMouseEvent syntheticMouseMoveEvent(adjustedClientPosition, adjustedGlobalPosition, LeftButton, PlatformEvent::MouseMoved, 0, false, false, false, false, WallTime::now(), 0, NoTap);
++    PlatformMouseEvent syntheticMousePressEvent(adjustedClientPosition, adjustedGlobalPosition, LeftButton, PlatformEvent::MousePressed, 1, false, false, false, false, currentTime(), 0, NoTap);
++    PlatformMouseEvent syntheticMouseMoveEvent(adjustedClientPosition, adjustedGlobalPosition, LeftButton, PlatformEvent::MouseMoved, 0, false, false, false, false, currentTime(), 0, NoTap);
+ 
+     HitTestRequest request(HitTestRequest::Active | HitTestRequest::DisallowUserAgentShadowContent);
+     auto documentPoint = protectedFrame->view() ? protectedFrame->view()->windowToContents(syntheticMouseMoveEvent.position()) : syntheticMouseMoveEvent.position();
+diff --git a/Source/WebCore/page/win/EventHandlerWin.cpp b/Source/WebCore/page/win/EventHandlerWin.cpp
+index 42106a6..dcec034 100644
+--- a/Source/WebCore/page/win/EventHandlerWin.cpp
++++ b/Source/WebCore/page/win/EventHandlerWin.cpp
+@@ -48,7 +48,7 @@
+ namespace WebCore {
+ 
+ #if ENABLE(DRAG_SUPPORT)
+-const Seconds EventHandler::TextDragDelay { 0_s };
++const double EventHandler::TextDragDelay = 0.0;
+ #endif
+ 
+ bool EventHandler::passMousePressEventToSubframe(MouseEventWithHitTestResults& mev, Frame* subframe)
+diff --git a/Source/WebCore/platform/PlatformEvent.h b/Source/WebCore/platform/PlatformEvent.h
+index 52cb9c8..5cb4784 100644
+--- a/Source/WebCore/platform/PlatformEvent.h
++++ b/Source/WebCore/platform/PlatformEvent.h
+@@ -26,7 +26,6 @@
+ #pragma once
+ 
+ #include <wtf/OptionSet.h>
+-#include <wtf/WallTime.h>
+ 
+ namespace WebCore {
+ 
+@@ -87,27 +86,29 @@ public:
+ 
+     OptionSet<Modifier> modifiers() const { return m_modifiers; }
+ 
+-    WallTime timestamp() const { return m_timestamp; }
++    double timestamp() const { return m_timestamp; }
+ 
+ protected:
+     PlatformEvent()
+         : m_type(NoType)
++        , m_timestamp(0)
+     {
+     }
+ 
+     explicit PlatformEvent(Type type)
+         : m_type(type)
++        , m_timestamp(0)
+     {
+     }
+ 
+-    PlatformEvent(Type type, OptionSet<Modifier> modifiers, WallTime timestamp)
++    PlatformEvent(Type type, OptionSet<Modifier> modifiers, double timestamp)
+         : m_type(type)
+         , m_modifiers(modifiers)
+         , m_timestamp(timestamp)
+     {
+     }
+ 
+-    PlatformEvent(Type type, bool shiftKey, bool ctrlKey, bool altKey, bool metaKey, WallTime timestamp)
++    PlatformEvent(Type type, bool shiftKey, bool ctrlKey, bool altKey, bool metaKey, double timestamp)
+         : m_type(type)
+         , m_timestamp(timestamp)
+     {
+@@ -129,7 +130,7 @@ protected:
+ 
+     unsigned m_type;
+     OptionSet<Modifier> m_modifiers;
+-    WallTime m_timestamp;
++    double m_timestamp;
+ };
+ 
+ } // namespace WebCore
+diff --git a/Source/WebCore/platform/PlatformKeyboardEvent.h b/Source/WebCore/platform/PlatformKeyboardEvent.h
+index 97d03af..87ba576 100644
+--- a/Source/WebCore/platform/PlatformKeyboardEvent.h
++++ b/Source/WebCore/platform/PlatformKeyboardEvent.h
+@@ -72,7 +72,7 @@ namespace WebCore {
+ #if ENABLE(KEYBOARD_CODE_ATTRIBUTE)
+         const String& code,
+ #endif
+-        const String& keyIdentifier, int windowsVirtualKeyCode, bool isAutoRepeat, bool isKeypad, bool isSystemKey, OptionSet<Modifier> modifiers, WallTime timestamp)
++        const String& keyIdentifier, int windowsVirtualKeyCode, bool isAutoRepeat, bool isKeypad, bool isSystemKey, OptionSet<Modifier> modifiers, double timestamp)
+             : PlatformEvent(type, modifiers, timestamp)
+             , m_text(text)
+             , m_unmodifiedText(unmodifiedText)
+diff --git a/Source/WebCore/platform/PlatformMouseEvent.h b/Source/WebCore/platform/PlatformMouseEvent.h
+index a4e7d58..104f539 100644
+--- a/Source/WebCore/platform/PlatformMouseEvent.h
++++ b/Source/WebCore/platform/PlatformMouseEvent.h
+@@ -61,7 +61,7 @@ const double ForceAtForceClick = 2;
+         }
+ 
+         PlatformMouseEvent(const IntPoint& position, const IntPoint& globalPosition, MouseButton button, PlatformEvent::Type type,
+-                           int clickCount, bool shiftKey, bool ctrlKey, bool altKey, bool metaKey, WallTime timestamp, double force, SyntheticClickType syntheticClickType)
++                           int clickCount, bool shiftKey, bool ctrlKey, bool altKey, bool metaKey, double timestamp, double force, SyntheticClickType syntheticClickType)
+             : PlatformEvent(type, shiftKey, ctrlKey, altKey, metaKey, timestamp)
+             , m_position(position)
+             , m_globalPosition(globalPosition)
+diff --git a/Source/WebCore/platform/PlatformWheelEvent.h b/Source/WebCore/platform/PlatformWheelEvent.h
+index 2958821..6d458be 100644
+--- a/Source/WebCore/platform/PlatformWheelEvent.h
++++ b/Source/WebCore/platform/PlatformWheelEvent.h
+@@ -70,7 +70,7 @@ public:
+     }
+ 
+     PlatformWheelEvent(IntPoint position, IntPoint globalPosition, float deltaX, float deltaY, float wheelTicksX, float wheelTicksY, PlatformWheelEventGranularity granularity, bool shiftKey, bool ctrlKey, bool altKey, bool metaKey)
+-        : PlatformEvent(PlatformEvent::Wheel, shiftKey, ctrlKey, altKey, metaKey, { })
++        : PlatformEvent(PlatformEvent::Wheel, shiftKey, ctrlKey, altKey, metaKey, 0)
+         , m_position(position)
+         , m_globalPosition(globalPosition)
+         , m_deltaX(deltaX)
+diff --git a/Source/WebCore/platform/cocoa/ScrollController.mm b/Source/WebCore/platform/cocoa/ScrollController.mm
+index 0b2b281..d379e24 100644
+--- a/Source/WebCore/platform/cocoa/ScrollController.mm
++++ b/Source/WebCore/platform/cocoa/ScrollController.mm
+@@ -179,14 +179,14 @@ bool ScrollController::handleWheelEvent(const PlatformWheelEvent& wheelEvent)
+     if (!m_momentumScrollInProgress && (momentumPhase == PlatformWheelEventPhaseBegan || momentumPhase == PlatformWheelEventPhaseChanged))
+         m_momentumScrollInProgress = true;
+ 
+-    CFTimeInterval timeDelta = wheelEvent.timestamp().secondsSinceEpoch().value() - m_lastMomentumScrollTimestamp;
++    CFTimeInterval timeDelta = wheelEvent.timestamp() - m_lastMomentumScrollTimestamp;
+     if (m_inScrollGesture || m_momentumScrollInProgress) {
+         if (m_lastMomentumScrollTimestamp && timeDelta > 0 && timeDelta < scrollVelocityZeroingTimeout) {
+             m_momentumVelocity.setWidth(eventCoalescedDeltaX / (float)timeDelta);
+             m_momentumVelocity.setHeight(eventCoalescedDeltaY / (float)timeDelta);
+-            m_lastMomentumScrollTimestamp = wheelEvent.timestamp().secondsSinceEpoch().value();
++            m_lastMomentumScrollTimestamp = wheelEvent.timestamp();
+         } else {
+-            m_lastMomentumScrollTimestamp = wheelEvent.timestamp().secondsSinceEpoch().value();
++            m_lastMomentumScrollTimestamp = wheelEvent.timestamp();
+             m_momentumVelocity = FloatSize();
+         }
+ 
+diff --git a/Source/WebCore/platform/glib/EventHandlerGLib.cpp b/Source/WebCore/platform/glib/EventHandlerGLib.cpp
+index a5e6853..bfa4c6c 100644
+--- a/Source/WebCore/platform/glib/EventHandlerGLib.cpp
++++ b/Source/WebCore/platform/glib/EventHandlerGLib.cpp
+@@ -49,7 +49,7 @@
+ namespace WebCore {
+ 
+ #if ENABLE(DRAG_SUPPORT)
+-const Seconds EventHandler::TextDragDelay { 0_s };
++const double EventHandler::TextDragDelay = 0.0;
+ #endif
+ 
+ bool EventHandler::tabsToAllFormControls(KeyboardEvent&) const
+diff --git a/Source/WebCore/platform/gtk/PlatformKeyboardEventGtk.cpp b/Source/WebCore/platform/gtk/PlatformKeyboardEventGtk.cpp
+index 4fc13be..d9b95a9 100644
+--- a/Source/WebCore/platform/gtk/PlatformKeyboardEventGtk.cpp
++++ b/Source/WebCore/platform/gtk/PlatformKeyboardEventGtk.cpp
+@@ -1259,7 +1259,7 @@ static OptionSet<PlatformEvent::Modifier> modifiersForGdkKeyEvent(GdkEventKey* e
+ 
+ // Keep this in sync with the other platform event constructors
+ PlatformKeyboardEvent::PlatformKeyboardEvent(GdkEventKey* event, const CompositionResults& compositionResults)
+-    : PlatformEvent(eventTypeForGdkKeyEvent(event), modifiersForGdkKeyEvent(event), WallTime::now())
++    : PlatformEvent(eventTypeForGdkKeyEvent(event), modifiersForGdkKeyEvent(event), currentTime())
+     , m_text(compositionResults.simpleString.length() ? compositionResults.simpleString : singleCharacterString(event->keyval))
+     , m_unmodifiedText(m_text)
+     , m_key(keyValueForGdkKeyCode(event->keyval))
+diff --git a/Source/WebCore/platform/gtk/PlatformMouseEventGtk.cpp b/Source/WebCore/platform/gtk/PlatformMouseEventGtk.cpp
+index ec91afe..b692485 100644
+--- a/Source/WebCore/platform/gtk/PlatformMouseEventGtk.cpp
++++ b/Source/WebCore/platform/gtk/PlatformMouseEventGtk.cpp
+@@ -38,7 +38,7 @@ namespace WebCore {
+ // Keep this in sync with the other platform event constructors
+ PlatformMouseEvent::PlatformMouseEvent(GdkEventButton* event)
+ {
+-    m_timestamp = WallTime::fromRawSeconds(event->time);
++    m_timestamp = event->time;
+     m_position = IntPoint((int)event->x, (int)event->y);
+     m_globalPosition = IntPoint((int)event->x_root, (int)event->y_root);
+     m_button = NoButton;
+@@ -87,7 +87,7 @@ PlatformMouseEvent::PlatformMouseEvent(GdkEventButton* event)
+ 
+ PlatformMouseEvent::PlatformMouseEvent(GdkEventMotion* motion)
+ {
+-    m_timestamp = WallTime::fromRawSeconds(motion->time);
++    m_timestamp = motion->time;
+     m_position = IntPoint((int)motion->x, (int)motion->y);
+     m_globalPosition = IntPoint((int)motion->x_root, (int)motion->y_root);
+     m_button = NoButton;
+diff --git a/Source/WebCore/platform/gtk/PlatformWheelEventGtk.cpp b/Source/WebCore/platform/gtk/PlatformWheelEventGtk.cpp
+index 4e6d792..3b0e590 100644
+--- a/Source/WebCore/platform/gtk/PlatformWheelEventGtk.cpp
++++ b/Source/WebCore/platform/gtk/PlatformWheelEventGtk.cpp
+@@ -33,7 +33,7 @@
+ #include "Scrollbar.h"
+ #include <gdk/gdk.h>
+ #include <gtk/gtk.h>
+-#include <wtf/WallTime.h>
++#include <wtf/CurrentTime.h>
+ 
+ namespace WebCore {
+ 
+@@ -43,7 +43,7 @@ PlatformWheelEvent::PlatformWheelEvent(GdkEventScroll* event)
+     static const float delta = 1;
+ 
+     m_type = PlatformEvent::Wheel;
+-    m_timestamp = WallTime::now();
++    m_timestamp = currentTime();
+ 
+     if (event->state & GDK_SHIFT_MASK)
+         m_modifiers |= Modifier::ShiftKey;
+diff --git a/Source/WebCore/platform/gtk/ScrollAnimatorGtk.cpp b/Source/WebCore/platform/gtk/ScrollAnimatorGtk.cpp
+index 43df230..c2aa9dc 100644
+--- a/Source/WebCore/platform/gtk/ScrollAnimatorGtk.cpp
++++ b/Source/WebCore/platform/gtk/ScrollAnimatorGtk.cpp
+@@ -112,8 +112,8 @@ FloatPoint ScrollAnimatorGtk::computeVelocity()
+     if (m_scrollHistory.isEmpty())
+         return { };
+ 
+-    auto first = m_scrollHistory[0].timestamp();
+-    auto last = m_scrollHistory.rbegin()->timestamp();
++    double first = m_scrollHistory[0].timestamp();
++    double last = m_scrollHistory.rbegin()->timestamp();
+ 
+     if (last == first)
+         return { };
+@@ -124,7 +124,7 @@ FloatPoint ScrollAnimatorGtk::computeVelocity()
+ 
+     m_scrollHistory.clear();
+ 
+-    return FloatPoint(accumDelta.x() * -1000 / (last - first).value(), accumDelta.y() * -1000 / (last - first).value());
++    return FloatPoint(accumDelta.x() * -1000 / (last - first), accumDelta.y() * -1000 / (last - first));
+ }
+ 
+ bool ScrollAnimatorGtk::handleWheelEvent(const PlatformWheelEvent& event)
+@@ -132,7 +132,7 @@ bool ScrollAnimatorGtk::handleWheelEvent(const PlatformWheelEvent& event)
+     m_kineticAnimation->stop();
+ 
+     m_scrollHistory.removeAllMatching([&event] (PlatformWheelEvent& otherEvent) -> bool {
+-        return (event.timestamp() - otherEvent.timestamp()) > scrollCaptureThreshold;
++        return Seconds::fromMilliseconds(event.timestamp() - otherEvent.timestamp()) > scrollCaptureThreshold;
+     });
+ 
+     if (event.isEndOfNonMomentumScroll()) {
+diff --git a/Source/WebCore/platform/ios/PlatformEventFactoryIOS.mm b/Source/WebCore/platform/ios/PlatformEventFactoryIOS.mm
+index 48c8403..062f982 100644
+--- a/Source/WebCore/platform/ios/PlatformEventFactoryIOS.mm
++++ b/Source/WebCore/platform/ios/PlatformEventFactoryIOS.mm
+@@ -32,7 +32,7 @@
+ #import "WAKAppKitStubs.h"
+ #import "WebEvent.h"
+ #import "WindowsKeyboardCodes.h"
+-#import <wtf/WallTime.h>
++#import <wtf/CurrentTime.h>
+ 
+ namespace WebCore {
+ 
+@@ -85,7 +85,7 @@ public:
+     PlatformMouseEventBuilder(WebEvent *event)
+     {
+         m_type = mouseEventType(event);
+-        m_timestamp = WallTime::now();
++        m_timestamp = currentTime();
+ 
+         m_position = pointForEvent(event);
+         m_globalPosition = globalPointForEvent(event);
+@@ -106,7 +106,7 @@ public:
+         ASSERT(event.type == WebEventScrollWheel);
+ 
+         m_type = PlatformEvent::Wheel;
+-        m_timestamp = WallTime::now();
++        m_timestamp = currentTime();
+ 
+         m_position = pointForEvent(event);
+         m_globalPosition = globalPointForEvent(event);
+@@ -369,7 +369,7 @@ public:
+ 
+         m_type = (event.type == WebEventKeyUp ? PlatformEvent::KeyUp : PlatformEvent::KeyDown);
+         m_modifiers = modifiersForEvent(event);
+-        m_timestamp = WallTime::now();
++        m_timestamp = currentTime();
+ 
+         m_text = event.characters;
+         m_unmodifiedText = event.charactersIgnoringModifiers;
+@@ -475,7 +475,7 @@ public:
+     {
+         m_type = touchEventType(event);
+         m_modifiers = modifiersForEvent(event);
+-        m_timestamp = WallTime::fromRawSeconds(event.timestamp);
++        m_timestamp = event.timestamp;
+ 
+         m_gestureScale = event.gestureScale;
+         m_gestureRotation = event.gestureRotation;
+@@ -496,7 +496,7 @@ public:
+     PlatformTouchEventBuilder(PlatformEvent::Type type, IntPoint location)
+     {
+         m_type = type;
+-        m_timestamp = WallTime::now();
++        m_timestamp = currentTime();
+         
+         m_gestureScale = 1;
+         m_gestureRotation = 0;
+diff --git a/Source/WebCore/platform/mac/PlatformEventFactoryMac.h b/Source/WebCore/platform/mac/PlatformEventFactoryMac.h
+index c40ec21..d20a2d8 100644
+--- a/Source/WebCore/platform/mac/PlatformEventFactoryMac.h
++++ b/Source/WebCore/platform/mac/PlatformEventFactoryMac.h
+@@ -48,7 +48,7 @@ WEBCORE_EXPORT int windowsKeyCodeForKeyEvent(NSEvent *);
+ WEBCORE_EXPORT String keyIdentifierForKeyEvent(NSEvent *);
+ WEBCORE_EXPORT String keyForKeyEvent(NSEvent *);
+ WEBCORE_EXPORT String codeForKeyEvent(NSEvent *);
+-WEBCORE_EXPORT WallTime eventTimeStampSince1970(NSEvent *);
++WEBCORE_EXPORT double eventTimeStampSince1970(NSEvent *);
+     
+ WEBCORE_EXPORT void getWheelEventDeltas(NSEvent *, float& deltaX, float& deltaY, BOOL& continuous);
+ WEBCORE_EXPORT UInt8 keyCharForEvent(NSEvent *);
+diff --git a/Source/WebCore/platform/mac/PlatformEventFactoryMac.mm b/Source/WebCore/platform/mac/PlatformEventFactoryMac.mm
+index 7941cd6..2b18224 100644
+--- a/Source/WebCore/platform/mac/PlatformEventFactoryMac.mm
++++ b/Source/WebCore/platform/mac/PlatformEventFactoryMac.mm
+@@ -39,7 +39,6 @@
+ #import <pal/spi/mac/NSEventSPI.h>
+ #import <pal/spi/mac/NSMenuSPI.h>
+ #import <wtf/ASCIICType.h>
+-#import <wtf/WallTime.h>
+ 
+ namespace WebCore {
+ 
+@@ -618,9 +617,9 @@ static CFTimeInterval cachedStartupTimeIntervalSince1970()
+     return systemStartupTime;
+ }
+ 
+-WallTime eventTimeStampSince1970(NSEvent* event)
++double eventTimeStampSince1970(NSEvent* event)
+ {
+-    return WallTime::fromRawSeconds(static_cast<double>(cachedStartupTimeIntervalSince1970() + [event timestamp]));
++    return static_cast<double>(cachedStartupTimeIntervalSince1970() + [event timestamp]);
+ }
+ 
+ static inline bool isKeyUpEvent(NSEvent *event)
+diff --git a/Source/WebCore/platform/win/KeyEventWin.cpp b/Source/WebCore/platform/win/KeyEventWin.cpp
+index 62ccac3..6555aef 100644
+--- a/Source/WebCore/platform/win/KeyEventWin.cpp
++++ b/Source/WebCore/platform/win/KeyEventWin.cpp
+@@ -220,7 +220,7 @@ static inline String singleCharacterString(UChar c)
+ }
+ 
+ PlatformKeyboardEvent::PlatformKeyboardEvent(HWND, WPARAM code, LPARAM keyData, Type type, bool systemKey)
+-    : PlatformEvent(type, GetKeyState(VK_SHIFT) & HIGH_BIT_MASK_SHORT, GetKeyState(VK_CONTROL) & HIGH_BIT_MASK_SHORT, GetKeyState(VK_MENU) & HIGH_BIT_MASK_SHORT, false, WallTime::fromRawSeconds(::GetTickCount() * 0.001))
++    : PlatformEvent(type, GetKeyState(VK_SHIFT) & HIGH_BIT_MASK_SHORT, GetKeyState(VK_CONTROL) & HIGH_BIT_MASK_SHORT, GetKeyState(VK_MENU) & HIGH_BIT_MASK_SHORT, false, ::GetTickCount() * 0.001)
+     , m_text((type == PlatformEvent::Char) ? singleCharacterString(code) : String())
+     , m_unmodifiedText((type == PlatformEvent::Char) ? singleCharacterString(code) : String())
+     , m_keyIdentifier((type == PlatformEvent::Char) ? String() : keyIdentifierForWindowsKeyCode(code))
+diff --git a/Source/WebCore/platform/win/PlatformMouseEventWin.cpp b/Source/WebCore/platform/win/PlatformMouseEventWin.cpp
+index ea247c9..000fd3a 100644
+--- a/Source/WebCore/platform/win/PlatformMouseEventWin.cpp
++++ b/Source/WebCore/platform/win/PlatformMouseEventWin.cpp
+@@ -81,7 +81,7 @@ static PlatformEvent::Type messageToEventType(UINT message)
+ }
+ 
+ PlatformMouseEvent::PlatformMouseEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, bool didActivateWebView)
+-    : PlatformEvent(messageToEventType(message), wParam & MK_SHIFT, wParam & MK_CONTROL, GetKeyState(VK_MENU) & HIGH_BIT_MASK_SHORT, GetKeyState(VK_MENU) & HIGH_BIT_MASK_SHORT, WallTime::now())
++    : PlatformEvent(messageToEventType(message), wParam & MK_SHIFT, wParam & MK_CONTROL, GetKeyState(VK_MENU) & HIGH_BIT_MASK_SHORT, GetKeyState(VK_MENU) & HIGH_BIT_MASK_SHORT, currentTime())
+     , m_position(positionForEvent(hWnd, lParam))
+     , m_globalPosition(globalPositionForEvent(hWnd, lParam))
+     , m_clickCount(0)
+diff --git a/Source/WebCore/platform/win/WheelEventWin.cpp b/Source/WebCore/platform/win/WheelEventWin.cpp
+index 6dbea20..9ef248b 100644
+--- a/Source/WebCore/platform/win/WheelEventWin.cpp
++++ b/Source/WebCore/platform/win/WheelEventWin.cpp
+@@ -73,7 +73,7 @@ static int verticalScrollLines()
+ }
+ 
+ PlatformWheelEvent::PlatformWheelEvent(HWND hWnd, const FloatSize& delta, const FloatPoint& location)
+-    : PlatformEvent(PlatformEvent::Wheel, false, false, false, false, WallTime::fromRawSeconds(::GetTickCount() * 0.001))
++    : PlatformEvent(PlatformEvent::Wheel, false, false, false, false, ::GetTickCount() * 0.001)
+     , m_directionInvertedFromDevice(false)
+ {
+     m_deltaX = delta.width();
+@@ -95,7 +95,7 @@ PlatformWheelEvent::PlatformWheelEvent(HWND hWnd, const FloatSize& delta, const
+ }
+ 
+ PlatformWheelEvent::PlatformWheelEvent(HWND hWnd, WPARAM wParam, LPARAM lParam, bool isMouseHWheel)
+-    : PlatformEvent(PlatformEvent::Wheel, wParam & MK_SHIFT, wParam & MK_CONTROL, GetKeyState(VK_MENU) & HIGH_BIT_MASK_SHORT, GetKeyState(VK_MENU) & HIGH_BIT_MASK_SHORT, WallTime::fromRawSeconds(::GetTickCount() * 0.001))
++    : PlatformEvent(PlatformEvent::Wheel, wParam & MK_SHIFT, wParam & MK_CONTROL, GetKeyState(VK_MENU) & HIGH_BIT_MASK_SHORT, GetKeyState(VK_MENU) & HIGH_BIT_MASK_SHORT, ::GetTickCount() * 0.001)
+     , m_position(positionForEvent(hWnd, lParam))
+     , m_globalPosition(globalPositionForEvent(hWnd, lParam))
+     , m_directionInvertedFromDevice(false)
+diff --git a/Source/WebKit/Shared/WebCoreArgumentCoders.cpp b/Source/WebKit/Shared/WebCoreArgumentCoders.cpp
+index 5d518a9..fdbcf0b 100644
+--- a/Source/WebKit/Shared/WebCoreArgumentCoders.cpp
++++ b/Source/WebKit/Shared/WebCoreArgumentCoders.cpp
+@@ -75,7 +75,6 @@
+ #include <pal/SessionID.h>
+ #include <wtf/MonotonicTime.h>
+ #include <wtf/Seconds.h>
+-#include <wtf/WallTime.h>
+ #include <wtf/text/CString.h>
+ #include <wtf/text/StringHash.h>
+ 
+@@ -163,21 +162,6 @@ bool ArgumentCoder<MonotonicTime>::decode(Decoder& decoder, MonotonicTime& time)
+     return true;
+ }
+ 
+-void ArgumentCoder<WallTime>::encode(Encoder& encoder, const WallTime& time)
+-{
+-    encoder << time.secondsSinceEpoch().value();
+-}
+-
+-bool ArgumentCoder<WallTime>::decode(Decoder& decoder, WallTime& time)
+-{
+-    double value;
+-    if (!decoder.decode(value))
+-        return false;
+-
+-    time = WallTime::fromRawSeconds(value);
+-    return true;
+-}
+-
+ void ArgumentCoder<Seconds>::encode(Encoder& encoder, const Seconds& seconds)
+ {
+     encoder << seconds.value();
+diff --git a/Source/WebKit/Shared/WebCoreArgumentCoders.h b/Source/WebKit/Shared/WebCoreArgumentCoders.h
+index c3d7ea0..d754cea 100644
+--- a/Source/WebKit/Shared/WebCoreArgumentCoders.h
++++ b/Source/WebKit/Shared/WebCoreArgumentCoders.h
+@@ -43,7 +43,6 @@
+ namespace WTF {
+ class MonotonicTime;
+ class Seconds;
+-class WallTime;
+ }
+ 
+ namespace WebCore {
+@@ -165,11 +164,6 @@ template<> struct ArgumentCoder<WTF::MonotonicTime> {
+     static bool decode(Decoder&, WTF::MonotonicTime&);
+ };
+ 
+-template<> struct ArgumentCoder<WTF::WallTime> {
+-    static void encode(Encoder&, const WTF::WallTime&);
+-    static bool decode(Decoder&, WTF::WallTime&);
+-};
+-
+ template<> struct ArgumentCoder<WTF::Seconds> {
+     static void encode(Encoder&, const WTF::Seconds&);
+     static bool decode(Decoder&, WTF::Seconds&);
+diff --git a/Source/WebKit/Shared/WebEvent.cpp b/Source/WebKit/Shared/WebEvent.cpp
+index 5a086f9..507bc16 100644
+--- a/Source/WebKit/Shared/WebEvent.cpp
++++ b/Source/WebKit/Shared/WebEvent.cpp
+@@ -28,17 +28,17 @@
+ 
+ #include "Decoder.h"
+ #include "Encoder.h"
+-#include "WebCoreArgumentCoders.h"
+ 
+ namespace WebKit {
+ 
+ WebEvent::WebEvent()
+     : m_type(static_cast<uint32_t>(NoType))
+     , m_modifiers(0)
++    , m_timestamp(0)
+ {
+ }
+ 
+-WebEvent::WebEvent(Type type, Modifiers modifiers, WallTime timestamp)
++WebEvent::WebEvent(Type type, Modifiers modifiers, double timestamp)
+     : m_type(type)
+     , m_modifiers(modifiers)
+     , m_timestamp(timestamp)
+diff --git a/Source/WebKit/Shared/WebEvent.h b/Source/WebKit/Shared/WebEvent.h
+index 2d459f6..210186d 100644
+--- a/Source/WebKit/Shared/WebEvent.h
++++ b/Source/WebKit/Shared/WebEvent.h
+@@ -34,7 +34,6 @@
+ #include <WebCore/FloatSize.h>
+ #include <WebCore/IntPoint.h>
+ #include <WebCore/IntSize.h>
+-#include <wtf/WallTime.h>
+ #include <wtf/text/WTFString.h>
+ 
+ namespace IPC {
+@@ -105,12 +104,12 @@ public:
+ 
+     Modifiers modifiers() const { return static_cast<Modifiers>(m_modifiers); }
+ 
+-    WallTime timestamp() const { return m_timestamp; }
++    double timestamp() const { return m_timestamp; }
+ 
+ protected:
+     WebEvent();
+ 
+-    WebEvent(Type, Modifiers, WallTime timestamp);
++    WebEvent(Type, Modifiers, double timestamp);
+ 
+     void encode(IPC::Encoder&) const;
+     static bool decode(IPC::Decoder&, WebEvent&);
+@@ -118,7 +117,7 @@ protected:
+ private:
+     uint32_t m_type; // Type
+     uint32_t m_modifiers; // Modifiers
+-    WallTime m_timestamp;
++    double m_timestamp;
+ };
+ 
+ // FIXME: Move this class to its own header file.
+@@ -136,9 +135,9 @@ public:
+     WebMouseEvent();
+ 
+ #if PLATFORM(MAC)
+-    WebMouseEvent(Type, Button, const WebCore::IntPoint& position, const WebCore::IntPoint& globalPosition, float deltaX, float deltaY, float deltaZ, int clickCount, Modifiers, WallTime timestamp, double force, SyntheticClickType = NoTap, int eventNumber = -1, int menuType = 0);
++    WebMouseEvent(Type, Button, const WebCore::IntPoint& position, const WebCore::IntPoint& globalPosition, float deltaX, float deltaY, float deltaZ, int clickCount, Modifiers, double timestamp, double force, SyntheticClickType = NoTap, int eventNumber = -1, int menuType = 0);
+ #else
+-    WebMouseEvent(Type, Button, const WebCore::IntPoint& position, const WebCore::IntPoint& globalPosition, float deltaX, float deltaY, float deltaZ, int clickCount, Modifiers, WallTime timestamp, double force = 0, SyntheticClickType = NoTap);
++    WebMouseEvent(Type, Button, const WebCore::IntPoint& position, const WebCore::IntPoint& globalPosition, float deltaX, float deltaY, float deltaZ, int clickCount, Modifiers, double timestamp, double force = 0, SyntheticClickType = NoTap);
+ #endif
+ 
+     Button button() const { return static_cast<Button>(m_button); }
+@@ -198,11 +197,11 @@ public:
+ 
+     WebWheelEvent() { }
+ 
+-    WebWheelEvent(Type, const WebCore::IntPoint& position, const WebCore::IntPoint& globalPosition, const WebCore::FloatSize& delta, const WebCore::FloatSize& wheelTicks, Granularity, Modifiers, WallTime timestamp);
++    WebWheelEvent(Type, const WebCore::IntPoint& position, const WebCore::IntPoint& globalPosition, const WebCore::FloatSize& delta, const WebCore::FloatSize& wheelTicks, Granularity, Modifiers, double timestamp);
+ #if PLATFORM(COCOA)
+-    WebWheelEvent(Type, const WebCore::IntPoint& position, const WebCore::IntPoint& globalPosition, const WebCore::FloatSize& delta, const WebCore::FloatSize& wheelTicks, Granularity, bool directionInvertedFromDevice, Phase, Phase momentumPhase, bool hasPreciseScrollingDeltas, uint32_t scrollCount, const WebCore::FloatSize& unacceleratedScrollingDelta, Modifiers, WallTime timestamp);
++    WebWheelEvent(Type, const WebCore::IntPoint& position, const WebCore::IntPoint& globalPosition, const WebCore::FloatSize& delta, const WebCore::FloatSize& wheelTicks, Granularity, bool directionInvertedFromDevice, Phase, Phase momentumPhase, bool hasPreciseScrollingDeltas, uint32_t scrollCount, const WebCore::FloatSize& unacceleratedScrollingDelta, Modifiers, double timestamp);
+ #elif PLATFORM(GTK)
+-    WebWheelEvent(Type, const WebCore::IntPoint& position, const WebCore::IntPoint& globalPosition, const WebCore::FloatSize& delta, const WebCore::FloatSize& wheelTicks, Phase, Phase momentumPhase, Granularity, Modifiers, WallTime timestamp);
++    WebWheelEvent(Type, const WebCore::IntPoint& position, const WebCore::IntPoint& globalPosition, const WebCore::FloatSize& delta, const WebCore::FloatSize& wheelTicks, Phase, Phase momentumPhase, Granularity, Modifiers, double timestamp);
+ #endif
+ 
+     const WebCore::IntPoint position() const { return m_position; }
+@@ -251,13 +250,13 @@ public:
+     ~WebKeyboardEvent();
+ 
+ #if USE(APPKIT)
+-    WebKeyboardEvent(Type, const String& text, const String& unmodifiedText, const String& key, const String& code, const String& keyIdentifier, int windowsVirtualKeyCode, int nativeVirtualKeyCode, int macCharCode, bool handledByInputMethod, const Vector<WebCore::KeypressCommand>&, bool isAutoRepeat, bool isKeypad, bool isSystemKey, Modifiers, WallTime timestamp);
++    WebKeyboardEvent(Type, const String& text, const String& unmodifiedText, const String& key, const String& code, const String& keyIdentifier, int windowsVirtualKeyCode, int nativeVirtualKeyCode, int macCharCode, bool handledByInputMethod, const Vector<WebCore::KeypressCommand>&, bool isAutoRepeat, bool isKeypad, bool isSystemKey, Modifiers, double timestamp);
+ #elif PLATFORM(GTK)
+-    WebKeyboardEvent(Type, const String& text, const String& key, const String& code, const String& keyIdentifier, int windowsVirtualKeyCode, int nativeVirtualKeyCode, bool handledByInputMethod, Vector<String>&& commands, bool isKeypad, Modifiers, WallTime timestamp);
++    WebKeyboardEvent(Type, const String& text, const String& key, const String& code, const String& keyIdentifier, int windowsVirtualKeyCode, int nativeVirtualKeyCode, bool handledByInputMethod, Vector<String>&& commands, bool isKeypad, Modifiers, double timestamp);
+ #elif PLATFORM(IOS)
+-    WebKeyboardEvent(Type, const String& text, const String& unmodifiedText, const String& key, const String& code, const String& keyIdentifier, int windowsVirtualKeyCode, int nativeVirtualKeyCode, int macCharCode, bool isAutoRepeat, bool isKeypad, bool isSystemKey, Modifiers, WallTime timestamp);
++    WebKeyboardEvent(Type, const String& text, const String& unmodifiedText, const String& key, const String& code, const String& keyIdentifier, int windowsVirtualKeyCode, int nativeVirtualKeyCode, int macCharCode, bool isAutoRepeat, bool isKeypad, bool isSystemKey, Modifiers, double timestamp);
+ #else
+-    WebKeyboardEvent(Type, const String& text, const String& unmodifiedText, const String& keyIdentifier, int windowsVirtualKeyCode, int nativeVirtualKeyCode, int macCharCode, bool isAutoRepeat, bool isKeypad, bool isSystemKey, Modifiers, WallTime timestamp);
++    WebKeyboardEvent(Type, const String& text, const String& unmodifiedText, const String& keyIdentifier, int windowsVirtualKeyCode, int nativeVirtualKeyCode, int macCharCode, bool isAutoRepeat, bool isKeypad, bool isSystemKey, Modifiers, double timestamp);
+ #endif
+ 
+     const String& text() const { return m_text; }
+@@ -383,7 +382,7 @@ private:
+ class WebTouchEvent : public WebEvent {
+ public:
+     WebTouchEvent() { }
+-    WebTouchEvent(WebEvent::Type type, Modifiers modifiers, WallTime timestamp, const Vector<WebPlatformTouchPoint>& touchPoints, WebCore::IntPoint position, bool isPotentialTap, bool isGesture, float gestureScale, float gestureRotation)
++    WebTouchEvent(WebEvent::Type type, Modifiers modifiers, double timestamp, const Vector<WebPlatformTouchPoint>& touchPoints, WebCore::IntPoint position, bool isPotentialTap, bool isGesture, float gestureScale, float gestureRotation)
+         : WebEvent(type, modifiers, timestamp)
+         , m_touchPoints(touchPoints)
+         , m_position(position)
+@@ -472,7 +471,7 @@ private:
+ class WebTouchEvent : public WebEvent {
+ public:
+     WebTouchEvent() { }
+-    WebTouchEvent(Type, Vector<WebPlatformTouchPoint>&&, Modifiers, WallTime timestamp);
++    WebTouchEvent(Type, Vector<WebPlatformTouchPoint>&&, Modifiers, double timestamp);
+ 
+     const Vector<WebPlatformTouchPoint>& touchPoints() const { return m_touchPoints; }
+ 
+diff --git a/Source/WebKit/Shared/WebKeyboardEvent.cpp b/Source/WebKit/Shared/WebKeyboardEvent.cpp
+index 0cf2719..eb4771f 100644
+--- a/Source/WebKit/Shared/WebKeyboardEvent.cpp
++++ b/Source/WebKit/Shared/WebKeyboardEvent.cpp
+@@ -37,7 +37,7 @@ WebKeyboardEvent::WebKeyboardEvent()
+ 
+ #if USE(APPKIT)
+ 
+-WebKeyboardEvent::WebKeyboardEvent(Type type, const String& text, const String& unmodifiedText, const String& key, const String& code, const String& keyIdentifier, int windowsVirtualKeyCode, int nativeVirtualKeyCode, int macCharCode, bool handledByInputMethod, const Vector<WebCore::KeypressCommand>& commands, bool isAutoRepeat, bool isKeypad, bool isSystemKey, Modifiers modifiers, WallTime timestamp)
++WebKeyboardEvent::WebKeyboardEvent(Type type, const String& text, const String& unmodifiedText, const String& key, const String& code, const String& keyIdentifier, int windowsVirtualKeyCode, int nativeVirtualKeyCode, int macCharCode, bool handledByInputMethod, const Vector<WebCore::KeypressCommand>& commands, bool isAutoRepeat, bool isKeypad, bool isSystemKey, Modifiers modifiers, double timestamp)
+     : WebEvent(type, modifiers, timestamp)
+     , m_text(text)
+     , m_unmodifiedText(unmodifiedText)
+@@ -62,7 +62,7 @@ WebKeyboardEvent::WebKeyboardEvent(Type type, const String& text, const String&
+ 
+ #elif PLATFORM(GTK)
+ 
+-WebKeyboardEvent::WebKeyboardEvent(Type type, const String& text, const String& key, const String& code, const String& keyIdentifier, int windowsVirtualKeyCode, int nativeVirtualKeyCode, bool handledByInputMethod, Vector<String>&& commands, bool isKeypad, Modifiers modifiers, WallTime timestamp)
++WebKeyboardEvent::WebKeyboardEvent(Type type, const String& text, const String& key, const String& code, const String& keyIdentifier, int windowsVirtualKeyCode, int nativeVirtualKeyCode, bool handledByInputMethod, Vector<String>&& commands, bool isKeypad, Modifiers modifiers, double timestamp)
+     : WebEvent(type, modifiers, timestamp)
+     , m_text(text)
+     , m_unmodifiedText(text)
+@@ -83,7 +83,7 @@ WebKeyboardEvent::WebKeyboardEvent(Type type, const String& text, const String&
+ 
+ #elif PLATFORM(IOS)
+ 
+-WebKeyboardEvent::WebKeyboardEvent(Type type, const String& text, const String& unmodifiedText, const String& key, const String& code, const String& keyIdentifier, int windowsVirtualKeyCode, int nativeVirtualKeyCode, int macCharCode, bool isAutoRepeat, bool isKeypad, bool isSystemKey, Modifiers modifiers, WallTime timestamp)
++WebKeyboardEvent::WebKeyboardEvent(Type type, const String& text, const String& unmodifiedText, const String& key, const String& code, const String& keyIdentifier, int windowsVirtualKeyCode, int nativeVirtualKeyCode, int macCharCode, bool isAutoRepeat, bool isKeypad, bool isSystemKey, Modifiers modifiers, double timestamp)
+     : WebEvent(type, modifiers, timestamp)
+     , m_text(text)
+     , m_unmodifiedText(unmodifiedText)
+@@ -106,7 +106,7 @@ WebKeyboardEvent::WebKeyboardEvent(Type type, const String& text, const String&
+ 
+ #else
+ 
+-WebKeyboardEvent::WebKeyboardEvent(Type type, const String& text, const String& unmodifiedText, const String& keyIdentifier, int windowsVirtualKeyCode, int nativeVirtualKeyCode, int macCharCode, bool isAutoRepeat, bool isKeypad, bool isSystemKey, Modifiers modifiers, WallTime timestamp)
++WebKeyboardEvent::WebKeyboardEvent(Type type, const String& text, const String& unmodifiedText, const String& keyIdentifier, int windowsVirtualKeyCode, int nativeVirtualKeyCode, int macCharCode, bool isAutoRepeat, bool isKeypad, bool isSystemKey, Modifiers modifiers, double timestamp)
+     : WebEvent(type, modifiers, timestamp)
+     , m_text(text)
+     , m_unmodifiedText(unmodifiedText)
+diff --git a/Source/WebKit/Shared/WebMouseEvent.cpp b/Source/WebKit/Shared/WebMouseEvent.cpp
+index 0f77fae..8da8d3f 100644
+--- a/Source/WebKit/Shared/WebMouseEvent.cpp
++++ b/Source/WebKit/Shared/WebMouseEvent.cpp
+@@ -47,9 +47,9 @@ WebMouseEvent::WebMouseEvent()
+ }
+ 
+ #if PLATFORM(MAC)
+-WebMouseEvent::WebMouseEvent(Type type, Button button, const IntPoint& position, const IntPoint& globalPosition, float deltaX, float deltaY, float deltaZ, int clickCount, Modifiers modifiers, WallTime timestamp, double force, SyntheticClickType syntheticClickType, int eventNumber, int menuType)
++WebMouseEvent::WebMouseEvent(Type type, Button button, const IntPoint& position, const IntPoint& globalPosition, float deltaX, float deltaY, float deltaZ, int clickCount, Modifiers modifiers, double timestamp, double force, SyntheticClickType syntheticClickType, int eventNumber, int menuType)
+ #else
+-WebMouseEvent::WebMouseEvent(Type type, Button button, const IntPoint& position, const IntPoint& globalPosition, float deltaX, float deltaY, float deltaZ, int clickCount, Modifiers modifiers, WallTime timestamp, double force, SyntheticClickType syntheticClickType)
++WebMouseEvent::WebMouseEvent(Type type, Button button, const IntPoint& position, const IntPoint& globalPosition, float deltaX, float deltaY, float deltaZ, int clickCount, Modifiers modifiers, double timestamp, double force, SyntheticClickType syntheticClickType)
+ #endif
+     : WebEvent(type, modifiers, timestamp)
+     , m_button(button)
+diff --git a/Source/WebKit/Shared/WebTouchEvent.cpp b/Source/WebKit/Shared/WebTouchEvent.cpp
+index 7aea0e7..b9aacba 100644
+--- a/Source/WebKit/Shared/WebTouchEvent.cpp
++++ b/Source/WebKit/Shared/WebTouchEvent.cpp
+@@ -32,7 +32,7 @@
+ 
+ namespace WebKit {
+ 
+-WebTouchEvent::WebTouchEvent(WebEvent::Type type, Vector<WebPlatformTouchPoint>&& touchPoints, Modifiers modifiers, WallTime timestamp)
++WebTouchEvent::WebTouchEvent(WebEvent::Type type, Vector<WebPlatformTouchPoint>&& touchPoints, Modifiers modifiers, double timestamp)
+     : WebEvent(type, modifiers, timestamp)
+     , m_touchPoints(WTFMove(touchPoints))
+ {
+diff --git a/Source/WebKit/Shared/WebWheelEvent.cpp b/Source/WebKit/Shared/WebWheelEvent.cpp
+index 4e13e89..13fe48d 100644
+--- a/Source/WebKit/Shared/WebWheelEvent.cpp
++++ b/Source/WebKit/Shared/WebWheelEvent.cpp
+@@ -32,7 +32,7 @@ using namespace WebCore;
+ 
+ namespace WebKit {    
+ 
+-WebWheelEvent::WebWheelEvent(Type type, const IntPoint& position, const IntPoint& globalPosition, const FloatSize& delta, const FloatSize& wheelTicks, Granularity granularity, Modifiers modifiers, WallTime timestamp)
++WebWheelEvent::WebWheelEvent(Type type, const IntPoint& position, const IntPoint& globalPosition, const FloatSize& delta, const FloatSize& wheelTicks, Granularity granularity, Modifiers modifiers, double timestamp)
+     : WebEvent(type, modifiers, timestamp)
+     , m_position(position)
+     , m_globalPosition(globalPosition)
+@@ -50,7 +50,7 @@ WebWheelEvent::WebWheelEvent(Type type, const IntPoint& position, const IntPoint
+ }
+ 
+ #if PLATFORM(COCOA)
+-WebWheelEvent::WebWheelEvent(Type type, const IntPoint& position, const IntPoint& globalPosition, const FloatSize& delta, const FloatSize& wheelTicks, Granularity granularity, bool directionInvertedFromDevice, Phase phase, Phase momentumPhase, bool hasPreciseScrollingDeltas, uint32_t scrollCount, const WebCore::FloatSize& unacceleratedScrollingDelta, Modifiers modifiers, WallTime timestamp)
++WebWheelEvent::WebWheelEvent(Type type, const IntPoint& position, const IntPoint& globalPosition, const FloatSize& delta, const FloatSize& wheelTicks, Granularity granularity, bool directionInvertedFromDevice, Phase phase, Phase momentumPhase, bool hasPreciseScrollingDeltas, uint32_t scrollCount, const WebCore::FloatSize& unacceleratedScrollingDelta, Modifiers modifiers, double timestamp)
+     : WebEvent(type, modifiers, timestamp)
+     , m_position(position)
+     , m_globalPosition(globalPosition)
+@@ -67,7 +67,7 @@ WebWheelEvent::WebWheelEvent(Type type, const IntPoint& position, const IntPoint
+     ASSERT(isWheelEventType(type));
+ }
+ #elif PLATFORM(GTK)
+-WebWheelEvent::WebWheelEvent(Type type, const IntPoint& position, const IntPoint& globalPosition, const FloatSize& delta, const FloatSize& wheelTicks, Phase phase, Phase momentumPhase, Granularity granularity, Modifiers modifiers, WallTime timestamp)
++WebWheelEvent::WebWheelEvent(Type type, const IntPoint& position, const IntPoint& globalPosition, const FloatSize& delta, const FloatSize& wheelTicks, Phase phase, Phase momentumPhase, Granularity granularity, Modifiers modifiers, double timestamp)
+     : WebEvent(type, modifiers, timestamp)
+     , m_position(position)
+     , m_globalPosition(globalPosition)
+diff --git a/Source/WebKit/Shared/gtk/WebEventFactory.cpp b/Source/WebKit/Shared/gtk/WebEventFactory.cpp
+index bcea329..68d6d38 100644
+--- a/Source/WebKit/Shared/gtk/WebEventFactory.cpp
++++ b/Source/WebKit/Shared/gtk/WebEventFactory.cpp
+@@ -140,7 +140,7 @@ WebMouseEvent WebEventFactory::createWebMouseEvent(const GdkEvent* event, int cu
+                          0 /* deltaZ */,
+                          currentClickCount,
+                          modifiersForEvent(event),
+-                         WallTime::fromRawSeconds(gdk_event_get_time(event)));
++                         gdk_event_get_time(event));
+ }
+ 
+ WebWheelEvent WebEventFactory::createWebWheelEvent(const GdkEvent* event)
+@@ -210,7 +210,7 @@ WebWheelEvent WebEventFactory::createWebWheelEvent(const GdkEvent* event, WebWhe
+         momentumPhase,
+         WebWheelEvent::ScrollByPixelWheelEvent,
+         modifiersForEvent(event),
+-        WallTime::fromRawSeconds(gdk_event_get_time(event)));
++        gdk_event_get_time(event));
+ }
+ 
+ WebKeyboardEvent WebEventFactory::createWebKeyboardEvent(const GdkEvent* event, const WebCore::CompositionResults& compositionResults, Vector<String>&& commands)
+@@ -227,7 +227,7 @@ WebKeyboardEvent WebEventFactory::createWebKeyboardEvent(const GdkEvent* event,
+         WTFMove(commands),
+         isGdkKeyCodeFromKeyPad(event->key.keyval),
+         modifiersForEvent(event),
+-        WallTime::fromRawSeconds(gdk_event_get_time(event)));
++        gdk_event_get_time(event));
+ }
+ 
+ #if ENABLE(TOUCH_EVENTS)
+@@ -249,7 +249,7 @@ WebTouchEvent WebEventFactory::createWebTouchEvent(const GdkEvent* event, Vector
+         ASSERT_NOT_REACHED();
+     }
+ 
+-    return WebTouchEvent(type, WTFMove(touchPoints), modifiersForEvent(event), WallTime::fromRawSeconds(gdk_event_get_time(event)));
++    return WebTouchEvent(type, WTFMove(touchPoints), modifiersForEvent(event), gdk_event_get_time(event));
+ #else
+     return WebTouchEvent();
+ #endif // GTK_API_VERSION_2
+diff --git a/Source/WebKit/Shared/ios/NativeWebTouchEventIOS.mm b/Source/WebKit/Shared/ios/NativeWebTouchEventIOS.mm
+index 7fc777e..68e0e6c 100644
+--- a/Source/WebKit/Shared/ios/NativeWebTouchEventIOS.mm
++++ b/Source/WebKit/Shared/ios/NativeWebTouchEventIOS.mm
+@@ -122,7 +122,7 @@ NativeWebTouchEvent::NativeWebTouchEvent(const _UIWebTouchEvent* event)
+     : WebTouchEvent(
+         webEventTypeForUIWebTouchEventType(event->type),
+         static_cast<Modifiers>(0),
+-        WallTime::fromRawSeconds(event->timestamp),
++        event->timestamp,
+         extractWebTouchPoint(event),
+         positionForCGPoint(event->locationInDocumentCoordinates),
+ #if defined UI_WEB_TOUCH_EVENT_HAS_IS_POTENTIAL_TAP && UI_WEB_TOUCH_EVENT_HAS_IS_POTENTIAL_TAP
+diff --git a/Source/WebKit/Shared/ios/WebIOSEventFactory.mm b/Source/WebKit/Shared/ios/WebIOSEventFactory.mm
+index 90fbc28..4e0259b 100644
+--- a/Source/WebKit/Shared/ios/WebIOSEventFactory.mm
++++ b/Source/WebKit/Shared/ios/WebIOSEventFactory.mm
+@@ -85,7 +85,7 @@ WebKit::WebKeyboardEvent WebIOSEventFactory::createWebKeyboardEvent(::WebEvent *
+         unmodifiedText = text;
+     }
+ 
+-    return WebKit::WebKeyboardEvent(type, text, unmodifiedText, key, code, keyIdentifier, windowsVirtualKeyCode, nativeVirtualKeyCode, macCharCode, autoRepeat, isKeypad, isSystemKey, modifiers, WallTime::fromRawSeconds(timestamp));
++    return WebKit::WebKeyboardEvent(type, text, unmodifiedText, key, code, keyIdentifier, windowsVirtualKeyCode, nativeVirtualKeyCode, macCharCode, autoRepeat, isKeypad, isSystemKey, modifiers, timestamp);
+ }
+ 
+ #endif // PLATFORM(IOS)
+diff --git a/Source/WebKit/Shared/mac/NativeWebGestureEventMac.mm b/Source/WebKit/Shared/mac/NativeWebGestureEventMac.mm
+index 0c45bff..3b55ce8 100644
+--- a/Source/WebKit/Shared/mac/NativeWebGestureEventMac.mm
++++ b/Source/WebKit/Shared/mac/NativeWebGestureEventMac.mm
+@@ -31,7 +31,7 @@
+ #import "WebEvent.h"
+ #import "WebGestureEvent.h"
+ #import <WebCore/IntPoint.h>
+-#import <WebCore/PlatformEventFactoryMac.h>
++#import <wtf/CurrentTime.h>
+ 
+ namespace WebKit {
+ 
+@@ -63,7 +63,7 @@ NativeWebGestureEvent::NativeWebGestureEvent(NSEvent *event, NSView *view)
+     : WebGestureEvent(
+         webEventTypeForNSEvent(event),
+         static_cast<Modifiers>(0),
+-        WebCore::eventTimeStampSince1970(event),
++        event.timestamp,
+         WebCore::IntPoint(pointForEvent(event, view)),
+         event.type == NSEventTypeMagnify ? event.magnification : 0,
+         event.type == NSEventTypeRotate ? event.rotation : 0)
+diff --git a/Source/WebKit/Shared/mac/WebEventFactory.mm b/Source/WebKit/Shared/mac/WebEventFactory.mm
+index 9d85594..0db3be8 100644
+--- a/Source/WebKit/Shared/mac/WebEventFactory.mm
++++ b/Source/WebKit/Shared/mac/WebEventFactory.mm
+@@ -360,7 +360,7 @@ WebMouseEvent WebEventFactory::createWebMouseEvent(NSEvent *event, NSEvent *last
+     float deltaZ = [event deltaZ];
+     int clickCount = clickCountForEvent(event);
+     WebEvent::Modifiers modifiers = modifiersForEvent(event);
+-    auto timestamp = eventTimeStampSince1970(event);
++    double timestamp = eventTimeStampSince1970(event);
+     int eventNumber = [event eventNumber];
+     int menuTypeForEvent = typeForEvent(event);
+ 
+@@ -418,7 +418,7 @@ WebWheelEvent WebEventFactory::createWebWheelEvent(NSEvent *event, NSView *windo
+     }
+ 
+     WebEvent::Modifiers modifiers           = modifiersForEvent(event);
+-    auto timestamp                          = eventTimeStampSince1970(event);
++    double timestamp                        = eventTimeStampSince1970(event);
+     
+     return WebWheelEvent(WebEvent::Wheel, IntPoint(position), IntPoint(globalPosition), FloatSize(deltaX, deltaY), FloatSize(wheelTicksX, wheelTicksY), granularity, directionInvertedFromDevice, phase, momentumPhase, hasPreciseScrollingDeltas, scrollCount, unacceleratedScrollingDelta, modifiers, timestamp);
+ }
+@@ -438,7 +438,7 @@ WebKeyboardEvent WebEventFactory::createWebKeyboardEvent(NSEvent *event, bool ha
+     bool isKeypad                   = isKeypadEvent(event);
+     bool isSystemKey                = false; // SystemKey is always false on the Mac.
+     WebEvent::Modifiers modifiers   = modifiersForEvent(event);
+-    auto timestamp                  = eventTimeStampSince1970(event);
++    double timestamp                = eventTimeStampSince1970(event);
+ 
+     // Always use 13 for Enter/Return -- we don't want to use AppKit's different character for Enter.
+     if (windowsVirtualKeyCode == VK_RETURN) {
+diff --git a/Source/WebKit/Shared/mac/WebGestureEvent.h b/Source/WebKit/Shared/mac/WebGestureEvent.h
+index b6f9c68..bc68ba5 100644
+--- a/Source/WebKit/Shared/mac/WebGestureEvent.h
++++ b/Source/WebKit/Shared/mac/WebGestureEvent.h
+@@ -45,7 +45,7 @@ namespace WebKit {
+ class WebGestureEvent : public WebEvent {
+ public:
+     WebGestureEvent() { }
+-    WebGestureEvent(WebEvent::Type type, Modifiers modifiers, WallTime timestamp, WebCore::IntPoint position, float gestureScale, float gestureRotation)
++    WebGestureEvent(WebEvent::Type type, Modifiers modifiers, double timestamp, WebCore::IntPoint position, float gestureScale, float gestureRotation)
+         : WebEvent(type, modifiers, timestamp)
+         , m_position(position)
+         , m_gestureScale(gestureScale)
+diff --git a/Source/WebKit/Shared/wpe/WebEventFactory.cpp b/Source/WebKit/Shared/wpe/WebEventFactory.cpp
+index fb39d4b..e7820d5 100644
+--- a/Source/WebKit/Shared/wpe/WebEventFactory.cpp
++++ b/Source/WebKit/Shared/wpe/WebEventFactory.cpp
+@@ -81,7 +81,7 @@ WebKeyboardEvent WebEventFactory::createWebKeyboardEvent(struct wpe_input_keyboa
+         singleCharacterString, singleCharacterString, identifierString,
+         wpe_input_windows_key_code_for_key_event(wpe_input_key_mapper_get_singleton(), event),
+         event->keyCode, 0, false, false, false,
+-        modifiersForEvent(event), WallTime::fromRawSeconds(event->time));
++        modifiersForEvent(event), event->time);
+ }
+ 
+ WebMouseEvent WebEventFactory::createWebMouseEvent(struct wpe_input_pointer_event* event, float deviceScaleFactor)
+@@ -119,7 +119,7 @@ WebMouseEvent WebEventFactory::createWebMouseEvent(struct wpe_input_pointer_even
+     WebCore::IntPoint position(event->x, event->y);
+     position.scale(1 / deviceScaleFactor);
+     return WebMouseEvent(type, button, position, position,
+-        0, 0, 0, clickCount, static_cast<WebEvent::Modifiers>(0), WallTime::fromRawSeconds(event->time));
++        0, 0, 0, clickCount, static_cast<WebEvent::Modifiers>(0), event->time);
+ }
+ 
+ WebWheelEvent WebEventFactory::createWebWheelEvent(struct wpe_input_axis_event* event, float deviceScaleFactor)
+@@ -154,7 +154,7 @@ WebWheelEvent WebEventFactory::createWebWheelEvent(struct wpe_input_axis_event*
+     WebCore::IntPoint position(event->x, event->y);
+     position.scale(1 / deviceScaleFactor);
+     return WebWheelEvent(WebEvent::Wheel, position, position,
+-        delta, wheelTicks, WebWheelEvent::ScrollByPixelWheelEvent, static_cast<WebEvent::Modifiers>(0), WallTime::fromRawSeconds(event->time));
++        delta, wheelTicks, WebWheelEvent::ScrollByPixelWheelEvent, static_cast<WebEvent::Modifiers>(0), event->time);
+ }
+ 
+ #if ENABLE(TOUCH_EVENTS)
+@@ -210,7 +210,7 @@ WebTouchEvent WebEventFactory::createWebTouchEvent(struct wpe_input_touch_event*
+                 pointCoordinates, pointCoordinates));
+     }
+ 
+-    return WebTouchEvent(type, WTFMove(touchPoints), WebEvent::Modifiers(0), WallTime::fromRawSeconds(event->time));
++    return WebTouchEvent(type, WTFMove(touchPoints), WebEvent::Modifiers(0), event->time);
+ }
+ #endif // ENABLE(TOUCH_EVENTS)
+ 
+diff --git a/Source/WebKit/WebProcess/InjectedBundle/API/c/WKBundlePage.cpp b/Source/WebKit/WebProcess/InjectedBundle/API/c/WKBundlePage.cpp
+index 07edabf..5df3dfc 100644
+--- a/Source/WebKit/WebProcess/InjectedBundle/API/c/WKBundlePage.cpp
++++ b/Source/WebKit/WebProcess/InjectedBundle/API/c/WKBundlePage.cpp
+@@ -478,17 +478,17 @@ void WKBundlePageForceRepaint(WKBundlePageRef page)
+ 
+ void WKBundlePageSimulateMouseDown(WKBundlePageRef page, int button, WKPoint position, int clickCount, WKEventModifiers modifiers, double time)
+ {
+-    toImpl(page)->simulateMouseDown(button, toIntPoint(position), clickCount, modifiers, WallTime::fromRawSeconds(time));
++    toImpl(page)->simulateMouseDown(button, toIntPoint(position), clickCount, modifiers, time);
+ }
+ 
+ void WKBundlePageSimulateMouseUp(WKBundlePageRef page, int button, WKPoint position, int clickCount, WKEventModifiers modifiers, double time)
+ {
+-    toImpl(page)->simulateMouseUp(button, toIntPoint(position), clickCount, modifiers, WallTime::fromRawSeconds(time));
++    toImpl(page)->simulateMouseUp(button, toIntPoint(position), clickCount, modifiers, time);
+ }
+ 
+ void WKBundlePageSimulateMouseMotion(WKBundlePageRef page, WKPoint position, double time)
+ {
+-    toImpl(page)->simulateMouseMotion(toIntPoint(position), WallTime::fromRawSeconds(time));
++    toImpl(page)->simulateMouseMotion(toIntPoint(position), time);
+ }
+ 
+ uint64_t WKBundlePageGetRenderTreeSize(WKBundlePageRef pageRef)
+diff --git a/Source/WebKit/WebProcess/InjectedBundle/API/gtk/DOM/WebKitDOMEvent.cpp b/Source/WebKit/WebProcess/InjectedBundle/API/gtk/DOM/WebKitDOMEvent.cpp
+index e7ed7d8..2618fe6 100644
+--- a/Source/WebKit/WebProcess/InjectedBundle/API/gtk/DOM/WebKitDOMEvent.cpp
++++ b/Source/WebKit/WebProcess/InjectedBundle/API/gtk/DOM/WebKitDOMEvent.cpp
+@@ -361,7 +361,7 @@ guint32 webkit_dom_event_get_time_stamp(WebKitDOMEvent* self)
+     WebCore::JSMainThreadNullState state;
+     g_return_val_if_fail(WEBKIT_DOM_IS_EVENT(self), 0);
+     WebCore::Event* item = WebKit::core(self);
+-    guint32 result = item->timeStamp().approximateWallTime().secondsSinceEpoch().milliseconds();
++    guint32 result = item->timeStamp();
+     return result;
+ }
+ 
+diff --git a/Source/WebKit/WebProcess/Plugins/Netscape/x11/NetscapePluginX11.cpp b/Source/WebKit/WebProcess/Plugins/Netscape/x11/NetscapePluginX11.cpp
+index 9a51634..db245cc 100644
+--- a/Source/WebKit/WebProcess/Plugins/Netscape/x11/NetscapePluginX11.cpp
++++ b/Source/WebKit/WebProcess/Plugins/Netscape/x11/NetscapePluginX11.cpp
+@@ -321,9 +321,9 @@ static inline void initializeXEvent(XEvent& event)
+     event.xany.window = 0;
+ }
+ 
+-static inline uint64_t xTimeStamp(WallTime timestamp)
++static inline uint64_t xTimeStamp(double timestampInSeconds)
+ {
+-    return timestamp.secondsSinceEpoch().milliseconds();
++    return timestampInSeconds * 1000;
+ }
+ 
+ static inline unsigned xKeyModifiers(const WebEvent& event)
+diff --git a/Source/WebKit/WebProcess/Plugins/PDF/PDFPlugin.mm b/Source/WebKit/WebProcess/Plugins/PDF/PDFPlugin.mm
+index 86fe36b..afcffa5 100644
+--- a/Source/WebKit/WebProcess/Plugins/PDF/PDFPlugin.mm
++++ b/Source/WebKit/WebProcess/Plugins/PDF/PDFPlugin.mm
+@@ -1576,7 +1576,7 @@ bool PDFPlugin::showContextMenuAtPoint(const IntPoint& point)
+ {
+     FrameView* frameView = webFrame()->coreFrame()->view();
+     IntPoint contentsPoint = frameView->contentsToRootView(point);
+-    WebMouseEvent event(WebEvent::MouseDown, WebMouseEvent::RightButton, contentsPoint, contentsPoint, 0, 0, 0, 1, static_cast<WebEvent::Modifiers>(0), WallTime::now(), WebCore::ForceAtClick);
++    WebMouseEvent event(WebEvent::MouseDown, WebMouseEvent::RightButton, contentsPoint, contentsPoint, 0, 0, 0, 1, static_cast<WebEvent::Modifiers>(0), monotonicallyIncreasingTime(), WebCore::ForceAtClick);
+     return handleContextMenuEvent(event);
+ }
+ 
+diff --git a/Source/WebKit/WebProcess/Plugins/PluginView.cpp b/Source/WebKit/WebProcess/Plugins/PluginView.cpp
+index ecd567f..a648f7e 100644
+--- a/Source/WebKit/WebProcess/Plugins/PluginView.cpp
++++ b/Source/WebKit/WebProcess/Plugins/PluginView.cpp
+@@ -897,7 +897,7 @@ std::unique_ptr<WebEvent> PluginView::createWebEvent(MouseEvent& event) const
+     if (event.metaKey())
+         modifiers |= WebEvent::MetaKey;
+ 
+-    return std::make_unique<WebMouseEvent>(type, button, m_plugin->convertToRootView(IntPoint(event.offsetX(), event.offsetY())), event.screenLocation(), 0, 0, 0, clickCount, static_cast<WebEvent::Modifiers>(modifiers), WallTime { }, 0);
++    return std::make_unique<WebMouseEvent>(type, button, m_plugin->convertToRootView(IntPoint(event.offsetX(), event.offsetY())), event.screenLocation(), 0, 0, 0, clickCount, static_cast<WebEvent::Modifiers>(modifiers), 0, 0);
+ }
+ 
+ void PluginView::handleEvent(Event& event)
+diff --git a/Source/WebKit/WebProcess/WebPage/WebPage.cpp b/Source/WebKit/WebProcess/WebPage/WebPage.cpp
+index 127a87e..2eb5f68 100644
+--- a/Source/WebKit/WebProcess/WebPage/WebPage.cpp
++++ b/Source/WebKit/WebProcess/WebPage/WebPage.cpp
+@@ -1281,7 +1281,7 @@ void WebPage::navigateToPDFLinkWithSimulatedClick(const String& url, IntPoint do
+         return;
+ 
+     const int singleClick = 1;
+-    RefPtr<MouseEvent> mouseEvent = MouseEvent::create(eventNames().clickEvent, true, true, MonotonicTime::now(), nullptr, singleClick, screenPoint.x(), screenPoint.y(), documentPoint.x(), documentPoint.y(),
++    RefPtr<MouseEvent> mouseEvent = MouseEvent::create(eventNames().clickEvent, true, true, currentTime(), nullptr, singleClick, screenPoint.x(), screenPoint.y(), documentPoint.x(), documentPoint.y(),
+ #if ENABLE(POINTER_LOCK)
+         0, 0,
+ #endif
+@@ -2155,11 +2155,11 @@ WebContextMenu* WebPage::contextMenuAtPointInWindow(const IntPoint& point)
+     corePage()->contextMenuController().clearContextMenu();
+ 
+     // Simulate a mouse click to generate the correct menu.
+-    PlatformMouseEvent mousePressEvent(point, point, RightButton, PlatformEvent::MousePressed, 1, false, false, false, false, WallTime::now(), WebCore::ForceAtClick, WebCore::NoTap);
++    PlatformMouseEvent mousePressEvent(point, point, RightButton, PlatformEvent::MousePressed, 1, false, false, false, false, currentTime(), WebCore::ForceAtClick, WebCore::NoTap);
+     corePage()->userInputBridge().handleMousePressEvent(mousePressEvent);
+     bool handled = corePage()->userInputBridge().handleContextMenuEvent(mousePressEvent, corePage()->mainFrame());
+     auto* menu = handled ? contextMenu() : nullptr;
+-    PlatformMouseEvent mouseReleaseEvent(point, point, RightButton, PlatformEvent::MouseReleased, 1, false, false, false, false, WallTime::now(), WebCore::ForceAtClick, WebCore::NoTap);
++    PlatformMouseEvent mouseReleaseEvent(point, point, RightButton, PlatformEvent::MouseReleased, 1, false, false, false, false, currentTime(), WebCore::ForceAtClick, WebCore::NoTap);
+     corePage()->userInputBridge().handleMouseReleaseEvent(mouseReleaseEvent);
+ 
+     return menu;
+@@ -3695,7 +3695,7 @@ void WebPage::dragEnded(WebCore::IntPoint clientPosition, WebCore::IntPoint glob
+     if (!view)
+         return;
+     // FIXME: These are fake modifier keys here, but they should be real ones instead.
+-    PlatformMouseEvent event(adjustedClientPosition, adjustedGlobalPosition, LeftButton, PlatformEvent::MouseMoved, 0, false, false, false, false, WallTime::now(), 0, WebCore::NoTap);
++    PlatformMouseEvent event(adjustedClientPosition, adjustedGlobalPosition, LeftButton, PlatformEvent::MouseMoved, 0, false, false, false, false, currentTime(), 0, WebCore::NoTap);
+     m_page->mainFrame().eventHandler().dragSourceEndedAt(event, (DragOperation)operation);
+ 
+     send(Messages::WebPageProxy::DidEndDragging());
+@@ -4691,17 +4691,17 @@ void WebPage::handleAlternativeTextUIResult(const String& result)
+ }
+ #endif
+ 
+-void WebPage::simulateMouseDown(int button, WebCore::IntPoint position, int clickCount, WKEventModifiers modifiers, WallTime time)
++void WebPage::simulateMouseDown(int button, WebCore::IntPoint position, int clickCount, WKEventModifiers modifiers, double time)
+ {
+     mouseEvent(WebMouseEvent(WebMouseEvent::MouseDown, static_cast<WebMouseEvent::Button>(button), position, position, 0, 0, 0, clickCount, static_cast<WebMouseEvent::Modifiers>(modifiers), time, WebCore::ForceAtClick, WebMouseEvent::NoTap));
+ }
+ 
+-void WebPage::simulateMouseUp(int button, WebCore::IntPoint position, int clickCount, WKEventModifiers modifiers, WallTime time)
++void WebPage::simulateMouseUp(int button, WebCore::IntPoint position, int clickCount, WKEventModifiers modifiers, double time)
+ {
+     mouseEvent(WebMouseEvent(WebMouseEvent::MouseUp, static_cast<WebMouseEvent::Button>(button), position, position, 0, 0, 0, clickCount, static_cast<WebMouseEvent::Modifiers>(modifiers), time, WebCore::ForceAtClick, WebMouseEvent::NoTap));
+ }
+ 
+-void WebPage::simulateMouseMotion(WebCore::IntPoint position, WallTime time)
++void WebPage::simulateMouseMotion(WebCore::IntPoint position, double time)
+ {
+     mouseEvent(WebMouseEvent(WebMouseEvent::MouseMove, WebMouseEvent::NoButton, position, position, 0, 0, 0, 0, WebMouseEvent::Modifiers(), time, 0, WebMouseEvent::NoTap));
+ }
+diff --git a/Source/WebKit/WebProcess/WebPage/WebPage.h b/Source/WebKit/WebProcess/WebPage/WebPage.h
+index 6cb1b8b..22ccb78 100644
+--- a/Source/WebKit/WebProcess/WebPage/WebPage.h
++++ b/Source/WebKit/WebProcess/WebPage/WebPage.h
+@@ -66,7 +66,6 @@
+ #include <wtf/RefPtr.h>
+ #include <wtf/RunLoop.h>
+ #include <wtf/Seconds.h>
+-#include <wtf/WallTime.h>
+ #include <wtf/text/WTFString.h>
+ 
+ #if HAVE(ACCESSIBILITY) && PLATFORM(GTK)
+@@ -809,9 +808,9 @@ public:
+ #endif
+ 
+     // For testing purpose.
+-    void simulateMouseDown(int button, WebCore::IntPoint, int clickCount, WKEventModifiers, WallTime);
+-    void simulateMouseUp(int button, WebCore::IntPoint, int clickCount, WKEventModifiers, WallTime);
+-    void simulateMouseMotion(WebCore::IntPoint, WallTime);
++    void simulateMouseDown(int button, WebCore::IntPoint, int clickCount, WKEventModifiers, double time);
++    void simulateMouseUp(int button, WebCore::IntPoint, int clickCount, WKEventModifiers, double time);
++    void simulateMouseMotion(WebCore::IntPoint, double time);
+ 
+ #if ENABLE(CONTEXT_MENUS)
+     void contextMenuShowing() { m_isShowingContextMenu = true; }
+diff --git a/Source/WebKit/WebProcess/WebPage/ios/WebPageIOS.mm b/Source/WebKit/WebProcess/WebPage/ios/WebPageIOS.mm
+index 88d21df..03fc2ed 100644
+--- a/Source/WebKit/WebProcess/WebPage/ios/WebPageIOS.mm
++++ b/Source/WebKit/WebProcess/WebPage/ios/WebPageIOS.mm
+@@ -531,7 +531,7 @@ void WebPage::handleSyntheticClick(Node* nodeRespondingToClick, const WebCore::F
+ 
+     WKBeginObservingContentChanges(true);
+ 
+-    mainframe.eventHandler().mouseMoved(PlatformMouseEvent(roundedAdjustedPoint, roundedAdjustedPoint, NoButton, PlatformEvent::MouseMoved, 0, false, false, false, false, WallTime::now(), WebCore::ForceAtClick, WebCore::NoTap));
++    mainframe.eventHandler().mouseMoved(PlatformMouseEvent(roundedAdjustedPoint, roundedAdjustedPoint, NoButton, PlatformEvent::MouseMoved, 0, false, false, false, false, currentTime(), WebCore::ForceAtClick, WebCore::NoTap));
+     mainframe.document()->updateStyleIfNeeded();
+ 
+     WKStopObservingContentChanges();
+@@ -583,11 +583,11 @@ void WebPage::completeSyntheticClick(Node* nodeRespondingToClick, const WebCore:
+     bool tapWasHandled = false;
+     m_lastInteractionLocation = roundedAdjustedPoint;
+ 
+-    tapWasHandled |= mainframe.eventHandler().handleMousePressEvent(PlatformMouseEvent(roundedAdjustedPoint, roundedAdjustedPoint, LeftButton, PlatformEvent::MousePressed, 1, false, false, false, false, WallTime::now(), WebCore::ForceAtClick, syntheticClickType));
++    tapWasHandled |= mainframe.eventHandler().handleMousePressEvent(PlatformMouseEvent(roundedAdjustedPoint, roundedAdjustedPoint, LeftButton, PlatformEvent::MousePressed, 1, false, false, false, false, currentTime(), WebCore::ForceAtClick, syntheticClickType));
+     if (m_isClosed)
+         return;
+ 
+-    tapWasHandled |= mainframe.eventHandler().handleMouseReleaseEvent(PlatformMouseEvent(roundedAdjustedPoint, roundedAdjustedPoint, LeftButton, PlatformEvent::MouseReleased, 1, false, false, false, false, WallTime::now(), WebCore::ForceAtClick, syntheticClickType));
++    tapWasHandled |= mainframe.eventHandler().handleMouseReleaseEvent(PlatformMouseEvent(roundedAdjustedPoint, roundedAdjustedPoint, LeftButton, PlatformEvent::MouseReleased, 1, false, false, false, false, currentTime(), WebCore::ForceAtClick, syntheticClickType));
+     if (m_isClosed)
+         return;
+ 
+@@ -639,7 +639,7 @@ void WebPage::requestAdditionalItemsForDragSession(const IntPoint& clientPositio
+     // To augment the platform drag session with additional items, end the current drag session and begin a new drag session with the new drag item.
+     // This process is opaque to the UI process, which still maintains the old drag item in its drag session. Similarly, this persistent drag session
+     // is opaque to the web process, which only sees that the current drag has ended, and that a new one is beginning.
+-    PlatformMouseEvent event(clientPosition, globalPosition, LeftButton, PlatformEvent::MouseMoved, 0, false, false, false, false, WallTime::now(), 0, NoTap);
++    PlatformMouseEvent event(clientPosition, globalPosition, LeftButton, PlatformEvent::MouseMoved, 0, false, false, false, false, currentTime(), 0, NoTap);
+     m_page->dragController().dragEnded();
+     m_page->mainFrame().eventHandler().dragSourceEndedAt(event, DragOperationNone, MayExtendDragSession::Yes);
+ 
+@@ -805,7 +805,7 @@ void WebPage::inspectorNodeSearchMovedToPosition(const FloatPoint& position)
+     IntPoint adjustedPoint = roundedIntPoint(position);
+     Frame& mainframe = m_page->mainFrame();
+ 
+-    mainframe.eventHandler().mouseMoved(PlatformMouseEvent(adjustedPoint, adjustedPoint, NoButton, PlatformEvent::MouseMoved, 0, false, false, false, false, { }, 0, WebCore::NoTap));
++    mainframe.eventHandler().mouseMoved(PlatformMouseEvent(adjustedPoint, adjustedPoint, NoButton, PlatformEvent::MouseMoved, 0, false, false, false, false, 0, 0, WebCore::NoTap));
+     mainframe.document()->updateStyleIfNeeded();
+ }
+ 
+diff --git a/Source/WebKitLegacy/ios/ChangeLog b/Source/WebKitLegacy/ios/ChangeLog
+index 27c52ca..6c419b0 100644
+--- a/Source/WebKitLegacy/ios/ChangeLog
++++ b/Source/WebKitLegacy/ios/ChangeLog
+@@ -1,16 +1,3 @@
+-2017-09-22  Chris Dumez  <cdumez@apple.com>
+-
+-        Use high resolution timestamp for event time
+-        https://bugs.webkit.org/show_bug.cgi?id=154246
+-        <rdar://problem/34333304>
+-
+-        Reviewed by Ryosuke Niwa.
+-
+-        Use WallTime / MonotonicTime instead of double type for clarity.
+-
+-        * WebView/WebPDFViewPlaceholder.mm:
+-        (-[WebPDFViewPlaceholder simulateClickOnLinkToURL:]):
+-
+ 2017-08-09  Yoshiaki Jitsukawa  <Yoshiaki.Jitsukawa@sony.com>
+ 
+         [PAL] Move spi/cocoa and spi/cg directories into PAL
+diff --git a/Source/WebKitLegacy/ios/WebView/WebPDFViewPlaceholder.mm b/Source/WebKitLegacy/ios/WebView/WebPDFViewPlaceholder.mm
+index c915fe4..48ae9f7 100644
+--- a/Source/WebKitLegacy/ios/WebView/WebPDFViewPlaceholder.mm
++++ b/Source/WebKitLegacy/ios/WebView/WebPDFViewPlaceholder.mm
+@@ -48,7 +48,7 @@
+ #import <WebKitLegacy/WebNSViewExtras.h>
+ #import <WebKitLegacy/WebPDFDocumentExtras.h>
+ #import <WebKitLegacy/WebViewPrivate.h>
+-#import <wtf/MonotonicTime.h>
++#import <wtf/CurrentTime.h>
+ #import <wtf/SoftLinking.h>
+ #import <wtf/Vector.h>
+ 
+@@ -479,7 +479,7 @@ static const float PAGE_HEIGHT_INSET = 4.0f * 2.0f;
+         return;
+ 
+     // Construct an event to simulate a click.
+-    RefPtr<Event> event = MouseEvent::create(eventNames().clickEvent, true, true, MonotonicTime::now(), 0, 1, 0, 0, 0, 0,
++    RefPtr<Event> event = MouseEvent::create(eventNames().clickEvent, true, true, currentTime(), 0, 1, 0, 0, 0, 0,
+ #if ENABLE(POINTER_LOCK)
+         0, 0,
+ #endif
+diff --git a/Source/WebKitLegacy/mac/DOM/DOMEvent.mm b/Source/WebKitLegacy/mac/DOM/DOMEvent.mm
+index 321a7f0..95f84dd 100644
+--- a/Source/WebKitLegacy/mac/DOM/DOMEvent.mm
++++ b/Source/WebKitLegacy/mac/DOM/DOMEvent.mm
+@@ -97,7 +97,7 @@
+ - (DOMTimeStamp)timeStamp
+ {
+     WebCore::JSMainThreadNullState state;
+-    return IMPL->timeStamp().approximateWallTime().secondsSinceEpoch().milliseconds();
++    return IMPL->timeStamp();
+ }
+ 
+ - (BOOL)defaultPrevented
+diff --git a/Source/WebKitLegacy/mac/WebView/WebFrame.mm b/Source/WebKitLegacy/mac/WebView/WebFrame.mm
+index f34d695..0016c0a 100644
+--- a/Source/WebKitLegacy/mac/WebView/WebFrame.mm
++++ b/Source/WebKitLegacy/mac/WebView/WebFrame.mm
+@@ -964,7 +964,7 @@ static inline WebDataSource *dataSource(DocumentLoader* loader)
+         return;
+     // FIXME: These are fake modifier keys here, but they should be real ones instead.
+     PlatformMouseEvent event(IntPoint(windowLoc), IntPoint(globalPoint(windowLoc, [view->platformWidget() window])),
+-                             LeftButton, PlatformEvent::MouseMoved, 0, false, false, false, false, WallTime::now(), WebCore::ForceAtClick, WebCore::NoTap);
++                             LeftButton, PlatformEvent::MouseMoved, 0, false, false, false, false, currentTime(), WebCore::ForceAtClick, WebCore::NoTap);
+     _private->coreFrame->eventHandler().dragSourceEndedAt(event, (DragOperation)operation);
+ }
+ #endif // ENABLE(DRAG_SUPPORT) && PLATFORM(MAC)
+diff --git a/Source/WebKitLegacy/mac/WebView/WebPDFView.mm b/Source/WebKitLegacy/mac/WebView/WebPDFView.mm
+index 18e35a5..ec57c88 100644
+--- a/Source/WebKitLegacy/mac/WebView/WebPDFView.mm
++++ b/Source/WebKitLegacy/mac/WebView/WebPDFView.mm
+@@ -1018,14 +1018,14 @@ static BOOL isFrameInRange(WebFrame *frame, DOMRange *range)
+     case NSEventTypeKeyDown: {
+         PlatformKeyboardEvent pe = PlatformEventFactory::createPlatformKeyboardEvent(nsEvent);
+         pe.disambiguateKeyDownEvent(PlatformEvent::RawKeyDown);
+-        event = KeyboardEvent::create(pe, nullptr);
++        event = KeyboardEvent::create(pe, 0);
+         break;
+     }
+     default:
+         break;
+     }
+     if (button != noButton) {
+-        event = MouseEvent::create(eventNames().clickEvent, true, true, MonotonicTime::now(), 0, [nsEvent clickCount], 0, 0, 0, 0,
++        event = MouseEvent::create(eventNames().clickEvent, true, true, currentTime(), 0, [nsEvent clickCount], 0, 0, 0, 0,
+ #if ENABLE(POINTER_LOCK)
+             0, 0,
+ #endif
+diff --git a/Source/WebKitLegacy/win/WebDropSource.cpp b/Source/WebKitLegacy/win/WebDropSource.cpp
+index 215e71f..f74f3d3 100644
+--- a/Source/WebKitLegacy/win/WebDropSource.cpp
++++ b/Source/WebKitLegacy/win/WebDropSource.cpp
+@@ -101,7 +101,7 @@ PlatformMouseEvent generateMouseEvent(WebView* webView, bool isDrag)
+     if (SUCCEEDED(webView->viewWindow(&viewWindow)))
+         ::ScreenToClient(viewWindow, reinterpret_cast<LPPOINT>(&localpt));
+     return PlatformMouseEvent(IntPoint(localpt.x, localpt.y), IntPoint(pt.x, pt.y),
+-        isDrag ? LeftButton : NoButton, PlatformEvent::MouseMoved, 0, false, false, false, false, WallTime::now(), 0, NoTap);
++        isDrag ? LeftButton : NoButton, PlatformEvent::MouseMoved, 0, false, false, false, false, currentTime(), 0, NoTap);
+ }
+ 
+ STDMETHODIMP WebDropSource::QueryContinueDrag(_In_ BOOL fEscapePressed, _In_ DWORD grfKeyState)
+-- 
+1.8.3.2
+
