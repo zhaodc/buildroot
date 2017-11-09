@@ -8,6 +8,32 @@ config BR2_PACKAGE_LIBCURL
 
 if BR2_PACKAGE_LIBCURL
 
+choice
+	prompt "Libcurl version to use"
+	default BR2_PACKAGE_LIBCURL_7_53_1
+	config BR2_PACKAGE_LIBCURL_7_53_1
+	bool "7.53.1"
+	config BR2_PACKAGE_LIBCURL_7_32_0
+	bool "7.32.0"
+endchoice
+
+config BR2_PACKAGE_LIBCURL_AT_LEAST_7_53_1
+	default y if BR2_PACKAGE_LIBCURL_7_53_1
+	default n
+	select BR2_PACKAGE_LIBCURL_AT_LEAST_7_32_0
+	bool
+
+config BR2_PACKAGE_LIBCURL_AT_LEAST_7_32_0
+	default y if BR2_PACKAGE_LIBCURL_7_32_0
+	default n
+	bool
+
+config BR2_PACKAGE_LIBCURL_VERSION_STRING
+	string
+	default "7.53.1" if BR2_PACKAGE_LIBCURL_AT_LEAST_7_53_1
+	default "7.32.0" if BR2_PACKAGE_LIBCURL_AT_LEAST_7_32_0
+	default "Version not set"
+
 config BR2_PACKAGE_CURL
 	bool "curl binary"
 	help
