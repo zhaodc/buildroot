@@ -17,7 +17,7 @@ rm -rf "${ROOTFS_FILES}"
 while read line
 do
 	find "${TARGET_DIR}" -name "$line$STAR" -printf "%P\n" >> "${ROOTFS_FILES}"
-done < "${BOARD_DIR}/vip.txt"
+done < "${BOARD_DIR}/acn.txt"
 
 # Append missing folders
 echo "usr/lib/gstreamer-1.0" >> "${ROOTFS_FILES}"
@@ -44,7 +44,7 @@ cp -pf "${BOARD_DIR}/wpeframework.sh" "${ROOTFS_DIR}"
 mkdir -p "${ROOTFS_DIR}/www"
 
 # Create tar
-tar -cvf "${BINARIES_DIR}/vip.tar" -C "${ROOTFS_DIR}" .
+tar -cvf "${BINARIES_DIR}/acn.tar" -C "${ROOTFS_DIR}" .
 
 # Cleaning up
 rm -rf "${ROOTFS_FILES}"

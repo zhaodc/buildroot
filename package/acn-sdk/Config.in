@@ -1,21 +1,26 @@
-config BR2_PACKAGE_VIP_SDK
-	bool "vip-sdk"
+config BR2_PACKAGE_ACN_SDK
+	bool "acn-sdk"
 	depends on BR2_mipsel
 	select BR2_PACKAGE_HAS_NEXUS
 	select BR2_PACKAGE_HAS_LIBEGL
 	select BR2_PACKAGE_HAS_LIBGLES
+	select BR2_PACKAGE_HAS_PLAYREADY
 	help
 	  Pre-compiled binaries for a platform
 
-if BR2_PACKAGE_VIP_SDK
+if BR2_PACKAGE_ACN_SDK
+
+config BR2_PACKAGE_HAS_PLAYREADY 
+	bool 
+        default "acn-sdk"
 
 config BR2_PACKAGE_PROVIDES_NEXUS
-	default "vip-sdk"
+	default "acn-sdk"
 
 config BR2_PACKAGE_PROVIDES_LIBEGL
-	default "vip-sdk"
+	default "acn-sdk"
 
 config BR2_PACKAGE_PROVIDES_LIBGLES
-	default "vip-sdk"
+	default "acn-sdk"
 
 endif
