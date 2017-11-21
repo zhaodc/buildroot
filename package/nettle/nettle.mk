@@ -5,7 +5,7 @@
 ################################################################################
 
 NETTLE_VERSION = 3.3
-ifeq ($(BR2_PACKAGE_PLAYREADY),y)
+ifneq ($(BR2_PACKAGE_PLAYREADY)$(BR2_PACKAGE_HAS_PLAYREADY),)
 NETTLE_VERSION = 2.7.1
 endif
 NETTLE_SITE = http://www.lysator.liu.se/~nisse/archive
