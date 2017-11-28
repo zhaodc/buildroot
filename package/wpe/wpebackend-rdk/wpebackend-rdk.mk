@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-WPEBACKEND_RDK_VERSION = 6d6d4f7eae905c5ebce23affa75337266e502443
+WPEBACKEND_RDK_VERSION = 208155e2723f3c7440dcfac44805ce2e279348fd
 WPEBACKEND_RDK_SITE = $(call github,WebPlatformForEmbedded,WPEBackend-rdk,$(WPEBACKEND_RDK_VERSION))
 WPEBACKEND_RDK_INSTALL_STAGING = YES
 WPEBACKEND_RDK_DEPENDENCIES = wpebackend libglib2
