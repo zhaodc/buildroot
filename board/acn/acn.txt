@@ -95,6 +95,7 @@ ca-certificates.crt
 libWPEFrameworkDeviceInfo.so
 libWPEFrameworkLocationSync.so
 libWPEFrameworkRemoteControl.so
+libWPEFrameworkSnapshot.so
 libWPEFrameworkWebKitBrowser.so
 libWPEFrameworkDIALServer.so
 libWPEFrameworkMonitor.so
