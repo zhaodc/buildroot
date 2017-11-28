@@ -34,7 +34,7 @@ grep -q "/usr/share ext4" /proc/mounts && echo "/usr/share is already mounted" |
 grep -q "/etc ext4" /proc/mounts && echo "/etc is already mounted" || mount -t ext4 --bind $ACN/etc/ /etc/
 grep -q "/usr/lib ext4" /proc/mounts && echo "/usr/lib is already mounted" || mount -t ext4 --bind $ACN/lib/ /usr/lib/
 
-//work around for playready
+#work around for playready
 cd /usr/bin/netflix
 
 LD_PRELOAD=$SOURCE/lib/libstdc\+\+.so.6.0.21 WPEFramework
