@@ -1,0 +1,25 @@
+From 943f368e491f40ac6263ffbd98b4fb86fd111a14 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Enrique=20Oca=C3=B1a=20Gonz=C3=A1lez?= <eocanha@igalia.com>
+Date: Mon, 27 Nov 2017 10:55:55 +0000
+Subject: [PATCH 1/3] Typefind min 1k
+
+---
+ plugins/elements/gsttypefindelement.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/plugins/elements/gsttypefindelement.c b/plugins/elements/gsttypefindelement.c
+index 5da2d75..3b29ed3 100644
+--- a/plugins/elements/gsttypefindelement.c
++++ b/plugins/elements/gsttypefindelement.c
+@@ -98,7 +98,7 @@ GST_STATIC_PAD_TEMPLATE ("src",
+ 
+ /* Require at least 2kB of data before we attempt typefinding in chain-mode.
+  * 128kB is massive overkill for the maximum, but doesn't do any harm */
+-#define TYPE_FIND_MIN_SIZE   (2*1024)
++#define TYPE_FIND_MIN_SIZE   (1*1024)
+ #define TYPE_FIND_MAX_SIZE (128*1024)
+ 
+ /* TypeFind signals and args */
+-- 
+1.8.3.2
+
