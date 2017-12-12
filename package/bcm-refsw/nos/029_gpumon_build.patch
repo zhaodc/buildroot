@@ -1,0 +1,15 @@
+diff -Naur ursr_ORG/rockford/middleware/vc5/tools/gpumon_hook/Nexus.mk ursr-E077_CADDV_MAINAPP_DEBUG/rockford/middleware/vc5/tools/gpumon_hook/Nexus.mk
+--- ursr_ORG/rockford/middleware/vc5/tools/gpumon_hook/Nexus.mk	2015-09-23 16:58:41.337763214 +0200
++++ ursr-E077_CADDV_MAINAPP_DEBUG/rockford/middleware/vc5/tools/gpumon_hook/Nexus.mk	2015-09-23 17:03:04.077798027 +0200
+@@ -26,9 +26,10 @@
+ 	@ln -sf libv3ddriver.so libkhronos.so
+ 	@mv libkhronos.so $(NEXUS_BIN_DIR)
+ 	@cp gpumon $(NEXUS_BIN_DIR)
++	@cp capture $(NEXUS_BIN_DIR)
+ 	@chmod 777 $(NEXUS_BIN_DIR)/gpumon
+ 
+-lib/libgpumon_hook.so : obj/gpumon_hook.o obj/api.o obj/control.o obj/remote.o obj/archive.o obj/packet.o obj/platform.o
++lib/libgpumon_hook.so : obj/gpumon_hook.o obj/api.o obj/remote.o obj/archive.o obj/packet.o obj/platform.o
+ 	@mkdir -p lib
+ 	$(info Linking $@)
+ 	@$(B_REFSW_CROSS_COMPILE)g++ $(LDFLAGS) -o $@ $^

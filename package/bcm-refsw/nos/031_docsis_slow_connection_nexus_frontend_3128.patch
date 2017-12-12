@@ -1,0 +1,24 @@
+diff -Naur CURRENT/nexus/modules/frontend/3128/src/nexus_frontend_3128.c PATCHED/nexus/modules/frontend/3128/src/nexus_frontend_3128.c
+--- CURRENT/nexus/modules/frontend/3128/src/nexus_frontend_3128.c	2016-03-02 08:06:13.729801083 +0000
++++ PATCHED/nexus/modules/frontend/3128/src/nexus_frontend_3128.c	2016-03-02 08:06:13.759801065 +0000
+@@ -164,7 +164,9 @@
+ } NEXUS_3128;
+ 
+ static BLST_S_HEAD(devList, NEXUS_3128) g_3128DevList = BLST_S_INITIALIZER(g_3128DevList);
+-
++// PACE PATCH BEGIN
++bool NEXUS_3128_frontend_init_done = false;
++// PACE PATCH END
+ 
+ typedef struct NEXUS_3128Channel
+ {
+@@ -603,6 +605,9 @@
+     pDevice->pGenericDeviceHandle->openPending = false;
+     pDevice->pGenericDeviceHandle->openFailed = false;
+     BKNI_LeaveCriticalSection();
++// PACE PATCH BEGIN
++    NEXUS_3128_frontend_init_done = true;
++// PACE PATCH END
+ 
+     return;
+ done:

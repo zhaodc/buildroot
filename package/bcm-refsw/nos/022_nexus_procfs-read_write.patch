@@ -1,0 +1,20 @@
+diff -Naur CURRENT/nexus/platforms/common/src/linuxkernel/nexus_driver_procfs.c PATCHED/nexus/platforms/common/src/linuxkernel/nexus_driver_procfs.c
+--- CURRENT/nexus/platforms/common/src/linuxkernel/nexus_driver_procfs.c	2015-10-08 08:24:42.782443000 +0000
++++ PATCHED/nexus/platforms/common/src/linuxkernel/nexus_driver_procfs.c	2015-10-08 08:24:44.605455887 +0000
+@@ -314,14 +314,14 @@
+ {
+     struct proc_dir_entry *entry;
+ #if LINUX_VERSION_CODE <= KERNEL_VERSION(3,10,0)
+-    entry = create_proc_entry(name, S_IFREG|S_IRUGO, parent);
++    entry= create_proc_entry(name, S_IFREG|S_IRUGO|S_IWUGO, parent);
+     if (!entry) return NULL;
+     entry->read_proc = fops->read;
+     entry->write_proc = fops->write;
+     entry->data = context;
+     return entry;
+ #else
+-    return proc_create_data(name, S_IFREG|S_IRUGO, parent, fops, context);
++    return proc_create_data(name, S_IFREG|S_IRUGO|S_IWUGO,parent,fops,context);
+ #endif
+ }
+ 

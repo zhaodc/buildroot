@@ -1,0 +1,31 @@
+diff -Naur CURRENT/nexus/modules/frontend/docsis/src/nexus_docsis.c PATCHED/nexus/modules/frontend/docsis/src/nexus_docsis.c
+--- CURRENT/nexus/modules/frontend/docsis/src/nexus_docsis.c	2016-04-19 08:44:59.183609000 +0000
++++ PATCHED/nexus/modules/frontend/docsis/src/nexus_docsis.c	2016-04-19 08:44:59.977614294 +0000
+@@ -184,6 +184,13 @@
+     hDevice->pGenericDeviceHandle = hFrontendDevice;
+     BKNI_CreateEvent(&hDevice->tunerStatusEvent);
+     BKNI_ResetEvent(hDevice->tunerStatusEvent);
++
++/* Start  : Broadcom patch 968045-15.1  for CM*/
++	BKNI_CreateEvent(&hDevice->tuneCompleteEvent);
++	BKNI_ResetEvent(hDevice->tuneCompleteEvent);	 
++/* End  : Broadcom patch 968045-15.1  for CM*/
++
++
+     BSTD_UNUSED(numDsChannels);
+     BSTD_UNUSED(numDataChannels);
+     BSTD_UNUSED(mtsif_chained);
+@@ -397,7 +404,13 @@
+     if (hDevice->tunerStatusEvent)
+     {
+         BKNI_DestroyEvent(hDevice->tunerStatusEvent);
++		
+     }
++
++	if (hDevice->tuneCompleteEvent)
++	{
++	 BKNI_DestroyEvent(hDevice->tuneCompleteEvent);
++	}
+ #endif
+ 
+     if (hDevice->statusCallback)

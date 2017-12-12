@@ -1,0 +1,127 @@
+diff -Nuar reference_code/rockford/applications/security/brcm/bcsd/Makefile rockford/applications/security/brcm/bcsd/Makefile
+--- reference_code/rockford/applications/security/brcm/bcsd/Makefile	2015-07-21 12:37:19.154452267 +0200
++++ rockford/applications/security/brcm/bcsd/Makefile	2015-07-21 16:09:17.167456912 +0200
+@@ -18,6 +18,29 @@
+ endif
+ 
+ include ./$(BCSD_OS_ENVIRONMENT).inc
++pace_bcsdlib: all
++	@echo -e "\n[PACE: $@ - Copying bcsd library in $(BCSDLIB_PATH)]"
++	-@if [ ! -d $(BCSDLIB_PATH) ]; then mkdir -v $(BCSDLIB_PATH); fi
++	@cp $(_TARGET) $(BCSDLIB_PATH)/libpace_bcsdlib.a 
++	@cp $(_TARGET_CA) $(BCSDLIB_PATH)/libpace_nagra_bcsdlib.a 
++	@echo "Installing CSD headers to $(BCSDLIB_PATH)"   
++	@cp -v $(BCSD_PATH)/include/* $(BCSDLIB_PATH)
++	@cp -v $(BCSD_PATH)/core/os/include/* $(BCSDLIB_PATH)
++	@cp -v $(BCSD_PATH)/configs/nagra/os/include/* $(BCSDLIB_PATH)
++	@echo -e "[PACE: $@ => Done]\n"
++
++pace_bcsdlib.pc:
++	@mkdir -p $(BCSDLIB_PATH)
++	@echo 'prefix=$(BCSDLIB_PATH)'                   >  $(BCSDLIB_PATH)/$@
++	@echo 'libdir=$${prefix}'                       >> $(BCSDLIB_PATH)/$@
++	@echo 'includedir=$${prefix}'                   >> $(BCSDLIB_PATH)/$@
++	@echo ""                                        >> $(BCSDLIB_PATH)/$@
++	@echo "Name: csd_lib"                    >> $(BCSDLIB_PATH)/$@
++	@echo "Description: nagra NOCS3 driver csd lib"             >> $(BCSDLIB_PATH)/$@
++	@echo "Version: $(REFSW_VER)"               >> $(BCSDLIB_PATH)/$@
++	@echo 'Libs: -L$${libdir} -lpace_bcsdlib -lpace_nagra_bcsdlib'        >> $(BCSDLIB_PATH)/$@
++	@echo 'Cflags: -DCA_VENDOR=$(CA_VENDOR) -DCA_VENDOR_INDEX=$(CA_VENDOR_INDEX) -I$${includedir}'      >> $(BCSDLIB_PATH)/$@
++
+ 
+ .PHONY: doxygen
+ doxygen:
+--- reference_code/rockford/applications/security/brcm/bcsd/os.inc	2015-08-13 16:56:40.290751830 +0200
++++ rockford/applications/security/brcm/bcsd/os.inc	2015-08-14 11:13:39.734489555 +0200
+@@ -72,15 +72,15 @@
+ LIB_ENDIAN=_le
+ ifeq ($(B_REFSW_ARCH),mips-linux)
+ LIB_ENDIAN=_be
+-CFLAGS += -DCFG_BIG_ENDIAN=1
++NS_CFLAGS += -DCFG_BIG_ENDIAN=1
+ else
+-CFLAGS += -DCFG_BIG_ENDIAN=0
++NS_CFLAGS += -DCFG_BIG_ENDIAN=0
+ endif
+ 
+ ifneq ($(DEBUG),n)
+-CFLAGS += -DBCSD_DEBUG_BUILD=1
++NS_CFLAGS += -DBCSD_DEBUG_BUILD=1
+ else
+-CFLAGS += -DBCSD_DEBUG_BUILD=0
++NS_CFLAGS += -DBCSD_DEBUG_BUILD=0
+ endif
+ 
+ _TARGET = $(BINDIR)/lib$(TARGET)$(LIB_ARCH)$(LIB_ENDIAN).a
+@@ -90,8 +90,8 @@
+ _OBJECTS_CA = $(addprefix $(OBJDIR_CA)/, $(OBJECTS_CA))
+ 
+ # This is the minimum needed to compile and link with Nexus
+-CFLAGS += \
+-  $(NEXUS_CFLAGS) $(addprefix -I,$(NEXUS_APP_INCLUDE_PATHS)) $(addprefix -D,$(NEXUS_APP_DEFINES)) \
++NS_CFLAGS += \
++  $(NEXUS_CFLAGS) $(addprefix -I,$(NEXUS_APP_INCLUDE_PATHS)) $(addprefix -D,$(NEXUS_APP_DEFINES)) -DBSTD_CPU_ENDIAN=$(BSTD_CPU_ENDIAN)\
+   -I$(NEXUS_TOP)/modules/security/include \
+   -I$(NEXUS_TOP)/modules/security/include/priv  \
+   -I$(NEXUS_TOP)/modules/security/src \
+@@ -121,14 +121,14 @@
+ CFLAGS += -DLIB_TOMCRYPT_SUPPORT=1
+ endif
+ 
+-CFLAGS += -Wall -DLTM_DESC -DREFSW_VER=$(REFSW_VER) -DNEXUS_HASH_IS_THREAD_SAFE=0 -DCA_VENDOR_INDEX=$(CA_VENDOR_INDEX) -DCA_VENDOR=$(CA_VENDOR)
++NS_CFLAGS += -Wall -DLTM_DESC -DREFSW_VER=$(REFSW_VER) -DNEXUS_HASH_IS_THREAD_SAFE=0 -DCA_VENDOR_INDEX=$(CA_VENDOR_INDEX) -DCA_VENDOR=$(CA_VENDOR) 
+ 
+ # Don't add 7344 or 7346 to this list; they are counted as Zeus 2.2 but don't
+ # have the extra OTPMSP bits.
+ ifeq ($(filter $(BCHP_CHIP), 7563 7362), $(BCHP_CHIP))
+-CFLAGS += -DZEUSVER=22
++NS_CFLAGS += -DZEUSVER=22
+ else
+-CFLAGS += -DZEUSVER=$(shell echo $(ZEUSVER) | sed 's/Zeus//')
++NS_CFLAGS += -DZEUSVER=$(shell echo $(ZEUSVER) | sed 's/Zeus//')
+ endif
+ 
+ .PHONY: all grep_cflags show_cflags clean
+@@ -141,10 +141,10 @@
+ # usage: "make grep_cflags GREPFOR=blah"
+ # If you get "make: ***[grep_cflags] Error 1", the string was not found
+ grep_cflags:
+-	$(Q_)echo $(CFLAGS) | tr ' ' '\n' | grep --color $(GREPFOR)
++	$(Q_)echo $(NS_CFLAGS) | tr ' ' '\n' | grep --color $(GREPFOR)
+ 
+ show_cflags:
+-	-$(Q_)echo $(CFLAGS) | tr ' ' '\n' >/tmp/$(USER)cflgtmp.tmp && less /tmp/$(USER)cflgtmp.tmp
++	-$(Q_)echo $(NS_CFLAGS) | tr ' ' '\n' >/tmp/$(USER)cflgtmp.tmp && less /tmp/$(USER)cflgtmp.tmp
+ 	-$(Q_)rm /tmp/$(USER)cflgtmp.tmp
+ 
+ $(OBJDIR) $(BINDIR) $(OBJDIR_CA) $(BINDIR_CA):
+@@ -161,15 +161,15 @@
+ # Default C-rule. Also generates dependency files
+ $(OBJDIR)/%.o: %.c
+ 	$(Q_)echo "[Compile... $(shell basename $@) (bcsd)]"
+-	$(Q_)$(CC) -c -o $@ $< $(CFLAGS)
+-	$(Q_)$(CC) -MM -c $< $(CFLAGS) >$(OBJDIR)/$*.d.tmp
++	$(Q_)$(CC) -c -o $@ $< $(NS_CFLAGS)
++	$(Q_)$(CC) -MM -c $< $(NS_CFLAGS) >$(OBJDIR)/$*.d.tmp
+ 	$(Q_)sed "s|$(shell basename $@):|$@:|" <$(OBJDIR)/$*.d.tmp >$(OBJDIR)/$*.d
+ 	$(Q_)rm $(OBJDIR)/$*.d.tmp
+ 
+ $(OBJDIR_CA)/%.o: %.c
+ 	$(Q_)echo "[Compile... $(shell basename $@) (ca_vendor)]"
+-	$(Q_)$(CC) -c -o $@ $< $(CFLAGS)
+-	$(Q_)$(CC) -MM -c $< $(CFLAGS) >$(OBJDIR_CA)/$*.d.tmp
++	$(Q_)$(CC) -c -o $@ $< $(NS_CFLAGS)
++	$(Q_)$(CC) -MM -c $< $(NS_CFLAGS) >$(OBJDIR_CA)/$*.d.tmp
+ 	$(Q_)sed "s|$(shell basename $@):|$@:|" <$(OBJDIR_CA)/$*.d.tmp >$(OBJDIR_CA)/$*.d
+ 	$(Q_)rm $(OBJDIR_CA)/$*.d.tmp
+
+--- reference_code/rockford/applications/security/brcm/bcsd/configs/nagra/os/make.inc	2015-08-14 16:10:08.453597737 +0200
++++ rockford/applications/security/brcm/bcsd/configs/nagra/os/make.inc	2015-08-14 16:14:01.435748635 +0200
+@@ -22,4 +22,5 @@
+ OBJECTS_CA += cavendor_nocs3.o
+ endif
+ 
+-CFLAGS += -DAPI_VERSION=$(API_VERSION) -DCA_VENDOR_INDEX=$(CA_VENDOR_INDEX)
+\ No newline at end of file
++NS_CFLAGS += -DAPI_VERSION=$(API_VERSION) -DCA_VENDOR_INDEX=$(CA_VENDOR_INDEX)
++

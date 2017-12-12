@@ -1,0 +1,73 @@
+diff -Nuar reference_code/rockford/applications/security/nagra/nocs3/4_1_1/os/csd/Makefile rockford/applications/security/nagra/nocs3/4_1_1/os/csd/Makefile
+--- reference_code/rockford/applications/security/nagra/nocs3/4_1_1/os/csd/Makefile	2015-07-10 15:23:09.486643506 +0200
++++ rockford/applications/security/nagra/nocs3/4_1_1/os/csd/Makefile	2015-07-10 19:08:34.318082344 +0200
+@@ -7,3 +7,24 @@
+ OBJECTS = csd.o
+ 
+ include ../Makefile.inc
++
++pace_csdlib: all
++	@echo -e "\n[PACE: $@ - Copying csd library in $(CSDLIB_PATH)]"
++	-@if [ ! -d $(CSDLIB_PATH) ]; then mkdir -v $(CSDLIB_PATH); fi
++	@cp $(_TARGET) $(CSDLIB_PATH)/libpace_csdlib.a  
++	@echo "Installing CSD headers to $(CSDLIB_PATH)"   
++	@cp -v $(NOCS3_OS_PATH)/csd/include/*.h $(CSDLIB_PATH)
++	@echo -e "[PACE: $@ => Done]\n"
++
++pace_csdlib.pc:
++	@mkdir -p $(CSDLIB_PATH)
++	@echo 'prefix=$(CSDLIB_PATH)'                   >  $(CSDLIB_PATH)/$@
++	@echo 'libdir=$${prefix}'                       >> $(CSDLIB_PATH)/$@
++	@echo 'includedir=$${prefix}'                   >> $(CSDLIB_PATH)/$@
++	@echo ""                                        >> $(CSDLIB_PATH)/$@
++	@echo "Name: csd_lib"                    >> $(CSDLIB_PATH)/$@
++	@echo "Description: nagra NOCS3 driver csd lib"             >> $(CSDLIB_PATH)/$@
++	@echo "Version: $(REFSW_VER)"               >> $(CSDLIB_PATH)/$@
++	@echo 'Libs: -L$${libdir} -lpace_csdlib'        >> $(CSDLIB_PATH)/$@
++	@echo 'Cflags: -I$${includedir}'      >> $(CSDLIB_PATH)/$@
++
+diff -Nuar reference_code/rockford/applications/security/nagra/nocs3/4_1_1/os/Makefile.inc rockford/applications/security/nagra/nocs3/4_1_1/os/Makefile.inc
+--- reference_code/rockford/applications/security/nagra/nocs3/4_1_1/os/Makefile.inc	2015-07-10 15:23:09.482643444 +0200
++++ rockford/applications/security/nagra/nocs3/4_1_1/os/Makefile.inc	2015-07-10 19:13:46.280890295 +0200
+@@ -23,7 +23,7 @@
+ OPENSOURCE_TOP ?= $(SECURITY_ROOT)/opensource
+ 
+ # NOCS3 specific include paths
+-CFLAGS = \
++NS_CFLAGS = \
+   -I$(NOCS_COMMON_ROOT)/session_manager/include \
+   -I$(NOCS_COMMON_ROOT)/session_manager/src \
+   -I$(NOCS3_ROOT)/csd/include \
+@@ -34,25 +34,25 @@
+   -I$(OPENSOURCE_TOP)/libtm/include
+ 
+ ifneq ($(RPC_TEST_HARNESS_WORKAROUND),)
+-CFLAGS += -DRPC_TEST_HARNESS_WORKAROUND
++NS_CFLAGS += -DRPC_TEST_HARNESS_WORKAROUND
+ endif
+ 
+ # Pick up the common security environment
+ include $(SECURITY_ROOT)/rules/os_common_env.mk
+-
++REFSW_VER :=1501
+ # Add in some reference software version specific parts
+ ifeq ($(filter $(REFSW_VER), 1302, 1303, 1304), $(REFSW_VER))
+ include $(PORTINGINTERFACE)/hsm/bhsm_nagra.inc
+ endif
+ 
+-ifeq ($(shell echo "$(REFSW_VER)>=1304" | bc), 1)
+-CFLAGS += -I$(NEXUS_TOP)/extensions/security/securepkl/include
+-endif
++#ifeq ($(shell echo "$(REFSW_VER)>=1304" | bc), 1)
++NS_CFLAGS += -I$(NEXUS_TOP)/extensions/security/securepkl/include
++#endif
+ 
+ ifeq ($(NO_C99),)
+-CFLAGS += -std=c99
++NS_CFLAGS += -std=c99
+ else
+-CFLAGS += -DNO_C99
++NS_CFLAGS += -DNO_C99
+ endif
+ 
+ # Makefile rules

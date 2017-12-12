@@ -1,0 +1,12 @@
+diff -Naur CURRENT/nexus/modules/frontend/3128/src/nexus_frontend_3128.c PATCHED/nexus/modules/frontend/3128/src/nexus_frontend_3128.c
+--- CURRENT/nexus/modules/frontend/3128/src/nexus_frontend_3128.c	2015-10-08 08:24:42.781443000 +0000
++++ PATCHED/nexus/modules/frontend/3128/src/nexus_frontend_3128.c	2015-10-08 08:24:44.075452232 +0000
+@@ -3265,7 +3265,7 @@
+     rc = BTNR_GetIfDacStatus(pDevice->tnr[pChannel->chn_num], &status);
+     if(rc){rc = BERR_TRACE(rc); goto done;}
+ 
+-    pStatus->rssi = status.rssi/100;
++    pStatus->rssi = status.rssi;
+     pStatus->tuneComplete = pDevice->ifdacTuneComplete;
+ 
+ done:

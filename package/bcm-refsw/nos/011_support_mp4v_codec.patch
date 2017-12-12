@@ -1,0 +1,11 @@
+--- reference_code/BSEAV/lib/media/bmedia_util.h	2015-03-05 17:39:31.000000000 +0100
++++ BSEAV/lib/media/bmedia_util.h	2015-03-05 17:39:42.267091300 +0100
+@@ -305,6 +305,8 @@
+ 					BMEDIA_FOURCC('a','v','c',' ')==(fourcc) || \
+ 					BMEDIA_FOURCC('A','V','C','1')==(fourcc) || \
+ 					BMEDIA_FOURCC('a','v','c','1')==(fourcc) || \
++					BMEDIA_FOURCC('m','p','4','v')==(fourcc) || \
++					BMEDIA_FOURCC('M','P','4','v')==(fourcc) || \
+ 					BMEDIA_FOURCC('H','2','6','4')==(fourcc) || \
+ 					BMEDIA_FOURCC('h','2','6','4')==(fourcc))
+ 

@@ -1,0 +1,38 @@
+--- reference_code/nexus/platforms/common/src/linuxuser.proxy/nexus_platform_os.c	2015-03-04 11:21:55.029024945 +0100
++++ nexus/platforms/common/src/linuxuser.proxy/nexus_platform_os.c	2015-03-06 09:28:44.655390287 +0100
+@@ -383,8 +383,11 @@
+     const char *devName;
+     int rc, fd;
+     struct stat st;
++#ifdef PACE_NOMKNOD
++    bool create_node = false;
++#else
+     bool create_node = true;
+-
++#endif
+     devName = NEXUS_GetEnv("NEXUS_DEVICE_NODE");
+     if (!devName) {
+         devName = "/dev/nexus";
+@@ -400,7 +403,13 @@
+         if(S_ISCHR(st.st_mode) && MAJOR(st.st_rdev) == NEXUS_PLATFORM_P_DRIVER_MAJOR && MINOR(st.st_rdev) == 0) {
+             create_node = false;
+         } else {
++#ifdef PACE_NOMKNOD
++            printf("\n!!!!! INVALID NODE !!!!! Removing stale device node %s (%#x major=%u(%u) minor=%u(%u))\n", devName, (unsigned)st.st_mode, (unsigned)MAJOR(st.st_rdev), NEXUS_PLATFORM_P_DRIVER_MAJOR, (unsigned)MINOR(st.st_rdev), 0);
++            exit (1);   
++#else
+             BDBG_MSG(("Removing stale device node %s (%#x major=%u(%u) minor=%u(%u))", devName, (unsigned)st.st_mode, (unsigned)MAJOR(st.st_rdev), NEXUS_PLATFORM_P_DRIVER_MAJOR, (unsigned)MINOR(st.st_rdev), 0));
++#endif 
++
+             /* coverity[toctou] - it's ok to use the filename after the stat() check */
+             rc = unlink(devName);
+             if(rc!=0) {
+@@ -1273,7 +1282,7 @@
+     if (state->platform_init) {
+         /* if you init (don't uninit) then join, you will fail here.
+         likewise, if you init, fork (but don't exec), then join, you will fail here. */
+-        return BERR_TRACE(NEXUS_NOT_AVAILABLE);
++        return NEXUS_SUCCESS;
+     }
+     if (state->init) {
+         BDBG_WRN(("clients should not call NEXUS_Platform_GetDefaultSettings"));

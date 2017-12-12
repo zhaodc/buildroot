@@ -1,0 +1,30 @@
+--- ursr-E077_CADDV_TT_RELEASE/nexus/modules/frontend/docsis/src/nexus_docsis_priv.c	2015-06-11 18:15:11.000000000 +0530
++++ NEW/nexus/modules/frontend/docsis/src/nexus_docsis_priv.c	2015-06-11 18:13:22.000000000 +0530
+@@ -165,15 +165,15 @@
+ #ifdef NEXUS_FRONTEND_REVERSE_RMAGNUM_SUPPORT
+     case BRPC_Notification_Event_TuneInit:
+         {
+-            BDBG_ERR(("Get Notification BRPC_Notification_Event_TuneInit"));
++            BDBG_MSG(("Get Notification BRPC_Notification_Event_TuneInit"));
+             dacGain = BRPC_GET_NOTIFICATION_REVERSE_RMAGNUM_EVENT_TUNEINIT_GAIN(event);
+-            BDBG_ERR(("TuneInit: dacGain[%d]", dacGain));
++            BDBG_MSG(("TuneInit: dacGain[%d]", dacGain));
+         }
+         break;
+ 
+     case BRPC_Notification_Event_Tune:
+         {
+-            BDBG_ERR(("Get Notification BRPC_Notification_Event_Tune"));
++            BDBG_MSG(("Get Notification BRPC_Notification_Event_Tune"));
+ 
+             NEXUS_Tuner_GetSettings(hDataTuner, &tunerSettings);
+             NEXUS_Tuner_GetDefaultTuneSettings(NEXUS_TunerMode_eQam, &tunerTuneSettings);
+@@ -202,7 +202,7 @@
+             tunerTuneSettings.tuneCompleteCallback.context = hDevice;
+             tunerTuneSettings.asyncStatusReadyCallback.callback = NEXUS_Docsis_P_TuneAsyncStatusReady;
+             tunerTuneSettings.asyncStatusReadyCallback.context = hDevice->tunerStatusEvent;
+-            BDBG_ERR(("Tune: freq[%d], annex[%d], qammode[%d]", tunerTuneSettings.frequency,
++            BDBG_MSG(("Tune: freq[%d], annex[%d], qammode[%d]", tunerTuneSettings.frequency,
+                 tunerTuneSettings.modeSettings.qam.annex,
+                 tunerTuneSettings.modeSettings.qam.qamMode));
+             rc = NEXUS_Tuner_Tune(hDataTuner, &tunerTuneSettings);

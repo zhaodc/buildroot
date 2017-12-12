@@ -1,0 +1,12 @@
+--- ursr-E077_CADDV_MAINAPP_DEBUG/BSEAV/lib/security/common_drm/examples/Makefile.orig	2015-09-19 01:54:38.000000000 +0200
++++ ursr-E077_CADDV_MAINAPP_DEBUG/BSEAV/lib/security/common_drm/examples/Makefile	2015-10-08 14:50:27.065386823 +0200
+@@ -222,7 +222,8 @@
+ ifeq ($(filter $(target), playready playready_svp urr_toggling), $(target))
+ ifeq ($(MSDRM_PRDY_SDK_VERSION), 2.5)
+ 	@echo [Copy $(target) dependencies...]
+-	cp -f $(BSEAV_TOP)/lib/security/common_drm/$(CMNDRM_PRDY_LIBDIR)/libcmndrmprdy.so $(NEXUS_BIN_DIR)
++	-cp -f $(BSEAV_TOP)/lib/security/common_drm/$(CMNDRM_PRDY_LIBDIR)/libcmndrmprdy.so $(NEXUS_BIN_DIR)
++    -cp -f -P ${STAGING_PATH}/usr/lib/libssl*.* $(NEXUS_BIN_DIR)
+ ifeq ($(SAGE_SUPPORT),y)
+ 	cp -f ${BSEAV}/lib/playready/2.5/bin/${ARCH_DIR_PRDY}/lib/libplayreadypk_host.so  ${NEXUS_BIN_DIR}
+ else

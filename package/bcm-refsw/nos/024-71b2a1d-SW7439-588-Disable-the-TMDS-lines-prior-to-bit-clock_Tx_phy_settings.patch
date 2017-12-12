@@ -1,0 +1,362 @@
+--- CURRENT/magnum/portinginterface/hdm/bhdm.inc
++++ PATCHED/magnum/portinginterface/hdm/bhdm.inc
+@@ -105,28 +105,13 @@ else ifeq ($(filter $(BCHP_CHIP), 7422 7425 7429 74295 7435 7231 7358 7344 7346
+ 	BHDM_SOURCES += $(MAGNUM)/portinginterface/hdm/src/core40nm/bhdm_priv.c
+ 
+ 
+-#######################
+-##       28nm platforms           ##
+-## with and without HDMI 2.0 ##
+-##          Support                 ##
+-#######################
+-else ifeq ($(filter $(BCHP_CHIP), 7366 7145 7439), $(BCHP_CHIP))
+-	BHDM_SOURCES +=	$(MAGNUM)/portinginterface/hdm/src/core28nm/bhdm_priv.c
+-
+-	ifeq ($(findstring $(BCHP_CHIP), 7366 7145 7439), $(BCHP_CHIP))
+-		ifeq ($(findstring $(BCHP_VER), a0 A0 ), $(BCHP_VER))
+-			BHDM_HDMI_20_SUPPORT=n
+-		else
+-			BHDM_HDMI_20_SUPPORT=y
+-		endif
+-	endif
+-
+ ##################
+-##     New Chips          ##
+ ##  28nm platforms      ##
+ ##################
+ else
+-	BHDM_SOURCES +=	$(MAGNUM)/portinginterface/hdm/src/core28nm/bhdm_priv.c
++	BHDM_SOURCES += $(MAGNUM)/portinginterface/hdm/src/core28nm/bhdm_priv.c
++
++## BHDM_CONFIG adjusts macros for non HDMI 2.0 SUPPORT
+ 	BHDM_HDMI_20_SUPPORT=y
+ endif
+ 
+--- CURRENT/magnum/portinginterface/hdm/src/common/bhdm.c
++++ PATCHED/magnum/portinginterface/hdm/src/common/bhdm.c
+@@ -662,6 +662,31 @@ const char * BHDM_P_GetVersion(void)
+ }
+ 
+ /*******************************************************************************
++void BHDM_P_SetDisplayStartupDefaults_isr
++Summary: Set the default settings for starting the HDMI Display (after power down, hot plug, etc.)
++*******************************************************************************/
++void BHDM_P_SetDisplayStartupDefaults_isr(BHDM_Handle hHDMI)
++{
++	BDBG_ENTER(BHDM_P_SetDisplayStartupDefaults_isr) ;
++
++	/* force detection of RxSense when TMDS is re-enabled  */
++	hHDMI->rxSensePowerDetected = false ;
++
++	/* force EnableDisplay if/when TMDS lines are enabled */
++	/* See BHDM_EnableDisplay */
++	hHDMI->DeviceSettings.bForceEnableDisplay = true ;
++
++#if BHDM_HAS_HDMI_20_SUPPORT
++	/* force configuration of Scrambling */
++	/* See BHDM_ConfigurePhy */
++      hHDMI->TmdsBitClockRatioChange = true;
++#endif
++
++	BDBG_LEAVE(BHDM_P_SetDisplayStartupDefaults_isr) ;
++}
++
++
++/*******************************************************************************
+ BERR_Code BHDM_GetDefaultSettings
+ Summary: Get the default settings for the HDMI device.
+ *******************************************************************************/
+@@ -2110,20 +2135,11 @@ void BHDM_P_DisableDisplay_isr(
+ 
+ #endif
+ 
+-	/* turn off the TMDS data lines */
++	/* turn off the TMDS clock/data lines */
+ 	BHDM_P_EnableTmdsData_isr(hHDMI, false) ;
+ 	BHDM_P_EnableTmdsClock_isr(hHDMI, false) ;
+ 
+-	/* set flag to force EnableDisplay if/when TMDS lines are re-enabled */
+-	/* See BHDM_EnableDisplay */
+-	hHDMI->DeviceSettings.bForceEnableDisplay = true ;
+-
+-	/* indicate HDMI Output (Clock + Data) is completely DISABLED */
+-	hHDMI->DeviceStatus.tmds.clockEnabled = false ;
+-	hHDMI->DeviceStatus.tmds.dataEnabled = false ;
+-
+-	/* force RxSense status to false */
+-	hHDMI->rxSensePowerDetected = false ;
++	BHDM_P_SetDisplayStartupDefaults_isr(hHDMI) ;
+ 
+ 	BDBG_LEAVE(BHDM_P_DisableDisplay_isr) ;
+ }
+@@ -3297,7 +3313,6 @@ static BERR_Code BHDM_P_ConfigureInputVideoFmt(
+ 	/* update pixel clock rate */
+ 	hHDMI->DeviceStatus.pixelClockRate = BHDM_P_TmdsClockToValue_isrsafe(hHDMI->eTmdsClock);
+ 
+-
+ done:
+ 	BDBG_LEAVE(BHDM_P_ConfigureInputVideoFmt) ;
+ 	return rc ;
+@@ -4777,12 +4792,19 @@ static void BHDM_P_TimerExpiration_isr (const BHDM_Handle hHDMI, int parm2)
+ 
+ 	case BHDM_P_TIMER_eTxScramble :
+ 		{
+-#if BHDM_CONFIG_HAS_HDCP22
++#if BHDM_HAS_HDMI_20_SUPPORT
+ 			BHDM_ScrambleConfig ScrambleSettings ;
+ 
++			/* TMDS Bit Clock Ratio change required TMDS lines to be OFF */
++			/* now turn the TMDS lines back on */
++			BHDM_P_EnableTmdsClock_isr(hHDMI, true) ;
++			BHDM_P_EnableTmdsData_isr(hHDMI, true) ;
++
+ 			BHDM_SCDC_P_GetScrambleParams_isrsafe(hHDMI, &ScrambleSettings) ;
+ 			BHDM_SCDC_P_ConfigureScramblingTx_isrsafe(hHDMI, &ScrambleSettings) ;
+ 
++			hHDMI->TmdsBitClockRatioChange = false ;
++
+ 			/* Wait 1s before reading Scramble Status; see BHDM_P_TimerExpiration_isr */
+ 			BTMR_StartTimer_isr(hHDMI->TimerScdcStatus,
+ 				BHDM_P_MILLISECOND * 1000) ;
+--- CURRENT/magnum/portinginterface/hdm/src/common/bhdm_config.h
++++ PATCHED/magnum/portinginterface/hdm/src/common/bhdm_config.h
+@@ -127,6 +127,9 @@ can be disabled to allow for successful compilation
+ 
+ #if BCHP_HDMI_TX_AUTO_I2C_REG_START
+ #define BHDM_CONFIG_HAS_HDCP22 1
++/* disable BHDM_HAS_HDMI_20_SUPPORT for those chips without AUTO_I2C block */
++#elif BHDM_HAS_HDMI_20_SUPPORT
++#undef BHDM_HAS_HDMI_20_SUPPORT
+ #endif
+ 
+ 
+--- CURRENT/magnum/portinginterface/hdm/src/common/bhdm_packet_acr_priv_isr.c
++++ PATCHED/magnum/portinginterface/hdm/src/common/bhdm_packet_acr_priv_isr.c
+@@ -247,6 +247,7 @@ void BHDM_AudioVideoRateChangeCB_isr(
+ 		newTmdsMode = BHDM_P_GetTmdsClockMode_isr(eTmdsClock) ;
+ 		if  (newTmdsMode != hHDMI->eTmdsMode)
+ 		{
++			hHDMI->TmdsBitClockRatioChange = true ;
+ 			hHDMI->eTmdsMode = newTmdsMode ;
+ 			videoRateChange = true ;
+ 		}
+--- CURRENT/magnum/portinginterface/hdm/src/common/bhdm_priv.h
++++ PATCHED/magnum/portinginterface/hdm/src/common/bhdm_priv.h
+@@ -449,6 +449,7 @@ typedef struct BHDM_P_Handle
+ 	BTMR_TimerHandle TimerScdcStatus ;
+ 	BTMR_TimerHandle TimerTxScramble ;
+ 	BHDM_P_TmdsMode eTmdsMode ;
++	bool TmdsBitClockRatioChange ;
+ 
+ #if BHDM_CONFIG_HAS_HDCP22
+ 	bool bAutoI2cMode ;
+--- CURRENT/magnum/portinginterface/hdm/src/core28nm/bhdm_priv.c
++++ PATCHED/magnum/portinginterface/hdm/src/core28nm/bhdm_priv.c
+@@ -162,10 +162,14 @@
+ 	case BFMT_VideoFmt_e3840x2160p_24Hz :
+ 	case BFMT_VideoFmt_e3840x2160p_25Hz :
+ 	case BFMT_VideoFmt_e3840x2160p_30Hz :
+-		stNewPreEmphasisConfig.uiPreEmphasis_Ch0 = 0x7d ;
+-		stNewPreEmphasisConfig.uiPreEmphasis_Ch1 = 0x7d ;
+-		stNewPreEmphasisConfig.uiPreEmphasis_Ch2 = 0x7d ;
+-		stNewPreEmphasisConfig.uiPreEmphasis_CK = 0x7d ;
++	case BFMT_VideoFmt_e4096x2160p_24Hz :
++	case BFMT_VideoFmt_e4096x2160p_25Hz :
++	case BFMT_VideoFmt_e4096x2160p_30Hz :
++		
++		stNewPreEmphasisConfig.uiPreEmphasis_Ch0 = 0xd8 ;
++		stNewPreEmphasisConfig.uiPreEmphasis_Ch1 = 0xd8 ;
++		stNewPreEmphasisConfig.uiPreEmphasis_Ch2 = 0xd8 ;
++		stNewPreEmphasisConfig.uiPreEmphasis_CK = 0xd8 ;
+ 
+ 		stNewPreEmphasisConfig.uiTermResSelData0 = 0x1 ;
+ 		stNewPreEmphasisConfig.uiTermResSelData1= 0x1 ;
+@@ -176,9 +180,9 @@
+ #if BHDM_HAS_HDMI_20_SUPPORT
+ 	case BFMT_VideoFmt_e3840x2160p_50Hz :
+ 	case BFMT_VideoFmt_e3840x2160p_60Hz :
+-		stNewPreEmphasisConfig.uiPreEmphasis_Ch0 = 0x1c ;
+-		stNewPreEmphasisConfig.uiPreEmphasis_Ch1 = 0x1c ;
+-		stNewPreEmphasisConfig.uiPreEmphasis_Ch2 = 0x1c ;
++		stNewPreEmphasisConfig.uiPreEmphasis_Ch0 = 0x7e ;
++		stNewPreEmphasisConfig.uiPreEmphasis_Ch1 = 0x7e ;
++		stNewPreEmphasisConfig.uiPreEmphasis_Ch2 = 0x7e ;
+ 		if (hHDMI->eTmdsMode == BHDM_P_TmdsMode_eHigh)
+ 			stNewPreEmphasisConfig.uiPreEmphasis_CK = 0xb ;
+ 		else
+@@ -384,12 +388,18 @@
+ 		goto done ;
+ 	}
+ 
+-#if BHDM_CONFIG_HAS_HDCP22
+-	rc = BHDM_SCDC_ConfigureScrambling(hHDMI) ;
+-	if (rc)
++#if BHDM_HAS_HDMI_20_SUPPORT
++	/****************************************************/
++	/* Set scramble configration if there is a change in the Bit Clock Ratio */
++	/****************************************************/
++	if (hHDMI->TmdsBitClockRatioChange)
+ 	{
+-		BERR_TRACE(rc) ;
+-		goto done ;
++		rc = BHDM_SCDC_ConfigureScrambling(hHDMI) ;
++		if (rc)
++		{
++			BERR_TRACE(rc) ;
++			goto done ;
++		}
+ 	}
+ #endif
+ 
+@@ -1171,11 +1181,15 @@
+ 		BHDM_SCDC_P_ConfigureScramblingTx_isrsafe(hHDMI, &ScrambleSettings) ;
+ 	}
+ #endif
+-
++	/* Pace change start */
++#if 0
+ #if defined NEXUS_USE_7250_DGL && ((BCHP_CHIP == 7439) || (BCHP_CHIP == 7250 && BCHP_VER >= BCHP_VER_B0))
+         BDBG_WRN((" 7250DGL Board,  BCHP_HDMI_TX_PHY_CHANNEL_SWAP = 0x3012  !!!")) ;
+         BREG_Write32(hRegister, BCHP_HDMI_TX_PHY_CHANNEL_SWAP + ulOffset, 0x3012) ;
+ #endif
++#endif
++	/* Pace change End */
++
+ 
+ 	hHDMI->phyPowered = true ;
+ 	return ;
+ 
+--- CURRENT/magnum/portinginterface/hdm/src/core28nm/bhdm_scdc.c
++++ PATCHED/magnum/portinginterface/hdm/src/core28nm/bhdm_scdc.c
+@@ -44,7 +44,7 @@ typedef struct BHDM_SCDC_DataMap
+ Summary:
+ 	Initialize the SCDC configuration
+ *******************************************************************************/
+-#if BHDM_CONFIG_HAS_HDCP22
++#if BHDM_HAS_HDMI_20_SUPPORT
+ BERR_Code BHDM_SCDC_Initialize(
+    const BHDM_Handle hHDMI               /* [in] HDMI handle */
+ )
+@@ -569,7 +569,7 @@ void BHDM_SCDC_P_GetScrambleParams_isrsafe(const BHDM_Handle hHDMI, BHDM_Scrambl
+ }
+ 
+ 
+-void BHDM_SCDC_P_ConfigureScramblingRx(const BHDM_Handle hHDMI)
++static void BHDM_SCDC_P_ConfigureScramblingRx(const BHDM_Handle hHDMI)
+ {
+ 	BERR_Code rc ;
+ 	BHDM_ScrambleConfig ScrambleSettings ;
+@@ -585,27 +585,26 @@ void BHDM_SCDC_P_ConfigureScramblingRx(const BHDM_Handle hHDMI)
+ 		(hHDMI->eTmdsMode == BHDM_P_TmdsMode_eHigh) ? "High" : "Low",
+ 		ScrambleSettings.rxTmdsConfig)) ;
+ 
++	/* Writes to Rx TMDS Bit Clock Ratio requires TMDS toggle */
++	/* turn off prior to making Rx changes */
++	BKNI_EnterCriticalSection() ;
++		BHDM_P_EnableTmdsClock_isr(hHDMI, false) ;
++		BHDM_P_EnableTmdsData_isr(hHDMI, false) ;
++	BKNI_LeaveCriticalSection() ;
++
+ 	rc =  BREG_I2C_Write(hHDMI->hI2cRegHandle,
+ 		BHDM_AUTO_I2C_P_SCDC_SLAVE_ADDR, BHDM_SCDC_TMDS_CONFIG,
+ 		&ScrambleSettings.rxTmdsConfig, 1) ;
+ 	if (rc) {BERR_TRACE(rc);}
+ 
+-	if (ScrambleSettings.rxTmdsConfig)
+-	{
+-		/* Wait for Rx to process the Scrambling Request prior to enabling Tx Scrambling */
+-		BTMR_StartTimer(hHDMI->TimerTxScramble, BHDM_P_MILLISECOND * 75) ;
+-		if (rc) {BERR_TRACE(rc) ;} ;
+-	}
+-	else  /* no need to wait for the Tx to enable scrambling; status can be read shortly */
+-	{
+-		/* Wait 1s before reading Scramble Status; see BHDM_P_TimerExpiration_isr */
+-		BTMR_StartTimer(hHDMI->TimerScdcStatus,
+-			BHDM_P_MILLISECOND * 1000) ;
+-	}
++	/* Allow the Rx to process the Scrambling Request prior to enabling/disabling Tx Scrambling */
++	rc = BTMR_StartTimer(hHDMI->TimerTxScramble, BHDM_P_MILLISECOND * 75) ;
++	if (rc) {BERR_TRACE(rc) ;} ;
+ }
+ 
+ 
+-void BHDM_SCDC_P_ConfigureScramblingTx_isrsafe(BHDM_Handle hHDMI, BHDM_ScrambleConfig *pstSettings)
++void BHDM_SCDC_P_ConfigureScramblingTx_isrsafe(
++	BHDM_Handle hHDMI, BHDM_ScrambleConfig *pstScrambleConfig)
+ {
+ 	BREG_Handle hRegister ;
+ 	uint32_t Register ;
+@@ -615,16 +614,16 @@ void BHDM_SCDC_P_ConfigureScramblingTx_isrsafe(BHDM_Handle hHDMI, BHDM_ScrambleC
+ 	ulOffset = hHDMI->ulOffset ;
+ 
+ 	BDBG_MSG(("Set Scrambling TX:  %d <%s>",
+-		pstSettings->txScrambleEnable,
+-		pstSettings->txScrambleEnable ? "ON" : "OFF")) ;
++		pstScrambleConfig->txScrambleEnable,
++		pstScrambleConfig->txScrambleEnable ? "ON" : "OFF")) ;
+ 
+-	BDBG_MSG(("SCDC TMDS Config: %x ; Clock Word Select: %x\n",
+-		pstSettings->rxTmdsConfig, pstSettings->clockWordSelect)) ;
++	BDBG_MSG(("   SCDC TMDS Config: %x ; Clock Word Select: %x",
++		pstScrambleConfig->rxTmdsConfig, pstScrambleConfig->clockWordSelect)) ;
+ 
+ 	/* next configure (or clear) the STB Scrambling configuration */
+ 	Register = BREG_Read32(hRegister, BCHP_HDMI_SCRAMBLER_CTL + ulOffset) ;
+ 		Register &= ~ BCHP_MASK(HDMI_SCRAMBLER_CTL, ENABLE) ;
+-		Register |= BCHP_FIELD_DATA(HDMI_SCRAMBLER_CTL, ENABLE, pstSettings->txScrambleEnable) ;
++		Register |= BCHP_FIELD_DATA(HDMI_SCRAMBLER_CTL, ENABLE, pstScrambleConfig->txScrambleEnable) ;
+ 	BREG_Write32(hRegister, BCHP_HDMI_SCRAMBLER_CTL + ulOffset, Register) ;
+ 
+ 	/* finally set Clock Word Select as needed */
+@@ -638,26 +637,24 @@ void BHDM_SCDC_P_ConfigureScramblingTx_isrsafe(BHDM_Handle hHDMI, BHDM_ScrambleC
+ 	Register = BREG_Read32(hRegister, BCHP_HDMI_TX_PHY_TMDS_CLK_WORD_SEL + ulOffset) ;
+ 		Register &= ~ BCHP_MASK(HDMI_TX_PHY_TMDS_CLK_WORD_SEL, CLK_WORD_SEL) ;
+ 		Register |= BCHP_FIELD_DATA(
+-			HDMI_TX_PHY_TMDS_CLK_WORD_SEL, CLK_WORD_SEL, pstSettings->clockWordSelect ) ;
++			HDMI_TX_PHY_TMDS_CLK_WORD_SEL, CLK_WORD_SEL, pstScrambleConfig->clockWordSelect ) ;
+ 	BREG_Write32(hRegister, BCHP_HDMI_TX_PHY_TMDS_CLK_WORD_SEL + ulOffset, Register) ;
+ 
+-	hHDMI->ScrambleConfig = *pstSettings ;
++	hHDMI->ScrambleConfig = *pstScrambleConfig ;
+ 
+ 
+ 	if (hHDMI->DeviceSettings.bEnableScdcMonitoring)
+ 	{
+ 		BDBG_MSG(("%s Auto I2c Channel %d for SCDC",
+-			pstSettings->txScrambleEnable ? "Enable" : "Disable",
++			pstScrambleConfig->txScrambleEnable ? "Enable" : "Disable",
+ 			BHDM_AUTO_I2C_P_CHANNEL_ePollScdcUpdate0)) ;
+ 
+ 		/* enable Auto I2c only if Scrambling is being turned on */
+ 		BHDM_AUTO_I2C_EnableReadChannel(hHDMI,
+-			BHDM_AUTO_I2C_P_CHANNEL_ePollScdcUpdate0, pstSettings->txScrambleEnable) ;
++			BHDM_AUTO_I2C_P_CHANNEL_ePollScdcUpdate0, pstScrambleConfig->txScrambleEnable) ;
+ 	}
+ }
+ 
+-#endif
+-
+ 
+ BERR_Code BHDM_SCDC_ConfigureScrambling(const BHDM_Handle hHDMI)
+ {
+@@ -665,7 +662,6 @@ BERR_Code BHDM_SCDC_ConfigureScrambling(const BHDM_Handle hHDMI)
+ 
+ 	BDBG_ENTER(BHDM_SCDC_ConfigureScrambling);
+ 
+-#if BHDM_CONFIG_HAS_HDCP22
+ 	BDBG_OBJECT_ASSERT(hHDMI, HDMI) ;
+ 
+ 	/* make sure Tx is not scrambling from a previous connection */
+@@ -682,11 +678,7 @@ BERR_Code BHDM_SCDC_ConfigureScrambling(const BHDM_Handle hHDMI)
+ 	BHDM_SCDC_P_ConfigureScramblingRx(hHDMI) ;
+ 
+ done:
+-
+-#else
+-	BSTD_UNUSED(hHDMI) ;
+-#endif
+-
+ 	BDBG_LEAVE(BHDM_SCDC_ConfigureScrambling);
+ 	return rc;
+ }
++#endif

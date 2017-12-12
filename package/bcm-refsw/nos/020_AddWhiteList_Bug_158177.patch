@@ -1,0 +1,56 @@
+--- reference_code/nexus/platforms/common/src/linuxkernel/nexus_driver.c	2015-03-04 11:21:55.194019278 +0100
++++ nexus/platforms/common/src/linuxkernel/nexus_driver.c	2015-03-06 16:16:25.844900689 +0100
+@@ -170,20 +170,33 @@
+     }
+     return;
+ }
+-
+-static int
+-nexus_driver_open(struct inode *inode, struct file *file)
++#ifndef NEXUS_TRUSTED_UIDS
++#define NEXUS_TRUSTED_UIDS { 0,1000, 256,257,258,258,259,260,408,500,1024,1025,1026,1027,1028,1029,1030,4000,1005}
++#endif
++static const kuid_t TrustedUID[]=NEXUS_TRUSTED_UIDS;
++/* NEXUS_TRUSTED_UIDS is defined by project conf
++   it would be something like
++   { 0,256,257,258,258,1024,1025,1026,1027}
++ */
++static int nexus_driver_open(struct inode *inode, struct file *file)
+ {
+     int rc;
+-#if LINUX_VERSION_CODE <= KERNEL_VERSION(2,6,18)
+-    rc = nexus_generic_driver_open(0, &file->private_data, current->group_leader->pid, NULL, current->euid == 0);
+-#elif LINUX_VERSION_CODE < KERNEL_VERSION(3,14,0) /*TODO, find which kernel version has forced this change */
+-    rc = nexus_generic_driver_open(0, &file->private_data, current->group_leader->pid, current->comm, current_euid() == 0);
++    unsigned minor = MINOR(inode->i_rdev);
++    bool trusted=false;
++    int i;
++    for (i=0;i<sizeof(TrustedUID)/sizeof(uid_t);i++)
++    {
++#if LINUX_VERSION_CODE <= KERNEL_VERSION(2, 6, 18)
++      if (current->euid == TrustedUID[i])
+ #else
+-    kuid_t euid;
+-    euid = current_euid();
+-    rc = nexus_generic_driver_open(0, &file->private_data, current->group_leader->pid, current->comm, euid.val == 0);
+-#endif
++      if (uid_eq(current_euid(), TrustedUID[i]))
++#endif    
++      {
++         trusted=true;
++	 break;
++      }
++    }
++	rc = nexus_generic_driver_open(0, &file->private_data, current->group_leader->pid, current->comm, trusted);
+     if (rc) return -ENODEV;
+     return 0;
+ }
+@@ -254,6 +267,8 @@
+     return 0;
+ }
+ 
++MODULE_LICENSE("Proprietary");
++
+ int
+ nexus_init_module(void)
+ {

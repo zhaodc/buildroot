@@ -1,0 +1,11 @@
+--- CURRENT/nexus/examples/security/ca/clear_key/playback_aescbc_clear_termination.c	2015-11-26 17:49:24.135983495 +0100
++++ PATCHED/nexus/examples/security/ca/clear_key/playback_aescbc_clear_termination.c	2015-12-03 11:07:33.482219034 +0100
+@@ -418,7 +418,7 @@
+     NEXUS_AudioOutput_RemoveAllInputs (NEXUS_AudioDac_GetConnector (platformConfig.outputs.audioDacs[0]));
+ #endif
+ 
+-#if NEXUS_NUM_AUDIO_DACS
++#if NEXUS_NUM_SPDIF_OUTPUTS
+     NEXUS_AudioOutput_RemoveAllInputs (NEXUS_SpdifOutput_GetConnector (platformConfig.outputs.spdif[0]));
+ #endif
+     NEXUS_AudioInput_Shutdown (NEXUS_AudioDecoder_GetConnector (audioDecoder, NEXUS_AudioDecoderConnectorType_eStereo));

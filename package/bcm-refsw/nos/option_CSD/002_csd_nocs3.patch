@@ -1,0 +1,125 @@
+diff -Nuar reference_code/rockford/applications/security/rules/os_common_env.mk rockford/applications/security/rules/os_common_env.mk
+--- reference_code/rockford/applications/security/rules/os_common_env.mk	2015-07-10 15:23:09.533644230 +0200
++++ rockford/applications/security/rules/os_common_env.mk	2015-07-10 19:22:46.453215196 +0200
+@@ -21,10 +21,10 @@
+ # Determine the endianness of the build
+ ifeq ($(B_REFSW_ARCH),mips-linux)
+ LIB_ENDIAN=_be
+-CFLAGS += -DCFG_BIG_ENDIAN=1
++NS_CFLAGS += -DCFG_BIG_ENDIAN=1
+ else
+ LIB_ENDIAN=_le
+-CFLAGS += -DCFG_BIG_ENDIAN=0
++NS_CFLAGS += -DCFG_BIG_ENDIAN=0
+ endif
+ 
+ BCSD_TOP ?= $(SECURITY_ROOT)/brcm/bcsd
+@@ -32,8 +32,8 @@
+ 
+ include $(PORTINGINTERFACE)/hsm/bhsm.inc
+ 
+-CFLAGS += \
+-  $(NEXUS_CFLAGS) $(addprefix -I,$(NEXUS_APP_INCLUDE_PATHS)) $(addprefix -D,$(NEXUS_APP_DEFINES)) \
++NS_CFLAGS += \
++  $(NEXUS_NS_CFLAGS) $(addprefix -I,$(NEXUS_APP_INCLUDE_PATHS)) $(addprefix -D,$(NEXUS_APP_DEFINES)) \
+   -I$(NEXUS_TOP)/../BSEAV/lib/netaccel/include \
+   -I$(NEXUS_TOP)/modules/security/include \
+   -I$(NEXUS_TOP)/modules/security/include/priv  \
+@@ -53,12 +53,12 @@
+   $(foreach incdir, $(BHSM_INCLUDES), -I$(incdir))
+ 
+ ifneq ($(CA_VENDOR),)
+-CFLAGS += -I$(BCSD_TOP)/configs/$(CA_VENDOR)/os/include
+-CFLAGS += -DCA_VENDOR_INDEX=$(CA_VENDOR_INDEX) -DCA_VENDOR=$(CA_VENDOR)
++NS_CFLAGS += -I$(BCSD_TOP)/configs/$(CA_VENDOR)/os/include
++NS_CFLAGS += -DCA_VENDOR_INDEX=$(CA_VENDOR_INDEX) -DCA_VENDOR=$(CA_VENDOR)
+ endif
+ 
+ REFSW_VER=$(shell $(SECURITY_ROOT)/rules/refsw_ver.sh)
+-CFLAGS += -DREFSW_VER=$(REFSW_VER)
++NS_CFLAGS += -DREFSW_VER=$(REFSW_VER)
+ 
+ SRCDIR ?= src
+ OBJDIR ?= $(CURDIR)/obj.$(NEXUS_PLATFORM)
+@@ -69,13 +69,13 @@
+ # Don't add 7344 or 7346 to this list; they are counted as Zeus 2.2 but don't
+ # have the extra OTPMSP bits.
+ ifeq ($(filter $(BCHP_CHIP), 7563 7362), $(BCHP_CHIP))
+-CFLAGS += -DZEUSVER=22
++NS_CFLAGS += -DZEUSVER=22
+ else
+-CFLAGS += -DZEUSVER=$(shell echo $(ZEUSVER) | sed 's/Zeus//')
++NS_CFLAGS += -DZEUSVER=$(shell echo $(ZEUSVER) | sed 's/Zeus//')
+ endif
+ 
+-ifeq ($(findstring BHSM_ZEUS_VER_MAJOR, $(CFLAGS)),)
+-CFLAGS += -DBHSM_ZEUS_VER_MAJOR=NEXUS_SECURITY_ZEUS_VERSION_MAJOR -DBHSM_ZEUS_VER_MINOR=NEXUS_SECURITY_ZEUS_VERSION_MINOR
++ifeq ($(findstring BHSM_ZEUS_VER_MAJOR, $(NS_CFLAGS)),)
++NS_CFLAGS += -DBHSM_ZEUS_VER_MAJOR=NEXUS_SECURITY_ZEUS_VERSION_MAJOR -DBHSM_ZEUS_VER_MINOR=NEXUS_SECURITY_ZEUS_VERSION_MINOR
+ endif
+ 
+-CFLAGS += -Wall -Werror -O3 -DLTM_DESC -DREFSW_VER=$(REFSW_VER)
++NS_CFLAGS += -Wall -Werror -O3 -DLTM_DESC -DREFSW_VER=$(REFSW_VER) -DCA_VENDOR_INDEX=$(CA_VENDOR_INDEX) -DCA_VENDOR=$(CA_VENDOR) -DBSTD_CPU_ENDIAN=$(BSTD_CPU_ENDIAN)
+diff -Nuar reference_code/rockford/applications/security/rules/os_common_rules.mk rockford/applications/security/rules/os_common_rules.mk
+--- reference_code/rockford/applications/security/rules/os_common_rules.mk	2015-07-10 15:23:09.533644230 +0200
++++ rockford/applications/security/rules/os_common_rules.mk	2015-07-10 19:17:35.606424556 +0200
+@@ -8,16 +8,16 @@
+ # Default C-rule. Also generates dependency files
+ $(OBJDIR)/%.o: $(SRCDIR)/%.c
+ 	$(Q_)echo "[Compile... $(shell basename $@) ($(BUILD_ID))]"
+-	$(Q_)$(CC) -c -o $@ $< $(CFLAGS)
+-	$(Q_)$(CC) -MM -c $< $(CFLAGS) >$(OBJDIR)/$*.d.tmp
++	$(Q_)$(CC) -c -o $@ $< $(NS_CFLAGS)
++	$(Q_)$(CC) -MM -c $< $(NS_CFLAGS) >$(OBJDIR)/$*.d.tmp
+ 	$(Q_)sed "s|$(shell basename $@):|$@:|" <$(OBJDIR)/$*.d.tmp >$(OBJDIR)/$*.d
+ 	$(Q_)rm $(OBJDIR)/$*.d.tmp
+ 
+ # Default C rule when there is no separate srcdir
+ $(OBJDIR)/%.o: %.c
+ 	$(Q_)echo "[Compile... $(shell basename $@) ($(BUILD_ID))]"
+-	$(Q_)$(CC) -c -o $@ $< $(CFLAGS)
+-	$(Q_)$(CC) -MM -c $< $(CFLAGS) >$(OBJDIR)/$*.d.tmp
++	$(Q_)$(CC) -c -o $@ $< $(NS_CFLAGS)
++	$(Q_)$(CC) -MM -c $< $(NS_CFLAGS) >$(OBJDIR)/$*.d.tmp
+ 	$(Q_)sed "s|$(shell basename $@):|$@:|" <$(OBJDIR)/$*.d.tmp >$(OBJDIR)/$*.d
+ 	$(Q_)rm $(OBJDIR)/$*.d.tmp
+ 
+@@ -30,10 +30,10 @@
+ # usage: "make grep_cflags GREPFOR=blah"
+ # If you get "make: ***[grep_cflags] Error 1", the string was not found
+ grep_cflags:
+-	$(Q_)echo $(CFLAGS) | tr ' ' '\n' | grep --color $(GREPFOR)
++	$(Q_)echo $(NS_CFLAGS) | tr ' ' '\n' | grep --color $(GREPFOR)
+ 
+ show_cflags:
+-	$(Q_)echo $(CFLAGS) | tr ' ' '\n' >/tmp/$(USER)cflgtmp.tmp && less /tmp/$(USER)cflgtmp.tmp
++	$(Q_)echo $(NS_CFLAGS) | tr ' ' '\n' >/tmp/$(USER)cflgtmp.tmp && less /tmp/$(USER)cflgtmp.tmp
+ 	-$(Q_)rm /tmp/$(USER)cflgtmp.tmp
+ 
+ show_ldflags:
+diff -Nuar reference_code/rockford/applications/security/rules/refsw_ver.sh rockford/applications/security/rules/refsw_ver.sh
+--- reference_code/rockford/applications/security/rules/refsw_ver.sh	2015-07-10 15:23:09.533644230 +0200
++++ rockford/applications/security/rules/refsw_ver.sh	2015-07-10 19:26:37.110769973 +0200
+@@ -5,14 +5,15 @@
+ VERSION_STRING=
+ 
+ # Look for the new style (13.4+) version
+-if [[ -e "$VERFILE_NEW" ]] ; then
+-    VERSION_MAJOR=`grep NEXUS_PLATFORM_VERSION_MAJOR $VERFILE_NEW | grep -oP "[0-9]+"`
+-    VERSION_MINOR=`grep NEXUS_PLATFORM_VERSION_MINOR $VERFILE_NEW | grep -oP "[0-9]+"`
+-    VERSION_STRING="$VERSION_MAJOR.$VERSION_MINOR"
+-elif [[ -e "$VERFILE_OLD" ]] ; then
+-    VERSION_STRING=`grep "NEXUS_COMMON_PLATFORM_VERSION " $VERFILE_OLD | grep -oP "[0-9]+,[0-9]+" | sed "s/,/\./"`
+-fi
++#if [[ -e "$VERFILE_NEW" ]] ; then
++#    VERSION_MAJOR=`grep NEXUS_PLATFORM_VERSION_MAJOR $VERFILE_NEW | grep -oP "[0-9]+"`
++#    VERSION_MINOR=`grep NEXUS_PLATFORM_VERSION_MINOR $VERFILE_NEW | grep -oP "[0-9]+"`
++#    VERSION_STRING="$VERSION_MAJOR.$VERSION_MINOR"
++#elif [[ -e "$VERFILE_OLD" ]] ; then
++#    VERSION_STRING=`grep "NEXUS_COMMON_PLATFORM_VERSION " $VERFILE_OLD | grep -oP "[0-9]+,[0-9]+" | sed "s/,/\./"`
++#fi
+ 
++VERSION_STRING="15.2"
+ if [[ "$VERSION_STRING" == "" ]] ; then
+     >&2 echo "refsw version detection failed."
+     exit 1

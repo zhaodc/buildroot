@@ -1,0 +1,47 @@
+diff -Naur CURRENT/nexus/build/os/linuxkernel/os_flags.inc PATCHED/nexus/build/os/linuxkernel/os_flags.inc
+--- CURRENT/nexus/build/os/linuxkernel/os_flags.inc	2015-11-04 16:55:51.652957592 +0100
++++ PATCHED/nexus/build/os/linuxkernel/os_flags.inc	2015-11-05 09:20:00.123986084 +0100
+@@ -162,6 +162,7 @@
+ # ARM
+ 
+ # CFLAGS only for OS abstraction files
++NEXUS_CFLAGS+=-DMODULE -mlong-calls
+ NEXUS_KERNEL_CFLAGS += \
+         -DLINUX \
+         -D__KERNEL__ \
+@@ -183,17 +184,32 @@
+ NEXUS_LDFLAGS += $(BCM_KBUILD_LDFLAGS)
+ 
+ # We are using -mfpu=vfpv3-d16 to force off generation of NEON instructions for fixed point code, when compiler comes with default -mfpu=neon-vfpv4
+-NEXUS_CFLAGS += -mfpu=vfpv3-d16
++NEXUS_CFLAGS += -msoft-float -mfloat-abi=softfp -mfpu=vfpv3-d16
++NEXUS_CFLAGS += -fno-pic
+ endif
+ 
+ NEXUS_CFLAGS += -DBSTD_CPU_ENDIAN=$(NEXUS_ENDIAN)
+ 
++# Release builds generate unused values. We suppress this warning.
++ifeq ($(B_REFSW_DEBUG),y)
++NEXUS_CFLAGS += -Wall
++NEXUS_CFLAGS += -Wno-unused-value
++endif
++
++# Kbuild uses this flag. We suppress this warning, which may occur inside Linux kernel code/headers.
++NEXUS_CFLAGS += -Wno-pointer-sign
++
+ ifeq ($(B_REFSW_ANDROID),y)
+ NEXUS_CFLAGS += -DB_REFSW_ANDROID
+ endif
+ 
++
++ifneq ($(filter ${B_REFSW_ARCH}, arm-linux), ${B_REFSW_ARCH})
++NEXUS_LDFLAGS += -G 0 --warn-common
++endif
++
+ # Flag to generate dependencies
+ CDEP_FLAG = -MMD
+ 
+ # NEXUS_EXTRA_CFLAGS can be defined by the user to bring in extra CFLAGS
+-NEXUS_CFLAGS += ${NEXUS_EXTRA_CFLAGS}
++# NEXUS_CFLAGS += ${NEXUS_EXTRA_CFLAGS}
+

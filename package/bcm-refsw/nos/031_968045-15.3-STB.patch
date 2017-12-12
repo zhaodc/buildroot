@@ -1,0 +1,164 @@
+diff -Naur CURRENT/magnum/portinginterface/dcm/bdcm_rtnr.c PATCHED/magnum/portinginterface/dcm/bdcm_rtnr.c
+--- CURRENT/magnum/portinginterface/dcm/bdcm_rtnr.c	2016-04-20 13:23:31.413874000 +0000
++++ PATCHED/magnum/portinginterface/dcm/bdcm_rtnr.c	2016-04-20 13:23:32.852884103 +0000
+@@ -26,7 +26,8 @@
+     This file contains remote tuner functions for reverse rmagnum support.
+ ****************************************************************************/
+ BERR_Code BDCM_Rtnr_TuneAck(
+-    BDCM_DeviceHandle hDevice
++    BDCM_DeviceHandle hDevice,
++    uint32_t Rssi
+     )
+ {
+     BRPC_Param_TuneAck Param;
+@@ -34,7 +35,7 @@
+ 
+     BDBG_ENTER(BDCM_Rtnr_TuneAck);
+     BDBG_ASSERT(hDevice);
+-    Param.TuneAck = 1;
++    Param.TuneAck = Rssi;
+     CHK_RETCODE( retCode, BRPC_CallProc(hDevice->hRpc,
+                                         BRPC_ProcId_ECM_TuneAck, (const uint32_t *)&Param,
+                                         sizeof(Param)/4, NULL,
+diff -Naur CURRENT/magnum/portinginterface/dcm/bdcm_rtnr.h PATCHED/magnum/portinginterface/dcm/bdcm_rtnr.h
+--- CURRENT/magnum/portinginterface/dcm/bdcm_rtnr.h	2016-04-20 13:23:31.413874000 +0000
++++ PATCHED/magnum/portinginterface/dcm/bdcm_rtnr.h	2016-04-20 13:23:32.852884103 +0000
+@@ -35,7 +35,8 @@
+ 	This function sends the remote tuner complete rpc to DOCSIS device.
+ ****************************************************************************/
+ BERR_Code BDCM_Rtnr_TuneAck(
+-    BDCM_DeviceHandle hDevice
++    BDCM_DeviceHandle hDevice,
++    uint32_t Rssi
+     );
+ 
+ /***************************************************************************
+diff -Naur CURRENT/nexus/modules/frontend/common/src/nexus_tuner.c PATCHED/nexus/modules/frontend/common/src/nexus_tuner.c
+--- CURRENT/nexus/modules/frontend/common/src/nexus_tuner.c	2016-04-20 13:23:31.425874000 +0000
++++ PATCHED/nexus/modules/frontend/common/src/nexus_tuner.c	2016-04-20 13:23:32.852884103 +0000
+@@ -378,6 +378,7 @@
+     {
+         BKNI_Memset(pStatus, 0, sizeof(*pStatus));
+         (void)BERR_TRACE(BERR_NOT_SUPPORTED);
++        BDBG_ERR(("chengs: NULL tuner->getStatus"));
+     }
+ }
+ 
+diff -Naur CURRENT/nexus/modules/frontend/docsis/src/nexus_docsis_priv.c PATCHED/nexus/modules/frontend/docsis/src/nexus_docsis_priv.c
+--- CURRENT/nexus/modules/frontend/docsis/src/nexus_docsis_priv.c	2016-04-20 13:23:32.819883876 +0000
++++ PATCHED/nexus/modules/frontend/docsis/src/nexus_docsis_priv.c	2016-04-20 13:23:32.853884110 +0000
+@@ -108,18 +108,10 @@
+ #ifdef NEXUS_FRONTEND_REVERSE_RMAGNUM_SUPPORT
+ static void NEXUS_Docsis_P_TuneComplete(void *context, int param)
+ {
+-    NEXUS_DocsisDevice *pDevice = (NEXUS_DocsisDevice *)context;
+-    BERR_Code retCode;
+-
+     BSTD_UNUSED(param);
+ 
+-    BDBG_MSG(("NEXUS_Docsis_P_TuneComplete received."));
+-
+-    retCode = BDCM_Rtnr_TuneAck(pDevice->hDocsis);
+-    if (retCode != BERR_SUCCESS)
+-    {
+-        BDBG_ERR((" BDCM_Rtnr_TuneAck fail"));
+-    }
++    BDBG_MSG(("NEXUS_Docsis_P_TuneComplete called."));
++    BKNI_SetEvent((BKNI_EventHandle)context);
+ }
+ 
+ static void NEXUS_Docsis_P_TuneAsyncStatusReady(void *context, int param)
+@@ -146,6 +138,7 @@
+     int dacGain = 0;
+     NEXUS_Error rc;
+     BERR_Code retCode;
++    int PowerLevel;
+ #else
+     NEXUS_DocsisChannelHandle hChannel;
+ #endif
+@@ -199,7 +192,7 @@
+             tunerTuneSettings.modeSettings.qam.qamMode = NEXUS_FrontendQamMode_e256;
+             tunerTuneSettings.frequency = BRPC_GET_NOTIFICATION_REVERSE_RMAGNUM_EVENT_TUNE_RF_FREQ(event)*1000;
+             tunerTuneSettings.tuneCompleteCallback.callback = NEXUS_Docsis_P_TuneComplete;
+-            tunerTuneSettings.tuneCompleteCallback.context = hDevice;
++            tunerTuneSettings.tuneCompleteCallback.context = hDevice->tuneCompleteEvent;
+             tunerTuneSettings.asyncStatusReadyCallback.callback = NEXUS_Docsis_P_TuneAsyncStatusReady;
+             tunerTuneSettings.asyncStatusReadyCallback.context = hDevice->tunerStatusEvent;
+             BDBG_MSG(("Tune: freq[%d], annex[%d], qammode[%d]", tunerTuneSettings.frequency,
+@@ -207,13 +200,41 @@
+                 tunerTuneSettings.modeSettings.qam.qamMode));
+             rc = NEXUS_Tuner_Tune(hDataTuner, &tunerTuneSettings);
+             if(rc){rc = BERR_TRACE(rc);}
++            
++            rc = BKNI_WaitForEvent(hDevice->tuneCompleteEvent, 1000);
++            if(rc)
++            {
++                BDBG_ERR((" Timeout waiting for tuneCompleteEvent"));
++                rc = BERR_TRACE(rc);
++            }
++            
++            rc = NEXUS_Tuner_RequestAsyncStatus(hDataTuner);
++            if(rc){rc = BERR_TRACE(rc);}
++            
++            rc = BKNI_WaitForEvent(hDevice->tunerStatusEvent, 1000);
++            if(rc)
++            {
++               BDBG_ERR((" Timeout waiting for tuneStatusEvent"));
++               rc = BERR_TRACE(rc);
++            }
++            
++            rc = NEXUS_Tuner_GetAsyncStatus(hDataTuner, &tunerStatus);
++            if(rc){rc = BERR_TRACE(rc);}
++            
++            PowerLevel = tunerStatus.rssi;
++            
++            BDBG_MSG((" Get Notification BRPC_Notification_Event_Tune rssi[%d], tuneComplete[%d], PowerLevel[%d]", tunerStatus.rssi, tunerStatus.tuneComplete, PowerLevel));
++            
++            retCode = BDCM_Rtnr_TuneAck(hDevice->hDocsis, PowerLevel);
++            if (retCode != BERR_SUCCESS)
++            {
++                BDBG_ERR((" BDCM_Rtnr_TuneAck fail"));
++            }
+         }
+         break;
+ 
+     case BRPC_Notification_Event_WfeRssi:
+         {
+-            BDBG_ERR(("Get Notification BRPC_Notification_Event_WfeRssi"));
+-
+             rc = NEXUS_Tuner_RequestAsyncStatus(hDataTuner);
+             if(rc){rc = BERR_TRACE(rc);}
+ 
+@@ -222,6 +243,8 @@
+ 
+             rc = NEXUS_Tuner_GetAsyncStatus(hDataTuner, &tunerStatus);
+             if(rc){rc = BERR_TRACE(rc);}
++            
++            BDBG_MSG((" Get Notification BRPC_Notification_Event_WfeRssi, rssi[%d]", tunerStatus.rssi));
+ 
+             retCode = BDCM_Rtnr_WfeRssiAck(hDevice->hDocsis, tunerStatus.rssi, tunerStatus.adcPgaGain);
+             if (retCode != BERR_SUCCESS)
+@@ -616,7 +639,11 @@
+ #ifdef NEXUS_FRONTEND_REVERSE_RMAGNUM_SUPPORT
+     if (hDevice->tunerStatusEvent)
+     {
+-        BKNI_DestroyEvent(hDevice->tunerStatusEvent);
++        BKNI_DestroyEvent(hDevice->tunerStatusEvent);        
++    }
++    if (hDevice->tuneCompleteEvent)
++    {
++        BKNI_DestroyEvent(hDevice->tuneCompleteEvent);
+     }
+ #endif
+     if (hDevice->statusCallback)
+diff -Naur CURRENT/nexus/modules/frontend/docsis/src/nexus_docsis_priv_types.h PATCHED/nexus/modules/frontend/docsis/src/nexus_docsis_priv_types.h
+--- CURRENT/nexus/modules/frontend/docsis/src/nexus_docsis_priv_types.h	2016-04-20 13:23:31.425874000 +0000
++++ PATCHED/nexus/modules/frontend/docsis/src/nexus_docsis_priv_types.h	2016-04-20 13:23:32.853884110 +0000
+@@ -101,6 +101,7 @@
+     #ifdef NEXUS_FRONTEND_REVERSE_RMAGNUM_SUPPORT 
+     NEXUS_TunerHandle dataTuner; 
+     BKNI_EventHandle tunerStatusEvent;
++    BKNI_EventHandle tuneCompleteEvent;
+     #endif
+ } NEXUS_DocsisDevice;
+ 

@@ -1,0 +1,25 @@
+--- CURRENT/nexus/modules/security/src/nexus_security.c	2016-03-21 17:02:48.578139945 +0100
++++ PATCHED/nexus/modules/security/src/nexus_security.c	2016-03-24 11:56:16.962243811 +0100
+@@ -779,6 +779,7 @@
+ static NEXUS_Error verify_pid_channel( NEXUS_KeySlotHandle keyslot, NEXUS_PidChannelHandle pidChannel, unsigned pidChannelIndex )
+ {
+     NEXUS_KeySlotHandle hKeySlot;
++    NEXUS_PidChannelHandle previousPidChannel = NULL;
+ 
+     BDBG_ENTER(verify_pid_channel);
+ 
+@@ -797,10 +798,12 @@
+             }
+             BDBG_MSG(("pidchannel %p/%d already has keyslot %p associated, breaking association", (void *)pidChannel, pidChannelIndex, (void *)hKeySlot));
+ 
++            previousPidChannel = pPidChannelNode->pidChannel;
++
+             NEXUS_Security_P_RemovePidchannel( hKeySlot,pPidChannelNode );
+-            if( pidChannel )
++            if( previousPidChannel)
+             {
+-                NEXUS_OBJECT_RELEASE( hKeySlot, NEXUS_PidChannel, pidChannel );
++                NEXUS_OBJECT_RELEASE( hKeySlot, NEXUS_PidChannel, previousPidChannel);
+             }
+         }
+     }

@@ -1,0 +1,12 @@
+diff -Naur CURRENT/nexus/lib/playback_ip/apps/Makefile PATCHED/nexus/lib/playback_ip/apps/Makefile
+--- CURRENT/nexus/lib/playback_ip/apps/Makefile	2015-10-08 08:24:42.756443000 +0000
++++ PATCHED/nexus/lib/playback_ip/apps/Makefile	2015-10-08 08:24:43.208446252 +0000
+@@ -306,7 +306,7 @@
+     endif
+ endif
+ 
+-LDFLAGS += -ltshdrbuilder
++LDFLAGS +=
+ 
+ # This is the minimum needed to compile and link with Nexus
+ CFLAGS += $(NEXUS_CFLAGS) $(addprefix -I,$(IP_APPLIB_TEST_INCLUDE_PATH)) $(addprefix -D,$(IP_APPLIB_TEST_DEFINES))

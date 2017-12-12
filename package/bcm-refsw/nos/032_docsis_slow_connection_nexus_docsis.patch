@@ -1,0 +1,53 @@
+--- CURRENT/nexus/modules/frontend/docsis/src/nexus_docsis.c	2016-02-29 10:43:07.653270081 +0100
++++ PATCHED/nexus/modules/frontend/docsis/src/nexus_docsis.c	2016-03-01 14:46:51.163878325 +0100
+@@ -52,16 +52,20 @@
+ #include "nexus_platform_features.h"
+ #include "nexus_docsis_priv.h"
+ #include "priv/nexus_transport_priv.h"
+ 
+ BDBG_MODULE(nexus_docsis);
+ BDBG_OBJECT_ID(NEXUS_DocsisDevice);
+ BDBG_OBJECT_ID(NEXUS_DocsisChannel);
+ 
++// PACE PATCH BEGIN
++extern bool NEXUS_3128_frontend_init_done;
++// PACE PATCH END
++
+ #define EXTERNAL_FRONTEND_NUMBER_OFFSET 16
+ 
+ #if NEXUS_HAS_MXT
+ BMXT_ChipRev NEXUS_DOCSIS_P_GetChipRev(uint8_t rawChipRev)
+ {
+     BMXT_ChipRev chipRev = BMXT_ChipRev_eMax;
+     switch(rawChipRev)
+     {
+@@ -123,20 +127,29 @@ NEXUS_FrontendDeviceHandle NEXUS_Docsis_
+     uint32_t numDsChannels, numDataChannels;
+     BDCM_DeviceSettings deviceSettings;
+     NEXUS_ThreadSettings threadSettings;
+     NEXUS_FrontendDeviceHandle hFrontendDevice=NULL;
+     NEXUS_DocsisDeviceHandle hDevice=NULL;
+     uint16_t chipId;
+     uint8_t rawChipRev;
+     bool has_3128 = false, mtsif_chained = false;
++    // PACE PATCH BEGIN
++    int count = 100; // Timeout = 10s
++    // PACE PATCH END
+ 
+     BDBG_ASSERT(pOpenSettings);
+     BSTD_UNUSED(index);
+ 
++    // PACE PATCH BEGIN
++    /* Workaround for wrong tuner "ready" state reported by BCM3128 (LEAP wideband tuner) at boot */
++    while (!NEXUS_3128_frontend_init_done && --count) 
++        BKNI_Sleep(100); // 100 ms
++    // PACE PATCH END
++
+     hFrontendDevice = BKNI_Malloc(sizeof(NEXUS_FrontendDevice));
+     if (!hFrontendDevice )
+     {
+         retCode = BERR_TRACE(BERR_OUT_OF_SYSTEM_MEMORY);
+         goto errorAlloc;
+     }
+     BKNI_Memset(hFrontendDevice, 0, sizeof(NEXUS_FrontendDevice));
+ 

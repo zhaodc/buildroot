@@ -1,0 +1,22 @@
+--- ursr-E077_PACE_DEBUG/nexus/lib/ipc/build/Makefile.old	2015-03-16 17:05:15.172734500 +0100
++++ ursr-E077_PACE_DEBUG/nexus/lib/ipc/build/Makefile	2015-03-16 17:05:19.170755101 +0100
+@@ -139,6 +139,19 @@
+ 	@echo $(CC) -o $@
+ 	$(Q_)$(CC) -o $@ $(filter-out %.h, $^) $(CFLAGS) $(LDFLAGS)
+ 
++ipclib:
++	$(Q_)$(CC) -fPIC -g -c -Wall $(NEXUS_TOP)/lib/ipc/bipc_client.c $(CFLAGS) $(LDFLAGS)
++	$(Q_)$(CC) -fPIC -g -c -Wall $(NEXUS_TOP)/lib/ipc/bipc_server.c $(CFLAGS) $(LDFLAGS)
++	$(Q_)$(CC) -fPIC -g -c -Wall $(NEXUS_TOP)/lib/ipc/bipc_util.c $(CFLAGS) $(LDFLAGS)
++	$(CC) -shared -Wl,-soname,libb_ipc.so -o libb_ipc.so bipc_client.o bipc_server.o bipc_util.o -lc
++	$(CP) libb_ipc.so $(NEXUS_TOP)/bin
++
++ipclib-clean:
++	$(RM) $(NEXUS_TOP)/lib/ipc/build/bipc_client.o
++	$(RM) $(NEXUS_TOP)/lib/ipc/build/bipc_server.o
++	$(RM) $(NEXUS_TOP)/lib/ipc/build/bipc_util.o
++	$(RM) $(NEXUS_TOP)/bin/libb_ipc.so
++
+ debug: apps
+ 	echo "set args ${CLIENT}" >.gdbinit
+ 	echo "r" >>.gdbinit

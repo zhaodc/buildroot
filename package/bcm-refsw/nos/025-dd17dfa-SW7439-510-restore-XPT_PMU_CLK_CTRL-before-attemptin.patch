@@ -1,0 +1,62 @@
+--- CURRENT/magnum/portinginterface/xpt/src/core28nm/bxpt.c
++++ PATCHED/magnum/portinginterface/xpt/src/core28nm/bxpt.c
+@@ -901,12 +901,6 @@ BERR_Code BXPT_Standby(
+     /* if we get to this point, then XPT is not in use */
+     if( pSettings->S3Standby )
+     {
+-#ifdef PWR_SUBMODULE_CLOCKGATING
+-        uint32_t Reg = BREG_Read32(hXpt->hRegister, BCHP_XPT_PMU_CLK_CTRL);
+-        hXpt->memdmaDisabled = BCHP_GET_FIELD_DATA(Reg, XPT_PMU_CLK_CTRL, MEMDMA_DISABLE);
+-        BCHP_SET_FIELD_DATA(Reg, XPT_PMU_CLK_CTRL, MEMDMA_DISABLE, 0); /* unconditionally enable MEMDMA, for kernel usage */
+-        BREG_Write32(hXpt->hRegister, BCHP_XPT_PMU_CLK_CTRL, Reg);
+-#endif
+ #ifdef BCHP_PWR_RESOURCE_XPT_REMUX
+         BCHP_PWR_AcquireResource(hXpt->hChip, BCHP_PWR_RESOURCE_XPT_REMUX);
+ #endif
+@@ -944,7 +938,9 @@ BERR_Code BXPT_Standby(
+     }
+ #endif /* BCHP_PWR_RESOURCE_XPT_WAKEUP */
+ 
++    hXpt->pmuClockCtrl = BREG_Read32(hXpt->hRegister, BCHP_XPT_PMU_CLK_CTRL); /* BOLT clockgates everything except DMA */
+     hXpt->bStandby = true;
++
+ #else
+     BSTD_UNUSED( hXpt );
+ #endif /* #ifdef BCHP_PWR_RESOURCE_XPT */
+@@ -968,7 +964,10 @@ BERR_Code BXPT_Resume(
+     BCHP_PWR_AcquireResource(hXpt->hChip, BCHP_PWR_RESOURCE_XPT_108M);
+ #endif
+ 
+-    BXPT_P_PMUMemPwr_Control(hXpt->hRegister, true, NULL); /* required before any XPT register access */
++    /* required before any XPT register access */
++    BREG_Write32(hXpt->hRegister, BCHP_XPT_PMU_CLK_CTRL, hXpt->pmuClockCtrl);
++    BXPT_P_PMUMemPwr_Control(hXpt->hRegister, true, NULL);
++
+ #ifdef BCHP_PWR_RESOURCE_XPT_SRAM
+     BCHP_PWR_AcquireResource(hXpt->hChip, BCHP_PWR_RESOURCE_XPT_SRAM);
+ #endif
+@@ -983,13 +982,6 @@ BERR_Code BXPT_Resume(
+ #ifdef BCHP_PWR_RESOURCE_XPT_REMUX
+         BCHP_PWR_ReleaseResource(hXpt->hChip, BCHP_PWR_RESOURCE_XPT_REMUX);
+ #endif
+-#ifdef PWR_SUBMODULE_CLOCKGATING
+-        if (hXpt->memdmaDisabled) {
+-            uint32_t Reg = BREG_Read32(hXpt->hRegister, BCHP_XPT_PMU_CLK_CTRL);
+-            BCHP_SET_FIELD_DATA(Reg, XPT_PMU_CLK_CTRL, MEMDMA_DISABLE, 1);
+-            BREG_Write32(hXpt->hRegister, BCHP_XPT_PMU_CLK_CTRL, Reg);
+-        }
+-#endif
+     }
+ 
+     if (hXpt->bS3Standby) {
+--- CURRENT/magnum/portinginterface/xpt/src/core28nm/bxpt_priv.h
++++ PATCHED/magnum/portinginterface/xpt/src/core28nm/bxpt_priv.h
+@@ -711,7 +711,7 @@ typedef struct BXPT_P_TransportData
+     bool bStandby; /* true if in standby */
+     bool bS3Standby;
+     bool WakeupEnabled; /* Wakeup packet support enabled */
+-    bool memdmaDisabled;
++    uint32_t pmuClockCtrl;
+ 
+ #ifdef BCHP_PWR_RESOURCE_XPT
+     struct BXPT_Backup sramBackup;
