@@ -9,7 +9,7 @@ OPENCDMI_SITE_METHOD = git
 OPENCDMI_SITE = git@github.com:Metrological/open-content-decryption-module-cdmi.git
 
 OPENCDMI_INSTALL_STAGING = YES
-OPENCDMI_DEPENDENCIES = rpcbind opencdm
+OPENCDMI_DEPENDENCIES = rpcbind
 OPENCDMI_LICENSE = Apache-2.0
 OPENCDMI_LICENSE_FILES = LICENSE
 
