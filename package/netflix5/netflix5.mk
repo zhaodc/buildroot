@@ -10,9 +10,12 @@ NETFLIX5_SITE_METHOD = git
 NETFLIX5_LICENSE = PROPRIETARY
 # TODO: check if all deps are really needed, e.g. decoders once gstreamer sink is selected
 NETFLIX5_DEPENDENCIES = freetype icu jpeg libpng libmng webp harfbuzz expat openssl c-ares libcurl graphite2 libvpx tremor libvorbis libogg nghttp2 ffmpeg
+NETFLIX5_INSTALL_STAGING = YES
 NETFLIX5_INSTALL_TARGET = YES
 NETFLIX5_SUBDIR = netflix
 NETFLIX5_RESOURCE_LOC = $(call qstrip,${BR2_PACKAGE_NETFLIX5_RESOURCE_LOCATION})
+
+NETFLIX5_CONF_ENV += TOOLCHAIN_DIRECTORY=$(STAGING_DIR)/usr LD=$(TARGET_CROSS)ld
 
 # TODO: disable hardcoded build type, check if all args are really needed.
 NETFLIX5_CONF_OPTS = \
@@ -34,5 +37,13 @@ NETFLIX5_CONF_OPTS = \
 	-DBUILD_DEBUG=ON -DNRDP_HAS_GIBBON_QA=ON -DNRDP_HAS_MUTEX_STACK=ON -DNRDP_HAS_OBJECTCOUNT=ON \
 	-DBUILD_PRODUCTION=OFF -DNRDP_HAS_QA=ON -DBUILD_SMALL=OFF -DBUILD_SYMBOLS=ON -DNRDP_HAS_TRACING=ON \
 	-DNRDP_CRASH_REPORTING=breakpad
+
+define NETFLIX5_INSTALL_STAGING_CMDS
+   echo 'NETFLIX5 IN INSTALL STAGING'
+endef
+
+define NETFLIX5_INSTALL_TARGET_CMDS
+   echo 'NETFLIX5 IN INSTALL TARGET'
+endef
 
 $(eval $(cmake-package))
