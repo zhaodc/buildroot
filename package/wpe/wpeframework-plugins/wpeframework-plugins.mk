@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-WPEFRAMEWORK_PLUGINS_VERSION = 68aa65ddd0f15cf3f5551956d364a8051b7de85f
+WPEFRAMEWORK_PLUGINS_VERSION = 4ef4332b1733c5a37882179a5eb092885fdf7d70 
 WPEFRAMEWORK_PLUGINS_SITE_METHOD = git
 WPEFRAMEWORK_PLUGINS_SITE = git@github.com:WebPlatformForEmbedded/WPEFrameworkPlugins.git
 WPEFRAMEWORK_PLUGINS_INSTALL_STAGING = YES
