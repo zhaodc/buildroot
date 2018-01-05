@@ -3,15 +3,69 @@ config BR2_PACKAGE_WPEFRAMEWORK_PLUGINS
 
 config BR2_PACKAGE_WPEFRAMEWORK_COMMANDER
 	select BR2_PACKAGE_WPEFRAMEWORK_PLUGINS
+	default y
 	bool "Commander"
 	help
 	  Commander Plugin
 
+menuconfig BR2_PACKAGE_WPEFRAMEWORK_COMPOSITOR
+    select BR2_PACKAGE_WPEFRAMEWORK_VIRTUALINPUT
+	bool "Compositor"
+	help
+	   WPE Platform Compositor plugin
+if BR2_PACKAGE_WPEFRAMEWORK_COMPOSITOR	   
+if BR2_PACKAGE_BCM_REFSW
+config BR2_PACKAGE_WPEFRAMEWORK_COMPOSITOR_NEXUS_SERVER
+	bool "Nexus server"
+	help
+	  Choose this if the system has a already a resource server running like nxserver.
+
+if BR2_PACKAGE_WPEFRAMEWORK_COMPOSITOR_NEXUS_SERVER
+config BR2_PACKAGE_WPEFRAMEWORK_COMPOSITOR_SERVICE_EXTERNAL
+    bool "External Compositor"
+    help
+        The master compositor is hosted in a different process. WPEFramework will attach to it.
+
+config BR2_PACKAGE_WPEFRAMEWORK_COMPOSITOR_SERVICE_INTERNAL
+    bool "Internal Compositor"
+    help
+        The master compositor is hosted in WPEFramework.
+endif
+endif
+
+config BR2_PACKAGE_WPEFRAMEWORK_COMPOSITOR_AUTOTRACE
+   bool "Enable Tracing at startup"
+   help 
+     If enabled the compositer plug-in will start tracing 
+     when WPEFramework is started.
+     
+config BR2_PACKAGE_WPEFRAMEWORK_COMPOSITOR_OUTOFPROCESS
+	bool "Out of process"
+	help
+	  Select this to run this plugin in its own process. 
+     
+config BR2_PACKAGE_WPEFRAMEWORK_COMPOSITOR_HARDWAREREADY
+	string "Manual overrule of the time it takes to initialisize all hardware (ms)"
+	default 0
+
+config BR2_PACKAGE_WPEFRAMEWORK_COMPOSITOR_SYSTEM
+	string "Callsign to report information."
+	default Controller
+endif
+
 menuconfig BR2_PACKAGE_WPEFRAMEWORK_DEVICEINFO
         select BR2_PACKAGE_WPEFRAMEWORK_PLUGINS
 	bool "DeviceInfo"
+	default y
 	help
 	  DeviceInfo Plugin
+
+config BR2_PACKAGE_WPEFRAMEWORK_DHCPSERVER
+	select BR2_PACKAGE_WPEFRAMEWORK_PLUGINS
+	bool "DHCPServer"
+	help
+	  IPv4 DHCP server functionality. Distribute IPv4 addresses throughout the
+          network.
 
 menuconfig BR2_PACKAGE_WPEFRAMEWORK_EGLTEST
         select BR2_PACKAGE_WPEFRAMEWORK_COMMON
@@ -30,7 +84,7 @@ if BR2_PACKAGE_WPEFRAMEWORK_LOCATIONSYNC
 
 config BR2_PACKAGE_WPEFRAMEWORK_LOCATIONSYNC_URI
 	string "location URI"
-	default "location.webplatformforembedded.org"
+	default "http://ip-api.com/json"
 endif	   
 
 config BR2_PACKAGE_WPEFRAMEWORK_MONITOR
@@ -38,12 +92,37 @@ config BR2_PACKAGE_WPEFRAMEWORK_MONITOR
 	bool "Monitor"
 	help
 	  Monitor Plugin
-
-config BR2_PACKAGE_WPEFRAMEWORK_TIMESYNC
+	  
+config BR2_PACKAGE_WPEFRAMEWORK_NETWORKCONTROL
 	select BR2_PACKAGE_WPEFRAMEWORK_PLUGINS
-	bool "TimeSync"
+	bool "NetworkControl"
 	help
-	  TimeSync Plugin
+	  Control the IP adressing of the interfaces in the system from 
+          WPEFramework (static IPv4/IPv6 or dhcp IPv4)
+
+menuconfig BR2_PACKAGE_WPEFRAMEWORK_OPENCDMI
+    bool "OpenCDM"
+    depends on BR2_PACKAGE_OPENCDMI
+    default y
+    help
+      A Plugin to interact with CDM Services.
+
+if BR2_PACKAGE_WPEFRAMEWORK_OPENCDMI
+
+config BR2_PACKAGE_WPEFRAMEWORK_OPENCDMI_AUTOSTART
+    depends on BR2_PACKAGE_WPEFRAMEWORK_OPENCDMI
+    bool "autostart"
+    default y
+      
+config BR2_PACKAGE_WPEFRAMEWORK_OPENCDMI_OOP
+    depends on BR2_PACKAGE_WPEFRAMEWORK_OPENCDMI
+    bool "outofprocess"
+    default y 
+    
+endif
+
+comment "OpenCDM requires the OpenCDM package to be selected"
+	depends on !BR2_PACKAGE_OPENCDMI
 
 menuconfig BR2_PACKAGE_WPEFRAMEWORK_REMOTECONTROL
 	select BR2_PACKAGE_WPEFRAMEWORK_PLUGINS
@@ -61,7 +140,7 @@ config BR2_PACKAGE_WPEFRAMEWORK_REMOTECONTROL_IR
 config BR2_PACKAGE_WPEFRAMEWORK_REMOTECONTROL_IRNEXUS
     bool "BCM Nexus IR Remote Control Unit"
     default false
-    depends on BR2_PACKAGE_BCM_REFSW && BR2_PACKAGE_WPEFRAMEWORK_REMOTECONTROL_IR
+    depends on (BR2_PACKAGE_BCM_REFSW || BR2_PACKAGE_HAS_NEXUS) && BR2_PACKAGE_WPEFRAMEWORK_REMOTECONTROL_IR
     help
       Enable the Nexus IR remote input
 
@@ -83,13 +162,42 @@ config BR2_PACKAGE_WPEFRAMEWORK_REMOTECONTROL_RF
     help
       Select devices which are based on Radio Frequency (RF) technology
 
+config BR2_PACKAGE_WPEFRAMEWORK_REMOTECONTROL_DEVUINPUT
+    bool "uinput (linux input system)"
+    help
+      Select devices which are annunced in the linux operating system under /dev/uinput as eventX
+
 endif
+
+config BR2_PACKAGE_WPEFRAMEWORK_RPCLINK
+    select BR2_PACKAGE_WPEFRAMEWORK_PLUGINS
+    bool "RPC link server"
+    help
+      Plugin adding an RPC server to act as a server itself
 
 config BR2_PACKAGE_WPEFRAMEWORK_SNAPSHOT
 	select BR2_PACKAGE_WPEFRAMEWORK_PLUGINS
 	bool "Snapshot"
 	help
 	  Snapshot Plugin
+
+config BR2_PACKAGE_WPEFRAMEWORK_SICONTROL
+	select BR2_PACKAGE_WPEFRAMEWORK_PLUGINS
+	bool "SI control"
+	help
+	  SI Control Plugin
+
+config BR2_PACKAGE_WPEFRAMEWORK_TIMESYNC
+	select BR2_PACKAGE_WPEFRAMEWORK_PLUGINS
+	bool "TimeSync"
+	help
+	  TimeSync Plugin
+
+config BR2_PACKAGE_WPEFRAMEWORK_TUNER
+	select BR2_PACKAGE_WPEFRAMEWORK_PLUGINS
+	bool "Tuner"
+	help
+	  Tuner Plugin
 
 config BR2_PACKAGE_WPEFRAMEWORK_TRACECONTROL
 	select BR2_PACKAGE_WPEFRAMEWORK_PLUGINS
@@ -148,7 +256,14 @@ config BR2_PACKAGE_WPEFRAMEWORK_YOUTUBE
       A wrapper around the youtube app to start it as a
       wpeframework plugin.
 
+config BR2_PACKAGE_WPEFRAMEWORK_WEBKITBROWSER_CLIENTIDENTIFIER
+    string "clientidentifier"
+    default ""
+
 endif
+
+comment "WebKitBrowser depends on WPE WebKit to be selected"
+	depends on !BR2_PACKAGE_WPEWEBKIT
 
 config BR2_PACKAGE_WPEFRAMEWORK_WEBPROXY
 	select BR2_PACKAGE_WPEFRAMEWORK_PLUGINS
@@ -176,21 +291,4 @@ config BR2_PACKAGE_WPEFRAMEWORK_WIFI
 	help
         WifiSetup Plugin for Wifi access
 
-config BR2_PACKAGE_WPEFRAMEWORK_TUNER
-	select BR2_PACKAGE_WPEFRAMEWORK_PLUGINS
-	bool "Tuner"
-	help
-	  Tuner Plugin
-
-config BR2_PACKAGE_WPEFRAMEWORK_SICONTROL
-	select BR2_PACKAGE_WPEFRAMEWORK_PLUGINS
-	bool "SI control"
-	help
-	  SI Control Plugin
-
-config BR2_PACKAGE_WPEFRAMEWORK_RPCLINK
-    select BR2_PACKAGE_WPEFRAMEWORK_PLUGINS
-    bool "RPC link server"
-    help
-      Plugin adding an RPC server to act as a server itself
-
+comment "External plugins below"

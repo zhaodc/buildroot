@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-NETFLIX_VERSION = 77a8648c5b8b69631b668c9953bd88ee839e9931
+NETFLIX_VERSION = 5765182b11843910edf3f1b6f5fe34f491cb6161
 NETFLIX_SITE = git@github.com:Metrological/netflix.git
 NETFLIX_SITE_METHOD = git
 NETFLIX_LICENSE = PROPRIETARY
@@ -51,7 +51,7 @@ NETFLIX_CONF_ENV += TARGET_CROSS="$(GNU_TARGET_NAME)-"
 
 ifeq ($(BR2_PACKAGE_WESTEROS)$(BR2_PACKAGE_WPEFRAMEWORK_COMPOSITOR),yy)
 NETFLIX_CONF_OPTS += -DGIBBON_INPUT=wpeframework
-NETFLIX_DEPENDENCIES = wpeframework-compositor
+NETFLIX_DEPENDENCIES = wpeframework-plugins
 else
 NETFLIX_CONF_OPTS += -DGIBBON_INPUT=devinput
 endif
