@@ -74,14 +74,6 @@ config BR2_PACKAGE_WPEWEBKIT_NO_JSC_OPTIMIZATIONS
 	help
 	  Avoid JSC optimizations such as JIT and FTL so that backtraces involving JS can come up cleaner
 
-
-config BR2_PACKAGE_WPEWEBKIT_USE_GOLD_LD
-	bool "use gold linker"
-		default n
-	help
-		If available in the toolchain WPE WebKit will use ld.gold to link objects. To enable 
-		this compile binutils with --enable-gold.
-
 endmenu
 
 config BR2_PACKAGE_WPEWEBKIT_JSC
@@ -121,32 +113,43 @@ config BR2_PACKAGE_WPEWEBKIT_ENABLE_MEDIA_SOURCE
 	help
 	  Enable Media Source Extensions
 
-config BR2_PACKAGE_WPEWEBKIT_USE_ENCRYPTED_MEDIA
-	bool "Encrypted Media Extensions (EME)"
+menu "Encrypted Media Extensions options (EME)"
+
+config BR2_PACKAGE_WPEWEBKIT_USE_ENCRYPTED_MEDIA_V1
+	bool "Encrypted Media Extensions (EME) v1"
 	default y
 	help
-	  Use Enable Encrypted Media Extensions (EME) API.
+	  Use Enable Encrypted Media Extensions (EME) V1 API.
 
-if BR2_PACKAGE_WPEWEBKIT_USE_ENCRYPTED_MEDIA
+config BR2_PACKAGE_WPEWEBKIT_USE_ENCRYPTED_MEDIA_V2
+	bool "Encrypted Media Extensions (EME) v2"
+	default n
+	help
+	  Use Enable Encrypted Media Extensions (EME) V2 object oriented API.
+
+config BR2_PACKAGE_WPEWEBKIT_USE_ENCRYPTED_MEDIA_V3
+	bool "Encrypted Media Extensions (EME) v3"
+	default n
+	help
+	  Use Enable Encrypted Media Extensions (EME) V3 API.
+
+if BR2_PACKAGE_WPEWEBKIT_USE_ENCRYPTED_MEDIA_V1 || BR2_PACKAGE_WPEWEBKIT_USE_ENCRYPTED_MEDIA_V2 || BR2_PACKAGE_WPEWEBKIT_USE_ENCRYPTED_MEDIA_V3
 
 choice
-  bool "Content decryption backend"
-  depends on BR2_PACKAGE_WPEWEBKIT_USE_ENCRYPTED_MEDIA
+  bool "PlayReady backend"
+  depends on BR2_PACKAGE_WPEWEBKIT_USE_ENCRYPTED_MEDIA_V1 || BR2_PACKAGE_WPEWEBKIT_USE_ENCRYPTED_MEDIA_V2 || BR2_PACKAGE_WPEWEBKIT_USE_ENCRYPTED_MEDIA_V3
   default BR2_PACKAGE_WPEWEBKIT_USE_PLAYREADY
   help
-    Choose the Content Decryption backend.
+    Choose the Playready backend.
 
 config BR2_PACKAGE_WPEWEBKIT_USE_PLAYREADY
-  bool "PlayReady"
+  bool "playready SDK"
   depends on BR2_PACKAGE_PLAYREADY
   help
     Use the Microsoft Playready SDK
 
-comment "PlayReady CDM requires playready to be selected"
-	depends on !BR2_PACKAGE_PLAYREADY
-
 config BR2_PACKAGE_WPEWEBKIT_USE_OPENCDM
-  bool "OpenCDM"
+  bool "OpenCDM sdk"
   depends on BR2_PACKAGE_OPENCDM
   help
     Use the OpenCDM SDK
@@ -154,6 +157,8 @@ config BR2_PACKAGE_WPEWEBKIT_USE_OPENCDM
 endchoice
 
 endif
+
+endmenu
 
 config BR2_PACKAGE_WPEWEBKIT_USE_GSTREAMER_GL
 	bool "gstreamer-gl"
