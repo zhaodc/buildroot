@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-WPEWEBKIT_VERSION = e4081869fdb8d301866e989469b0bd869abab3e9
+WPEWEBKIT_VERSION = 638821b0b10bef5e3efce24ffb6c29d1f3056986
 WPEWEBKIT_SITE = $(call github,WebPlatformForEmbedded,WPEWebKit,$(WPEWEBKIT_VERSION))
 
 WPEWEBKIT_INSTALL_STAGING = YES
@@ -23,8 +23,8 @@ endif
 WPEWEBKIT_DEPENDENCIES = host-bison host-cmake host-flex host-gperf host-ruby icu pcre
 
 ifeq ($(WPEWEBKIT_BUILD_WEBKIT),y)
-WPEWEBKIT_DEPENDENCIES += wpebackend libgcrypt libgles libegl libepoxy cairo freetype \
-	fontconfig harfbuzz libxml2 libxslt sqlite libsoup jpeg libpng
+WPEWEBKIT_DEPENDENCIES += wpebackend libgcrypt libgles libegl cairo freetype fontconfig \
+	harfbuzz libxml2 libxslt sqlite libsoup jpeg libpng
 endif
 
 WPEWEBKIT_EXTRA_FLAGS = -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
@@ -59,7 +59,7 @@ WPEWEBKIT_FLAGS = \
 	-DENABLE_NOTIFICATIONS=ON \
 	-DENABLE_DATABASE_PROCESS=ON \
 	-DENABLE_INDEXED_DATABASE=ON \
-        -DENABLE_MEDIA_STATISTICS=ON \
+	-DENABLE_MEDIA_STATISTICS=ON \
 	-DENABLE_FETCH_API=ON
 
 ifeq ($(BR2_TOOLCHAIN_USES_MUSL),y)
@@ -225,7 +225,7 @@ WPEWEBKIT_BUILD_TARGETS += jsc
 endif
 ifeq ($(WPEWEBKIT_BUILD_WEBKIT),y)
 WPEWEBKIT_BUILD_TARGETS += libWPEWebKit.so libWPEWebInspectorResources.so \
-	WPE{Network,Storage,Web}Process
+	WPE{Database,Network,Web}Process
 
 endif
 
@@ -245,10 +245,10 @@ endif
 
 ifeq ($(WPEWEBKIT_BUILD_WEBKIT),y)
 define WPEWEBKIT_INSTALL_STAGING_CMDS_WEBKIT
-	cp $(WPEWEBKIT_BUILDDIR)/bin/WPE{Network,Storage,Web}Process $(STAGING_DIR)/usr/bin/ && \
+	cp $(WPEWEBKIT_BUILDDIR)/bin/WPE{Database,Network,Web}Process $(STAGING_DIR)/usr/bin/ && \
 	cp -d $(WPEWEBKIT_BUILDDIR)/lib/libWPE* $(STAGING_DIR)/usr/lib/ && \
 	DESTDIR=$(STAGING_DIR) $(HOST_DIR)/usr/bin/cmake -DCOMPONENT=Development -P $(WPEWEBKIT_BUILDDIR)/Source/JavaScriptCore/cmake_install.cmake > /dev/null && \
-	DESTDIR=$(STAGING_DIR) $(HOST_DIR)/usr/bin/cmake -DCOMPONENT=Development -P $(WPEWEBKIT_BUILDDIR)/Source/WebKit/cmake_install.cmake > /dev/null
+	DESTDIR=$(STAGING_DIR) $(HOST_DIR)/usr/bin/cmake -DCOMPONENT=Development -P $(WPEWEBKIT_BUILDDIR)/Source/WebKit2/cmake_install.cmake > /dev/null
 endef
 else
 WPEWEBKIT_INSTALL_STAGING_CMDS_WEBKIT = true
@@ -270,7 +270,7 @@ endif
 
 ifeq ($(WPEWEBKIT_BUILD_WEBKIT),y)
 define WPEWEBKIT_INSTALL_TARGET_CMDS_WEBKIT
-	cp $(WPEWEBKIT_BUILDDIR)/bin/WPE{Network,Storage,Web}Process $(TARGET_DIR)/usr/bin/ && \
+	cp $(WPEWEBKIT_BUILDDIR)/bin/WPE{Database,Network,Web}Process $(TARGET_DIR)/usr/bin/ && \
 	cp -d $(WPEWEBKIT_BUILDDIR)/lib/libWPE* $(TARGET_DIR)/usr/lib/ && \
 	$(STRIPCMD) $(TARGET_DIR)/usr/lib/libWPEWebKit.so.0.0.*
 endef
