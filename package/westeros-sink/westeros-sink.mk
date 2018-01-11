@@ -32,8 +32,6 @@ else ifeq ($(BR2_PACKAGE_MARVELL_AMPSDK),y)
 	WESTEROS_SINK_SUBDIR = syna/westeros-sink
 endif
 
-
-
 define WESTEROS_SINK_RUN_AUTOCONF
 	mkdir -p $(@D)/$(WESTEROS_SINK_SUBDIR)/cfg
 endef
