@@ -66,6 +66,7 @@ rm -rf $SOURCE/root
 mkdir -p $STORAGE_PATH/app
 ln -sfn $STORAGE_PATH/app $SOURCE/root
 mkdir -p $SOURCE/root/QueueCommunicator
+mkdir -p $SOURCE/root/Provisioning
 
 # Netflix
 if [ ! -d $SOURCE/root/Netflix ]; then
