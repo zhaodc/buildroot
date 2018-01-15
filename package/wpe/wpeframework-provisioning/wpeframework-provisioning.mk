@@ -1,3 +1,9 @@
+################################################################################
+#
+# WPEFramework Provisioning Plugin
+#
+################################################################################
+
 WPEFRAMEWORK_PROVISIONING_VERSION = fe4ac5a92333019182e71c006f4077b7b220d4b3
 WPEFRAMEWORK_PROVISIONING_SITE_METHOD = git
 WPEFRAMEWORK_PROVISIONING_SITE = git@github.com:WebPlatformForEmbedded/WPEPluginProvisioning.git
