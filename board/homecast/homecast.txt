@@ -1,6 +1,6 @@
 WPENetworkProcess
 WPEWebProcess
-WPEDatabaseProcess
+WPEStorageProcess
 WPEFramework
 WPEProcess
 gst-plugin-scanner
@@ -13,6 +13,7 @@ libcairo.so
 libcares.so
 libcrypto.so
 libcurl.so
+libepoxy.so
 libevdev.so
 libexpat.so
 libfaad.so
@@ -61,6 +62,7 @@ libnettle.so
 liborc-0.4.so
 liborc-test-0.4.so
 libpcre.so
+libunistring.so
 libpixman-1.so
 libplayready.so
 libpng16.so
@@ -108,8 +110,18 @@ libWPEFrameworkTracing.so
 libWPEFrameworkVirtualInput.so
 libWPEFrameworkTimeSync.so
 libWPEFrameworkWebShell.so
+libWPEFrameworkSwitchBoard.so
+libWPEFrameworkProvisioning.so
+libWPEFrameworkNetflix.so
 libnxclient.so
 libWPEBackend.so
 libWPEBackend-rdk.so
 libWPEBackend-default.so
 libwebpdemux.so
+libbrcmgstutil.so
+libbrcmaudiodecoder.so
+libbrcmaudiofilter.so
+libbrcmaudiosink.so
+libbrcmvideodecoder.so
+libbrcmvideosink.so
+libbrcmvidfilter.so

@@ -3,7 +3,7 @@
 # cdm
 #
 ################################################################################
-OPENCDM_VERSION = 862a1eab0f0fbefd302d11a7ef14d9bd0eb1fb99
+OPENCDM_VERSION = f223f5dd751528fb7e40ac56f3b6aa99eaf04361
 OPENCDM_SITE_METHOD = git
 OPENCDM_SITE = https://github.com/WebPlatformForEmbedded/WPEOpenCDM.git
 
@@ -24,8 +24,6 @@ define OPENCDM_BUILD_CMDS
 endef
 
 define OPENCDM_INSTALL_TARGET_CMDS
-    cp $(@D)/src/browser/wpe/bin/ocdm_client $(TARGET_DIR)/usr/bin
-    cp $(@D)/src/browser/wpe/bin/ocdm_decryptor $(TARGET_DIR)/usr/bin
     cp $(@D)/src/browser/wpe/lib/libocdm.so $(TARGET_DIR)/usr/lib
 endef
 define OPENCDM_INSTALL_STAGING_CMDS
