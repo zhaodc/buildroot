@@ -236,6 +236,7 @@ config BR2_PACKAGE_WPEFRAMEWORK_TUNER
 config BR2_PACKAGE_WPEFRAMEWORK_COBALT
     select BR2_PACKAGE_WPEFRAMEWORK_PLUGINS
     bool "Cobalt"
+    depends on BR2_PACKAGE_COBALT
     help
       Cobalt Plugin
 
